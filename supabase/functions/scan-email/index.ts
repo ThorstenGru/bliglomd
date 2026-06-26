@@ -1,4 +1,4 @@
-// Supabase Edge Function — HIBP-skärming
+// Supabase Edge Function — breach check via XposedOrNot (free, no API key needed)
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 
 const corsHeaders = {
@@ -15,19 +15,15 @@ serve(async (req) => {
     const { email } = await req.json()
     const encodedEmail = encodeURIComponent(email)
 
-    const hibpRes = await fetch(
-      `https://haveibeenpwned.com/api/v3/breachedaccount/${encodedEmail}`,
-      {
-        headers: {
-          'hibp-api-key': Deno.env.get('HIBP_API_KEY') ?? '',
-          'User-Agent': 'BliGlomd-GDPR-Tool',
-        },
-      }
+    const xonRes = await fetch(
+      `https://api.xposedornot.com/v1/breach-analytics?email=${encodedEmail}`,
+      { headers: { 'User-Agent': 'BliGlomd-GDPR-Tool' } }
     )
 
     let breaches = []
-    if (hibpRes.status === 200) {
-      breaches = await hibpRes.json()
+    if (xonRes.status === 200) {
+      const data = await xonRes.json()
+      breaches = data?.ExposedBreaches?.breaches_details ?? []
     }
 
     return new Response(JSON.stringify({ breaches }), {

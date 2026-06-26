@@ -4,17 +4,19 @@ import { COMPANIES } from '../data/companies'
 import { CompanyCard } from '../components/CompanyCard'
 import type { Company } from '../types'
 
-interface HibpBreach {
-  Name: string
-  Domain: string
-  BreachDate: string
-  Description: string
+interface XonBreach {
+  breach: string
+  xposed_date: string
+  domain: string
+  industry: string
+  xposed_data: string
+  xposed_records: number
 }
 
 export function Scan() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
-  const [breaches, setBreaches] = useState<HibpBreach[]>([])
+  const [breaches, setBreaches] = useState<XonBreach[]>([])
   const [suggestions, setSuggestions] = useState<Company[]>([])
   const [hasScanned, setHasScanned] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -31,20 +33,18 @@ export function Scan() {
 
       if (fnError) throw new Error(fnError.message)
 
-      const foundBreaches: HibpBreach[] = data?.breaches ?? []
+      const foundBreaches: XonBreach[] = data?.breaches ?? []
       setBreaches(foundBreaches)
 
-      // Föreslå alla 20 företag som startförslag
       setSuggestions(COMPANIES)
       setHasScanned(true)
 
-      // Spara skanningen i databasen
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         await supabase.from('scans').insert({
           user_id: user.id,
           scan_email: email,
-          hibp_breaches: foundBreaches.map((b) => b.Name),
+          hibp_breaches: foundBreaches.map((b) => b.breach),
           category_suggestions: COMPANIES,
         })
       }
@@ -102,12 +102,22 @@ export function Scan() {
               ) : (
                 <div className="space-y-3">
                   {breaches.map((breach) => (
-                    <div key={breach.Name} className="bg-red-50 border border-red-200 rounded-xl p-4">
-                      <div className="flex items-center justify-between">
-                        <span className="font-semibold text-red-900">{breach.Name}</span>
-                        <span className="text-xs text-red-600">{breach.BreachDate}</span>
+                    <div key={breach.breach} className="bg-red-50 border border-red-200 rounded-xl p-4">
+                      <div className="flex items-center justify-between flex-wrap gap-2">
+                        <span className="font-semibold text-red-900">{breach.breach}</span>
+                        <span className="text-xs text-red-600">{breach.xposed_date}</span>
                       </div>
-                      <p className="text-sm text-red-700 mt-1">{breach.Domain}</p>
+                      <p className="text-sm text-red-700 mt-1">{breach.domain}</p>
+                      {breach.xposed_data && (
+                        <p className="text-xs text-red-500 mt-1">
+                          Exponerade uppgifter: {breach.xposed_data}
+                        </p>
+                      )}
+                      {breach.xposed_records > 0 && (
+                        <p className="text-xs text-red-400 mt-0.5">
+                          {breach.xposed_records.toLocaleString('sv-SE')} poster läcktes
+                        </p>
+                      )}
                     </div>
                   ))}
                 </div>

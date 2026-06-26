@@ -165,11 +165,11 @@ const COMPONENTS: ComponentDef[] = [
   {
     id: 'hibp',
     category: 'external',
-    docsUrl: 'https://haveibeenpwned.com',
+    docsUrl: 'https://xposedornot.com',
     check: async () => {
       const t0 = performance.now()
       try {
-        await fetchWithTimeout('https://haveibeenpwned.com/', { mode: 'no-cors' }, 8000)
+        await fetchWithTimeout('https://api.xposedornot.com/', { mode: 'no-cors' }, 8000)
         return { status: 'operational', responseTime: Math.round(performance.now() - t0) }
       } catch {
         return { status: 'down', responseTime: Math.round(performance.now() - t0) }
@@ -241,8 +241,8 @@ const T = {
         desc: 'Extern e-posttjänst — levererar GDPR-raderingsmail till företagen',
       },
       hibp: {
-        name: 'HaveIBeenPwned API',
-        desc: 'Extern tjänst — kontrollerar om e-postadressen förekommer i dataintrång',
+        name: 'XposedOrNot API',
+        desc: 'Gratis extern tjänst — kontrollerar om e-postadressen förekommer i dataintrång',
       },
     },
     backHome: '← Hem',
@@ -307,8 +307,8 @@ const T = {
         desc: 'External email service — delivers GDPR deletion emails to companies',
       },
       hibp: {
-        name: 'HaveIBeenPwned API',
-        desc: 'External service — checks if an email address appears in known data breaches',
+        name: 'XposedOrNot API',
+        desc: 'Free external service — checks if an email address appears in known data breaches',
       },
     },
     backHome: '← Home',
