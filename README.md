@@ -1,0 +1,2 @@
+# bliglomd
+BliGlömd — GDPR raderingsförfrågningar
