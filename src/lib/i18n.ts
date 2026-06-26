@@ -17,6 +17,15 @@ export const translations = {
       days: 'dagar',
       utgivningsbevis: 'Utgivningsbevis',
       utgivningsbevisbadge: 'Utgivningsbevis — Pressfrihetsskyddat',
+      bankid: 'BankID krävs',
+      bankidBadge: 'Avanmälan kräver BankID direkt på sajten — e-post fungerar inte.',
+      sensitive: 'Känslig',
+      sensitiveBadge: 'Visar brottsregister, domar eller annan känslig information.',
+      requestType: {
+        gdpr_art17: { label: 'GDPR Art. 17', tooltip: 'Företaget är rättsligt skyldigt att radera dina uppgifter.' },
+        opt_out:    { label: 'Avanmälan',    tooltip: 'Frivillig avanmälan — utgivningsbevis skyddar sajten mot GDPR-krav.' },
+        authority:  { label: 'Myndighet',    tooltip: 'Myndighetsverktyg eller guide — inte en raderingsförfrågan.' },
+      },
     },
     nav: {
       home: 'Hem',
@@ -53,6 +62,7 @@ export const translations = {
       utgivningsbevisbanner:
         'Vi fokuserar på svenska medier med utgivningsbevis — dina rättigheter gäller även mot dem.',
     },
+
     auth: {
       login: 'Logga in',
       signup: 'Skapa konto',
@@ -82,6 +92,9 @@ export const translations = {
       recordsLeaked: 'poster läcktes',
       companiesTitle: 'Skicka raderingsförfrågningar till',
       mediaFirst: 'Svenska medier med utgivningsbevis',
+      gdprCompanies: 'GDPR-skyldiga företag',
+      optOutSites: 'Avanmälningssajter (utgivningsbevis)',
+      authorityTools: 'Myndighetsverktyg & guider',
       otherCompanies: 'Övriga företag',
       utgivningsbevisbadge:
         'Utgivningsbevis — kan åberopa journalistiskt syfte för viss data',
@@ -109,6 +122,11 @@ export const translations = {
       successSub: 'Du kan följa statusen i din dashboard.',
       toDashboard: 'Gå till Dashboard',
       utgivningsbevisbadge: 'OBS: Detta företag har utgivningsbevis och kan åberopa journalistiskt syfte för viss data.',
+      bankidRequired: 'BankID krävs för att avanmäla dina uppgifter. Besök sajten direkt — e-post fungerar inte för detta företag.',
+      optOutBanner: 'Detta är en avanmälan (opt-out), inte en GDPR-radering. Företaget kan avslå GDPR-begäranden med hänvisning till utgivningsbevis.',
+      sensitiveWarning: 'Varning: Denna sajt visar känslig information (brottsregister, domar). Tänk på att informationen är offentlig.',
+      authorityBanner: 'Detta är ett myndighetsverktyg eller en guide — inte en förfrågan till ett privat företag.',
+      optOutBody: 'Jag önskar avanmäla och ta bort mina personuppgifter från er tjänst.',
       templateGreeting: 'Hej,',
       templateBody: 'Jag utövar min rätt enligt GDPR Artikel 17 (rätten till radering) och begär att ni omgående raderar alla personuppgifter som ni behandlar avseende mig.',
       templateNameLabel: 'Namn',
@@ -172,6 +190,15 @@ export const translations = {
       days: 'days',
       utgivningsbevis: 'Publishing Certificate',
       utgivningsbevisbadge: 'Publishing Certificate — Swedish Press Freedom Protection',
+      bankid: 'BankID required',
+      bankidBadge: 'Opt-out requires BankID directly on the site — email will not work.',
+      sensitive: 'Sensitive',
+      sensitiveBadge: 'Displays criminal records, court verdicts or other sensitive information.',
+      requestType: {
+        gdpr_art17: { label: 'GDPR Art. 17', tooltip: 'The company is legally obligated to delete your data.' },
+        opt_out:    { label: 'Opt-out',      tooltip: 'Voluntary opt-out — publishing certificate shields the site from GDPR erasure.' },
+        authority:  { label: 'Authority',    tooltip: 'Authority tool or guide — not a deletion request to a private company.' },
+      },
     },
     nav: {
       home: 'Home',
@@ -237,6 +264,9 @@ export const translations = {
       recordsLeaked: 'records leaked',
       companiesTitle: 'Send deletion requests to',
       mediaFirst: 'Swedish media with publishing certificates',
+      gdprCompanies: 'GDPR-obligated companies',
+      optOutSites: 'Opt-out sites (publishing certificate)',
+      authorityTools: 'Authority tools & guides',
       otherCompanies: 'Other companies',
       utgivningsbevisbadge:
         'Publishing certificate — may invoke journalistic purpose for some data',
@@ -264,6 +294,11 @@ export const translations = {
       successSub: 'You can track the status in your dashboard.',
       toDashboard: 'Go to Dashboard',
       utgivningsbevisbadge: 'NOTE: This company holds a publishing certificate and may invoke journalistic purpose for some data.',
+      bankidRequired: 'BankID is required to opt out your details. Visit the site directly — email does not work for this company.',
+      optOutBanner: 'This is a voluntary opt-out, not a GDPR erasure. The company may refuse GDPR requests citing its publishing certificate.',
+      sensitiveWarning: 'Warning: This site shows sensitive information (criminal records, court verdicts). Note that the information is publicly available.',
+      authorityBanner: 'This is an authority tool or guide — not a request to a private company.',
+      optOutBody: 'I wish to opt out and have my personal data removed from your service.',
       templateGreeting: 'Hello,',
       templateBody: 'I am exercising my right under GDPR Article 17 (right to erasure) and request that you immediately delete all personal data that you process concerning me.',
       templateNameLabel: 'Name',

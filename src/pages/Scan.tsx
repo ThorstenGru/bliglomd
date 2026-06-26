@@ -57,8 +57,10 @@ export function Scan() {
     }
   }
 
-  const utgivningsCompanies = COMPANIES_SORTED.filter((c) => c.utgivningsbevis)
-  const otherCompanies = COMPANIES_SORTED.filter((c) => !c.utgivningsbevis)
+  const mediaCompanies   = COMPANIES_SORTED.filter((c) => c.request_type === 'gdpr_art17' && c.utgivningsbevis)
+  const gdprCompanies    = COMPANIES_SORTED.filter((c) => c.request_type === 'gdpr_art17' && !c.utgivningsbevis)
+  const optOutCompanies  = COMPANIES_SORTED.filter((c) => c.request_type === 'opt_out')
+  const authorityEntries = COMPANIES_SORTED.filter((c) => c.request_type === 'authority')
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
@@ -126,7 +128,7 @@ export function Scan() {
             )}
           </div>
 
-          {/* Companies — utgivningsbevis first */}
+          {/* Companies — grouped by type */}
           <div>
             <h2 className="text-xl font-semibold text-gray-900 mb-4">{t.scan.companiesTitle}</h2>
 
@@ -134,16 +136,34 @@ export function Scan() {
               <span>📰</span> {t.scan.mediaFirst}
             </h3>
             <div className="space-y-3 mb-8">
-              {utgivningsCompanies.map((company) => (
+              {mediaCompanies.map((company) => (
                 <CompanyCard key={company.id} company={company} />
               ))}
             </div>
 
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-              {t.scan.otherCompanies}
+            <h3 className="text-sm font-semibold text-green-700 uppercase tracking-wide mb-3 flex items-center gap-2">
+              <span>✅</span> {t.scan.gdprCompanies}
+            </h3>
+            <div className="space-y-3 mb-8">
+              {gdprCompanies.map((company) => (
+                <CompanyCard key={company.id} company={company} />
+              ))}
+            </div>
+
+            <h3 className="text-sm font-semibold text-amber-600 uppercase tracking-wide mb-3 flex items-center gap-2">
+              <span>🔒</span> {t.scan.optOutSites}
+            </h3>
+            <div className="space-y-3 mb-8">
+              {optOutCompanies.map((company) => (
+                <CompanyCard key={company.id} company={company} />
+              ))}
+            </div>
+
+            <h3 className="text-sm font-semibold text-blue-700 uppercase tracking-wide mb-3 flex items-center gap-2">
+              <span>🏛️</span> {t.scan.authorityTools}
             </h3>
             <div className="space-y-3">
-              {otherCompanies.map((company) => (
+              {authorityEntries.map((company) => (
                 <CompanyCard key={company.id} company={company} />
               ))}
             </div>

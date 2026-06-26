@@ -1,7 +1,7 @@
 import type { Company } from '../types'
 
 export const COMPANIES: Company[] = [
-  // ── Swedish media with utgivningsbevis ─────────────────────────────────────
+  // ── Group 1: Swedish media with utgivningsbevis (GDPR Art. 17) ────────────
   {
     id: 'aftonbladet',
     name: 'Aftonbladet',
@@ -17,6 +17,7 @@ export const COMPANIES: Company[] = [
     level2_available: true,
     level3_available: true,
     utgivningsbevis: true,
+    request_type: 'gdpr_art17',
   },
   {
     id: 'expressen',
@@ -33,6 +34,7 @@ export const COMPANIES: Company[] = [
     level2_available: true,
     level3_available: true,
     utgivningsbevis: true,
+    request_type: 'gdpr_art17',
   },
   {
     id: 'dn',
@@ -49,6 +51,7 @@ export const COMPANIES: Company[] = [
     level2_available: true,
     level3_available: true,
     utgivningsbevis: true,
+    request_type: 'gdpr_art17',
   },
   {
     id: 'svd',
@@ -65,6 +68,7 @@ export const COMPANIES: Company[] = [
     level2_available: true,
     level3_available: true,
     utgivningsbevis: true,
+    request_type: 'gdpr_art17',
   },
   {
     id: 'gp',
@@ -81,6 +85,7 @@ export const COMPANIES: Company[] = [
     level2_available: true,
     level3_available: true,
     utgivningsbevis: true,
+    request_type: 'gdpr_art17',
   },
   {
     id: 'svt',
@@ -97,6 +102,7 @@ export const COMPANIES: Company[] = [
     level2_available: true,
     level3_available: true,
     utgivningsbevis: true,
+    request_type: 'gdpr_art17',
   },
   {
     id: 'sr',
@@ -113,6 +119,7 @@ export const COMPANIES: Company[] = [
     level2_available: true,
     level3_available: true,
     utgivningsbevis: true,
+    request_type: 'gdpr_art17',
   },
   {
     id: 'tv4',
@@ -129,9 +136,10 @@ export const COMPANIES: Company[] = [
     level2_available: true,
     level3_available: true,
     utgivningsbevis: true,
+    request_type: 'gdpr_art17',
   },
 
-  // ── Swedish companies ───────────────────────────────────────────────────────
+  // ── Group 1b: Swedish & international companies (GDPR Art. 17) ────────────
   {
     id: 'spotify',
     name: 'Spotify',
@@ -147,6 +155,7 @@ export const COMPANIES: Company[] = [
     level2_available: true,
     level3_available: true,
     utgivningsbevis: false,
+    request_type: 'gdpr_art17',
   },
   {
     id: 'klarna',
@@ -163,6 +172,7 @@ export const COMPANIES: Company[] = [
     level2_available: true,
     level3_available: true,
     utgivningsbevis: false,
+    request_type: 'gdpr_art17',
   },
   {
     id: 'swish',
@@ -179,6 +189,7 @@ export const COMPANIES: Company[] = [
     level2_available: true,
     level3_available: true,
     utgivningsbevis: false,
+    request_type: 'gdpr_art17',
   },
   {
     id: 'bankid',
@@ -195,6 +206,7 @@ export const COMPANIES: Company[] = [
     level2_available: true,
     level3_available: true,
     utgivningsbevis: false,
+    request_type: 'gdpr_art17',
   },
   {
     id: 'ikea',
@@ -211,6 +223,7 @@ export const COMPANIES: Company[] = [
     level2_available: true,
     level3_available: true,
     utgivningsbevis: false,
+    request_type: 'gdpr_art17',
   },
   {
     id: 'hm',
@@ -227,6 +240,7 @@ export const COMPANIES: Company[] = [
     level2_available: true,
     level3_available: true,
     utgivningsbevis: false,
+    request_type: 'gdpr_art17',
   },
   {
     id: 'blocket',
@@ -243,6 +257,7 @@ export const COMPANIES: Company[] = [
     level2_available: true,
     level3_available: true,
     utgivningsbevis: false,
+    request_type: 'gdpr_art17',
   },
   {
     id: 'tradera',
@@ -259,9 +274,8 @@ export const COMPANIES: Company[] = [
     level2_available: true,
     level3_available: true,
     utgivningsbevis: false,
+    request_type: 'gdpr_art17',
   },
-
-  // ── International companies (relevant for Swedish users) ───────────────────
   {
     id: 'google',
     name: 'Google',
@@ -277,6 +291,24 @@ export const COMPANIES: Company[] = [
     level2_available: true,
     level3_available: false,
     utgivningsbevis: false,
+    request_type: 'gdpr_art17',
+  },
+  {
+    id: 'google-deindex',
+    name: 'Google — Avindexering',
+    category: 'Sökmotor',
+    country: 'US',
+    gdpr_email: null,
+    gdpr_url: 'https://www.google.com/webmasters/tools/legal-removal-requests?hl=sv',
+    instructions_sv:
+      'Begär borttagning av sökresultat som innehåller dina personuppgifter via Googles formulär för juridiska borttagningsbegäranden. Gäller rätten att bli bortglömd (GDPR Art. 17) för sökresultat som refererar till föråldrad eller skadlig information.',
+    instructions_en:
+      'Request removal of search results containing your personal data via Google\'s legal removal request form. Applies the right to be forgotten (GDPR Art. 17) for search results referencing outdated or harmful information.',
+    level1_available: true,
+    level2_available: false,
+    level3_available: false,
+    utgivningsbevis: false,
+    request_type: 'gdpr_art17',
   },
   {
     id: 'meta',
@@ -293,6 +325,7 @@ export const COMPANIES: Company[] = [
     level2_available: true,
     level3_available: false,
     utgivningsbevis: false,
+    request_type: 'gdpr_art17',
   },
   {
     id: 'linkedin',
@@ -309,6 +342,7 @@ export const COMPANIES: Company[] = [
     level2_available: true,
     level3_available: false,
     utgivningsbevis: false,
+    request_type: 'gdpr_art17',
   },
   {
     id: 'microsoft',
@@ -325,6 +359,7 @@ export const COMPANIES: Company[] = [
     level2_available: true,
     level3_available: true,
     utgivningsbevis: false,
+    request_type: 'gdpr_art17',
   },
   {
     id: 'apple',
@@ -341,6 +376,7 @@ export const COMPANIES: Company[] = [
     level2_available: true,
     level3_available: false,
     utgivningsbevis: false,
+    request_type: 'gdpr_art17',
   },
   {
     id: 'amazon',
@@ -357,6 +393,7 @@ export const COMPANIES: Company[] = [
     level2_available: true,
     level3_available: true,
     utgivningsbevis: false,
+    request_type: 'gdpr_art17',
   },
   {
     id: 'tiktok',
@@ -373,6 +410,7 @@ export const COMPANIES: Company[] = [
     level2_available: true,
     level3_available: true,
     utgivningsbevis: false,
+    request_type: 'gdpr_art17',
   },
   {
     id: 'snapchat',
@@ -389,6 +427,7 @@ export const COMPANIES: Company[] = [
     level2_available: true,
     level3_available: true,
     utgivningsbevis: false,
+    request_type: 'gdpr_art17',
   },
   {
     id: 'twitter-x',
@@ -405,6 +444,7 @@ export const COMPANIES: Company[] = [
     level2_available: true,
     level3_available: true,
     utgivningsbevis: false,
+    request_type: 'gdpr_art17',
   },
   {
     id: 'zalando',
@@ -421,11 +461,288 @@ export const COMPANIES: Company[] = [
     level2_available: true,
     level3_available: true,
     utgivningsbevis: false,
+    request_type: 'gdpr_art17',
+  },
+
+  // ── Group 2: Swedish opt-out / people-search sites ─────────────────────────
+  // These hold utgivningsbevis and can legally refuse GDPR Art. 17 erasure.
+  // They offer voluntary opt-out processes instead.
+  {
+    id: 'ratsit',
+    name: 'Ratsit',
+    category: 'Övrigt',
+    country: 'SE',
+    gdpr_email: null,
+    gdpr_url: 'https://www.ratsit.se/om-ratsit/sparra-uppgifter',
+    instructions_sv:
+      'Besök ratsit.se och logga in med BankID. Gå till din profil och klicka på "Spärra uppgifter". Skyddet aktiveras direkt men gäller endast i 12 månader — du måste sedan förnya det. BankID är obligatoriskt, e-post fungerar inte.',
+    instructions_en:
+      'Visit ratsit.se and log in with BankID. Go to your profile and click "Spärra uppgifter" (block details). Protection is immediate but only lasts 12 months — you must renew it. BankID is required, email will not work.',
+    level1_available: true,
+    level2_available: false,
+    level3_available: false,
+    utgivningsbevis: true,
+    request_type: 'opt_out',
+    bankid_required: true,
+    warning: 'Skyddet löper ut efter 12 månader och måste förnyas via BankID.',
+    reminder_days: 365,
+  },
+  {
+    id: 'merinfo',
+    name: 'Merinfo',
+    category: 'Övrigt',
+    country: 'SE',
+    gdpr_email: null,
+    gdpr_url: 'https://www.merinfo.se/ta-bort-uppgifter',
+    instructions_sv:
+      'Besök merinfo.se/ta-bort-uppgifter och följ anvisningarna. Merinfo kräver BankID för identifiering. Välj de uppgifter du vill spärra och bekräfta med BankID.',
+    instructions_en:
+      'Visit merinfo.se/ta-bort-uppgifter and follow the instructions. Merinfo requires BankID for identification. Select the details you want to block and confirm with BankID.',
+    level1_available: true,
+    level2_available: false,
+    level3_available: false,
+    utgivningsbevis: true,
+    request_type: 'opt_out',
+    bankid_required: true,
+  },
+  {
+    id: 'hitta',
+    name: 'Hitta.se',
+    category: 'Övrigt',
+    country: 'SE',
+    gdpr_email: null,
+    gdpr_url: 'https://www.hitta.se/information/ta-bort',
+    instructions_sv:
+      'Gå till hitta.se/information/ta-bort och logga in med BankID. Välj vilka uppgifter som ska döljas. Hitta.se (Schibsted) har utgivningsbevis och hanterar borttagning via BankID-identifiering.',
+    instructions_en:
+      'Go to hitta.se/information/ta-bort and log in with BankID. Select which details to hide. Hitta.se (Schibsted) holds a publishing certificate and handles removal via BankID identification.',
+    level1_available: true,
+    level2_available: false,
+    level3_available: false,
+    utgivningsbevis: true,
+    request_type: 'opt_out',
+    bankid_required: true,
+  },
+  {
+    id: 'eniro',
+    name: 'Eniro',
+    category: 'Övrigt',
+    country: 'SE',
+    gdpr_email: 'gdpr@eniro.com',
+    gdpr_url: 'https://eniro.se/gdpr',
+    instructions_sv:
+      'Besök eniro.se/gdpr och logga in med BankID för att avanmäla dina uppgifter. Alternativt kan du kontakta gdpr@eniro.com med en skriftlig avanmälningsförfrågan och bifoga identitetshandling.',
+    instructions_en:
+      'Visit eniro.se/gdpr and log in with BankID to opt out your details. Alternatively, contact gdpr@eniro.com with a written opt-out request and attach identity verification.',
+    level1_available: true,
+    level2_available: true,
+    level3_available: false,
+    utgivningsbevis: true,
+    request_type: 'opt_out',
+    bankid_required: true,
+  },
+  {
+    id: 'mrkoll',
+    name: 'MrKoll',
+    category: 'Övrigt',
+    country: 'SE',
+    gdpr_email: 'info@mrkoll.se',
+    gdpr_url: 'https://mrkoll.se/om/ta-bort-uppgifter/',
+    instructions_sv:
+      'Gå till mrkoll.se/om/ta-bort-uppgifter/ och följ anvisningarna för att avanmäla dina uppgifter. BankID krävs inte — du kan använda e-post eller webbformuläret. Ange vilka uppgifter du vill ta bort.',
+    instructions_en:
+      'Go to mrkoll.se/om/ta-bort-uppgifter/ and follow the instructions to opt out your details. BankID is not required — you can use email or the web form. Specify which details you want removed.',
+    level1_available: true,
+    level2_available: true,
+    level3_available: false,
+    utgivningsbevis: true,
+    request_type: 'opt_out',
+  },
+  {
+    id: 'upplysning',
+    name: 'Upplysning.se',
+    category: 'Övrigt',
+    country: 'SE',
+    gdpr_email: null,
+    gdpr_url: 'https://www.upplysning.se/ta-bort-info',
+    instructions_sv:
+      'Besök upplysning.se/ta-bort-info. Sök upp din profil och följ anvisningarna för borttagning. Ingen inloggning krävs — uppgifterna verifieras via den e-postadress som är kopplad till profilen.',
+    instructions_en:
+      'Visit upplysning.se/ta-bort-info. Find your profile and follow the removal instructions. No login is required — details are verified via the email address linked to the profile.',
+    level1_available: true,
+    level2_available: false,
+    level3_available: false,
+    utgivningsbevis: true,
+    request_type: 'opt_out',
+  },
+  {
+    id: 'birthday',
+    name: 'Birthday.se',
+    category: 'Övrigt',
+    country: 'SE',
+    gdpr_email: null,
+    gdpr_url: 'https://www.birthday.se/privacy',
+    instructions_sv:
+      'Besök birthday.se/privacy och välj alternativet för att dölja dina uppgifter. BankID krävs för att identifiera dig och bekräfta borttagningen.',
+    instructions_en:
+      'Visit birthday.se/privacy and select the option to hide your details. BankID is required to identify yourself and confirm the removal.',
+    level1_available: true,
+    level2_available: false,
+    level3_available: false,
+    utgivningsbevis: true,
+    request_type: 'opt_out',
+    bankid_required: true,
+  },
+  {
+    id: 'biluppgifter',
+    name: 'Biluppgifter.se',
+    category: 'Övrigt',
+    country: 'SE',
+    gdpr_email: null,
+    gdpr_url: 'https://www.biluppgifter.se/gdpr',
+    instructions_sv:
+      'Gå till biluppgifter.se/gdpr för att begära borttagning. Observera att Biluppgifter.se ofta hänvisar till att fordonsregistret är offentlig information och kan avslå GDPR-begäranden. Vid avslag — anmäl till IMY.',
+    instructions_en:
+      'Go to biluppgifter.se/gdpr to request removal. Note that Biluppgifter.se often claims the vehicle register is public information and may refuse GDPR requests. If refused — file a complaint with IMY.',
+    level1_available: true,
+    level2_available: false,
+    level3_available: false,
+    utgivningsbevis: true,
+    request_type: 'opt_out',
+    warning: 'Åberopar ofta att fordonsregistret är offentlig information och kan avslå begäran. IMY-anmälan kan bli nödvändig.',
+  },
+  {
+    id: '180',
+    name: '180.se',
+    category: 'Övrigt',
+    country: 'SE',
+    gdpr_email: null,
+    gdpr_url: 'https://www.180.se',
+    instructions_sv:
+      'Sök upp din profil på 180.se. Klicka på din post och välj alternativet för att begära borttagning av uppgifterna. Inget BankID krävs för att skicka förfrågan.',
+    instructions_en:
+      'Find your profile on 180.se. Click your listing and select the option to request removal of your details. No BankID is required to submit a request.',
+    level1_available: true,
+    level2_available: false,
+    level3_available: false,
+    utgivningsbevis: true,
+    request_type: 'opt_out',
+  },
+  {
+    id: 'allabolag',
+    name: 'Allabolag.se',
+    category: 'Övrigt',
+    country: 'SE',
+    gdpr_email: 'info@allabolag.se',
+    gdpr_url: 'https://www.allabolag.se/om_allabolag/integritetspolicy',
+    instructions_sv:
+      'Allabolag.se visar huvudsakligen offentliga bolagsuppgifter. Om du är registrerad som firmatecknare eller styrelsemedlem kan du kontakta info@allabolag.se för att begära rättelse av felaktig personlig information. Uppgifter från Bolagsverket kan inte raderas.',
+    instructions_en:
+      'Allabolag.se primarily displays public company registration data. If you are registered as a signatory or board member, contact info@allabolag.se to request correction of incorrect personal information. Data from the Swedish Companies Registration Office cannot be deleted.',
+    level1_available: true,
+    level2_available: true,
+    level3_available: false,
+    utgivningsbevis: true,
+    request_type: 'opt_out',
+  },
+  {
+    id: 'krimfup',
+    name: 'Krimfup.se',
+    category: 'Övrigt',
+    country: 'SE',
+    gdpr_email: null,
+    gdpr_url: 'https://www.krimfup.se/ta-bort',
+    instructions_sv:
+      'Gå till krimfup.se/ta-bort och sök upp din profil. Följ anvisningarna för borttagning — ingen inloggning krävs, men du måste bekräfta din identitet via e-post. Uppgifterna hämtas från offentliga domslut.',
+    instructions_en:
+      'Go to krimfup.se/ta-bort and find your profile. Follow the removal instructions — no login required, but you must verify your identity via email. The data is sourced from public court verdicts.',
+    level1_available: true,
+    level2_available: false,
+    level3_available: false,
+    utgivningsbevis: true,
+    request_type: 'opt_out',
+    sensitive: true,
+    warning: 'Visar brottsregister och domslut. Uppgifterna är offentliga men känsliga.',
+  },
+  {
+    id: 'lexbase',
+    name: 'Lexbase.se',
+    category: 'Övrigt',
+    country: 'SE',
+    gdpr_email: 'gdpr@lexbase.se',
+    gdpr_url: 'https://lexbase.se/remove',
+    instructions_sv:
+      'Besök lexbase.se/remove eller skicka en förfrågan till gdpr@lexbase.se. Ange ditt fullständiga namn och personnummer. Lexbase publicerar domar och domslut och hänvisar till utgivningsbevis för att avslå GDPR-begäranden, men erbjuder en frivillig avanmälningsprocess.',
+    instructions_en:
+      'Visit lexbase.se/remove or send a request to gdpr@lexbase.se. Include your full name and personal ID number. Lexbase publishes court verdicts and cites its publishing certificate to refuse GDPR requests, but offers a voluntary opt-out process.',
+    level1_available: true,
+    level2_available: true,
+    level3_available: false,
+    utgivningsbevis: true,
+    request_type: 'opt_out',
+    sensitive: true,
+    warning: 'Visar domar och domslut från allmänna domstolar. Uppgifterna är offentliga men känsliga.',
+  },
+
+  // ── Group 3: Authority tools & guides ─────────────────────────────────────
+  {
+    id: 'skatteverket-adressparr',
+    name: 'Skatteverket — Adressspärr',
+    category: 'Övrigt',
+    country: 'SE',
+    gdpr_email: null,
+    gdpr_url: 'https://www.skatteverket.se/privat/folkbokforing/skyddadepersonuppgifter',
+    instructions_sv:
+      'Skatteverket erbjuder tre nivåer av adressskydd: (1) Sekretessmarkering — skyddar mot offentliga register, kräver ansökan via blankett SKV 7717. (2) Skyddad folkbokföring — högsta skyddsnivån för hotade personer. (3) Kvarskrivning — du är folkbokförd på annan adress. Besök skatteverket.se för mer information och blanketter. BankID behövs för e-legitimation.',
+    instructions_en:
+      'Skatteverket offers three levels of address protection: (1) Confidentiality marking — protects against public registers, apply via form SKV 7717. (2) Protected civil registration — highest protection for threatened persons. (3) Remain registered at old address. Visit skatteverket.se for details and forms. BankID is needed for e-identification.',
+    level1_available: true,
+    level2_available: false,
+    level3_available: false,
+    utgivningsbevis: false,
+    request_type: 'authority',
+    bankid_required: true,
+  },
+  {
+    id: 'adresslaset',
+    name: 'Adresslåset',
+    category: 'Övrigt',
+    country: 'SE',
+    gdpr_email: null,
+    gdpr_url: 'https://www.adresslaset.se',
+    instructions_sv:
+      'Adresslåset är en betaltjänst som skyddar din adress hos privata aktörer (t.ex. mäklarregister, kreditupplysningsföretag). Besök adresslaset.se för att registrera dig. Tjänsten kompletterar Skatteverkets adressskydd och riktar sig mot privata register.',
+    instructions_en:
+      'Adresslåset is a paid service that protects your address with private companies (e.g. real estate registries, credit agencies). Visit adresslaset.se to register. The service complements Skatteverket address protection and targets private registries.',
+    level1_available: true,
+    level2_available: false,
+    level3_available: false,
+    utgivningsbevis: false,
+    request_type: 'authority',
+  },
+  {
+    id: 'imy-anmalan',
+    name: 'IMY — Anmäl sida',
+    category: 'Övrigt',
+    country: 'SE',
+    gdpr_email: 'imy@imy.se',
+    gdpr_url: 'https://www.imy.se/anmalan-och-tillstand/klagomal-och-krav/',
+    instructions_sv:
+      'Om ett företag vägrar radera dina uppgifter kan du anmäla dem till Integritetsskyddsmyndigheten (IMY). Fyll i IMYs klagomålsformulär på imy.se eller skicka ett klagomål till imy@imy.se. Bifoga ditt ursprungliga raderingsbegäran och företagets svar (eller utebliven respons). IMY kan utfärda böter på upp till 4 % av företagets globala omsättning.',
+    instructions_en:
+      'If a company refuses to delete your data, you can report them to the Swedish Data Protection Authority (IMY). Fill in IMY\'s complaint form at imy.se or send a complaint to imy@imy.se. Attach your original deletion request and the company\'s response (or lack thereof). IMY can issue fines of up to 4% of global revenue.',
+    level1_available: true,
+    level2_available: true,
+    level3_available: false,
+    utgivningsbevis: false,
+    request_type: 'authority',
   },
 ]
 
-/** Companies with Swedish publishing certificate (utgivningsbevis), sorted first */
+/** Companies sorted by group: news media → GDPR companies → opt-out sites → authority tools */
 export const COMPANIES_SORTED = [
-  ...COMPANIES.filter((c) => c.utgivningsbevis),
-  ...COMPANIES.filter((c) => !c.utgivningsbevis),
+  ...COMPANIES.filter((c) => c.request_type === 'gdpr_art17' && c.utgivningsbevis),
+  ...COMPANIES.filter((c) => c.request_type === 'gdpr_art17' && !c.utgivningsbevis),
+  ...COMPANIES.filter((c) => c.request_type === 'opt_out'),
+  ...COMPANIES.filter((c) => c.request_type === 'authority'),
 ]
