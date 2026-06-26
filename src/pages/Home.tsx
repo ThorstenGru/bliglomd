@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useLang } from '../contexts/LanguageContext'
+import { BrandLogo } from '../components/BrandLogo'
 import type { Session } from '@supabase/supabase-js'
 
 interface HomeProps {
@@ -10,16 +11,15 @@ export function Home({ session }: HomeProps) {
   const { t } = useLang()
 
   return (
-    <div className="bg-gradient-to-br from-brand-50 to-white">
+    <div className="bg-brand-50">
       {/* Hero */}
-      <section className="max-w-5xl mx-auto px-4 pt-16 pb-12 text-center">
-        <div className="inline-flex items-center gap-2 bg-brand-100 text-brand-700 text-sm font-medium px-4 py-1.5 rounded-full mb-6">
+      <section className="max-w-5xl mx-auto px-4 pt-14 pb-12 text-center">
+        <BrandLogo variant="large" className="mx-auto mb-8" />
+
+        <div className="inline-flex items-center gap-2 bg-brand-100 text-brand-700 text-sm font-medium px-4 py-1.5 rounded-full mb-5">
           {t.home.badge}
         </div>
-        <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 leading-tight mb-4">
-          {t.home.title}
-        </h1>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+        <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
           {t.home.subtitle}
         </p>
 

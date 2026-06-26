@@ -55,14 +55,14 @@ function AppShell() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-brand-50 flex items-center justify-center">
         <p className="text-gray-400">Laddar...</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-brand-50">
       <NavBar session={session} />
       <Routes>
         <Route path="/" element={<Home session={session} />} />

@@ -1,4 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect width="100" height="100" rx="20" fill="#6d28d9"/>
-  <text x="50" y="72" font-size="60" text-anchor="middle" font-family="system-ui,sans-serif" font-weight="bold" fill="white">B</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+  <rect x="1" y="0.5" width="14" height="15" rx="3" fill="#E8F0FE"/>
+  <rect x="2.5" y="2" width="11" height="12" rx="2.5" fill="#3B82F6"/>
+  <rect x="4" y="3.5" width="8" height="9" rx="2" fill="#1E3A8A"/>
+  <circle cx="8" cy="7.5" r="1.7" fill="white"/>
+  <path d="M5.5,11 Q5.5,9.3 8,9.3 Q10.5,9.3 10.5,11" fill="white"/>
 </svg>

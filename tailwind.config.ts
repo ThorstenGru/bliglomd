@@ -7,17 +7,33 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+      },
       colors: {
         brand: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          900: '#0c4a6e',
+          // Numeric scale (used throughout existing code)
+          50:      '#F0F5FF',
+          100:     '#E8F0FE',
+          200:     '#BFDBFE',
+          300:     '#93C5FD',
+          400:     '#60A5FA',
+          500:     '#3B82F6',
+          600:     '#2563EB',
+          700:     '#1D4ED8',
+          800:     '#1E40AF',
+          900:     '#1E3A8A',
+          // Named aliases (section 18)
+          deep:    '#1E3A8A',
+          primary: '#3B82F6',
+          soft:    '#93C5FD',
+          surface: '#E8F0FE',
+          bg:      '#F0F5FF',
+        },
+        status: {
+          danger:  '#EF4444',
+          success: '#22C55E',
+          warning: '#F59E0B',
         },
       },
     },
