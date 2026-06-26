@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
+import { useLang } from '../contexts/LanguageContext'
 
 type StatusValue = 'operational' | 'degraded' | 'down' | 'checking' | 'unconfigured'
-type Lang = 'sv' | 'en'
 type Category = 'frontend' | 'backend' | 'database' | 'edge_functions' | 'external'
 
 interface CheckResult {
@@ -349,7 +349,7 @@ function overallStatus(results: Record<string, CheckResult>): StatusValue {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function Status() {
-  const [lang, setLang] = useState<Lang>('sv')
+  const { lang } = useLang()
   const [results, setResults] = useState<Record<string, CheckResult>>({})
   const [running, setRunning] = useState(false)
   const [lastChecked, setLastChecked] = useState<Date | null>(null)
@@ -413,13 +413,6 @@ export function Status() {
               <h1 className="text-3xl font-bold">{t.title}</h1>
               <p className="mt-1 text-white/90 text-sm">{t.subtitle}</p>
             </div>
-            {/* Language toggle */}
-            <button
-              onClick={() => setLang(lang === 'sv' ? 'en' : 'sv')}
-              className="shrink-0 bg-white/20 hover:bg-white/30 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
-            >
-              {lang === 'sv' ? 'English' : 'Svenska'}
-            </button>
           </div>
 
           {/* Overall status banner */}

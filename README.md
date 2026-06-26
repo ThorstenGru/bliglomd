@@ -1,126 +1,140 @@
-# BliGlömd
+# BliGlömd — GDPR Deletion Request Tool
 
-**GDPR raderingsförfrågningar med ett klick.**
+Live: **[bliglömd.se](https://xn--bliglmd-e1a.se)**
 
-BliGlömd hjälper privatpersoner att utöva sin rätt enligt GDPR Artikel 17 — rätten till radering. Välj ett företag, välj nivå och skicka en juridiskt korrekt raderingsförfrågan på sekunder.
-
-🌐 **Live:** [bliglömd.se](https://xn--bliglmd-e1a.se)
-📊 **Status:** [bliglömd.se/status](https://xn--bliglmd-e1a.se/status)
+BliGlömd helps Swedish internet users exercise their right to erasure under GDPR Article 17. It scans your email address for known data breaches and generates ready-to-send deletion requests for companies that hold your personal data — with a focus on Swedish companies that hold a publishing certificate (_utgivningsbevis_) under YGL.
 
 ---
 
-## Funktioner
+## Features
 
-| Nivå | Namn | Vad det gör |
-|------|------|-------------|
-| L1 | **Hitta** | Guidade instruktioner + länk till varje företags GDPR-sida |
-| L2 | **Skicka** | Färdig juridisk mailmall att kopiera och skicka själv |
-| L3 | **Bevaka** | Vi skickar mailet åt dig och spårar svaret i din dashboard |
+| Level | What it does |
+|-------|-------------|
+| **L1 — Find** | Guided instructions for each company's GDPR portal |
+| **L2 — Send** | Ready-made, legally correct email template to copy-paste |
+| **L3 — Monitor** | BliGlömd sends the email and records the status |
 
-- Skärmar din e-post mot kända dataintrång (XposedOrNot)
-- 20 förkonfigurerade företag (Google, Meta, Spotify, Klarna, Swish m.fl.)
-- Realtids systemstatussida (SV/EN)
-- Konto med e-post + lösenord via Supabase Auth
+- **Bilingual** — full Swedish/English UI, persisted per user in localStorage
+- **Breach scan** — powered by [XposedOrNot](https://xposedornot.com) (free, no API key)
+- **Utgivningsbevis focus** — Swedish media companies (Aftonbladet, Expressen, DN, SvD, GP, SVT, SR, TV4…) shown first, with note about journalistic exemption
+- **Dashboard** — track request status (pending → sent → confirmed → removed)
+- **System status** page at `/status` — real-time health of all components
 
 ---
 
 ## Tech Stack
 
-| Lager | Teknologi |
+| Layer | Technology |
 |-------|-----------|
 | Frontend | React 18 + TypeScript + Vite + Tailwind CSS |
-| Auth & Databas | Supabase (PostgreSQL + Row Level Security) |
-| Serverless | Supabase Edge Functions (Deno) |
-| E-post | Resend API |
-| Intrångskoll | XposedOrNot API (gratis, ingen nyckel krävs) |
-| Hosting | GitHub Pages (via GitHub Actions) |
-| Domän | bliglömd.se (Strato.se) |
+| Auth & DB | Supabase (PostgreSQL + RLS) |
+| Email | Resend.com (via Supabase Edge Function) |
+| Hosting | GitHub Pages with custom domain |
+| CI/CD | GitHub Actions |
 
 ---
 
-## Repo-struktur
+## Company Coverage
 
-```
-bliglomd/
-├── public/
-│   ├── CNAME                    # Custom domain för GitHub Pages
-│   └── favicon.svg
-├── src/
-│   ├── components/
-│   │   ├── AuthModal.tsx        # Inloggning / registrering
-│   │   ├── CompanyCard.tsx      # Företagskort i skärmlistan
-│   │   ├── LevelBadge.tsx       # L1/L2/L3-badge
-│   │   └── StatusBadge.tsx      # Förfrågningsstatus-badge
-│   ├── data/
-│   │   └── companies.ts         # 20 företag med GDPR-kontakter
-│   ├── lib/
-│   │   └── supabase.ts          # Supabase-klient
-│   ├── pages/
-│   │   ├── Home.tsx             # Landningssida
-│   │   ├── Scan.tsx             # E-postsökning + intrångskoll
-│   │   ├── Request.tsx          # Skicka förfrågan (L1/L2/L3)
-│   │   ├── Dashboard.tsx        # Mina förfrågningar
-│   │   └── Status.tsx           # Systemstatussida (SV/EN)
-│   ├── types/
-│   │   └── index.ts
-│   └── App.tsx                  # Router + AuthGuard
-├── supabase/
-│   ├── functions/
-│   │   ├── scan-email/          # Intrångskontroll via XposedOrNot
-│   │   └── send-request/        # Skickar GDPR-mail via Resend
-│   └── migrations/
-│       └── 001_initial_schema.sql
-├── .github/
-│   └── workflows/
-│       └── deploy.yml           # Build + deploy till GitHub Pages
-├── vite.config.ts
-└── tailwind.config.js
-```
+26 companies currently in the database. **12 with utgivningsbevis** (shown first):
+
+Aftonbladet · Expressen · Dagens Nyheter · Svenska Dagbladet · Göteborgs-Posten · SVT · Sveriges Radio · TV4 · Bonnier News · Schibsted · MTG · Stampen
+
+Plus: Google · Meta · LinkedIn · Apple · Spotify · Amazon · Microsoft · TikTok · Klarna · Zalando · Blocket · Tradera · Hemnet · Swedbank
 
 ---
 
-## Lokalt utvecklingsläge
+## Environment Variables
 
-Du behöver Node.js 20+.
+Set in GitHub Secrets and injected at build time:
+
+```
+VITE_SUPABASE_URL=https://ydkahdqvuykpmjkpunck.supabase.co
+VITE_SUPABASE_ANON_KEY=sb_publishable_...
+```
+
+Edge Function secret (set in Supabase Dashboard > Edge Functions > Secrets):
+
+```
+RESEND_API_KEY=re_...  ← NEVER commit this
+```
+
+> **Security**: Never commit `.env.local`. Never put `RESEND_API_KEY` or the service role key in GitHub Secrets or source code.
+
+---
+
+## Local Development
 
 ```bash
-git clone https://github.com/ThorstenGru/bliglomd.git
-cd bliglomd
 npm install
-```
-
-Skapa `.env.local`:
-```
-VITE_SUPABASE_URL=https://<din-project-ref>.supabase.co
-VITE_SUPABASE_ANON_KEY=<din-anon-nyckel>
-```
-
-```bash
+cp .env.local.example .env.local   # fill in Supabase URL + anon key
 npm run dev
 ```
 
 ---
 
-## Deployment
+## Deploy
 
-Varje push till `main` triggar GitHub Actions som automatiskt:
-1. Bygger projektet med Vite
-2. Deployar `dist/` till GitHub Pages
+Push to `main` — GitHub Actions builds and deploys to GitHub Pages automatically.
 
-**GitHub Secrets som krävs:**
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_ANON_KEY`
+### Edge Functions (manual deploy needed after changes)
+
+Install the [Supabase CLI](https://supabase.com/docs/guides/cli), then:
+
+```bash
+supabase login
+supabase link --project-ref ydkahdqvuykpmjkpunck
+supabase functions deploy scan-email
+supabase functions deploy send-request
+```
+
+### Database Migrations
+
+Apply via Supabase Dashboard → SQL Editor, or:
+
+```bash
+supabase db push
+```
 
 ---
 
-## Säkerhet
+## Project Structure
 
-- `RESEND_API_KEY` lagras **endast** i Supabase Edge Function Secrets — aldrig i kod eller git
-- `.env.local` är gitignorerad
-- Service role key används aldrig i frontend eller GitHub Secrets
-- Alla Supabase-tabeller skyddas av Row Level Security (RLS)
-- GitHub secret scanning är aktiverat
+```
+src/
+├── components/
+│   ├── AuthModal.tsx      — login/signup modal
+│   ├── CompanyCard.tsx    — company with level badges + utgivningsbevis badge
+│   ├── LevelBadge.tsx     — L1/L2/L3 colored badge
+│   ├── NavBar.tsx         — sticky top nav with language toggle
+│   └── StatusBadge.tsx    — request status badge
+├── contexts/
+│   └── LanguageContext.tsx — global SV/EN context, persisted to localStorage
+├── data/
+│   └── companies.ts       — 26 companies; COMPANIES_SORTED (utgivningsbevis first)
+├── lib/
+│   ├── i18n.ts            — all SV/EN translations
+│   └── supabase.ts        — client init with env-var guard
+├── pages/
+│   ├── Home.tsx           — landing page with hero + level cards
+│   ├── Scan.tsx           — breach check + company list
+│   ├── Request.tsx        — L1/L2/L3 request flow
+│   ├── Dashboard.tsx      — my requests table
+│   └── Status.tsx         — real-time system health
+└── types/
+    └── index.ts           — Company, Request, Scan, RequestStatus types
+
+supabase/
+├── functions/
+│   ├── scan-email/        — breach check via XposedOrNot API
+│   └── send-request/      — GDPR email via Resend
+└── migrations/
+    ├── 001_initial_schema.sql
+    └── 002_add_scan_columns.sql
+```
 
 ---
+
+## License
 
 © 2026 Thorsten Grund. All rights reserved.

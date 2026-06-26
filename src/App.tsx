@@ -1,7 +1,8 @@
-import { useState, useEffect, type ReactNode } from 'react'
+import { useState, useEffect, useCallback, type ReactNode } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { supabase } from './lib/supabase'
-import { AuthModal } from './components/AuthModal'
+import { LanguageProvider, useLang } from './contexts/LanguageContext'
+import { NavBar } from './components/NavBar'
 import { Home } from './pages/Home'
 import { Scan } from './pages/Scan'
 import { Request } from './pages/Request'
@@ -10,34 +11,32 @@ import { Status } from './pages/Status'
 import type { Session } from '@supabase/supabase-js'
 
 function AuthGuard({ session, children }: { session: Session | null; children: ReactNode }) {
-  const [showModal, setShowModal] = useState(false)
+  const { t } = useLang()
+
+  const openAuth = useCallback(() => {
+    document.dispatchEvent(new CustomEvent('bliglomd:open-auth'))
+  }, [])
 
   if (!session) {
     return (
-      <>
-        {showModal ? (
-          <AuthModal onClose={() => setShowModal(false)} />
-        ) : (
-          <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-            <div className="text-center">
-              <p className="text-gray-600 mb-4">Du måste vara inloggad för att fortsätta.</p>
-              <button
-                onClick={() => setShowModal(true)}
-                className="bg-brand-600 text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-brand-700 transition-colors"
-              >
-                Logga in
-              </button>
-            </div>
-          </div>
-        )}
-      </>
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">{t.nav.login}</p>
+          <button
+            onClick={openAuth}
+            className="bg-brand-600 text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-brand-700 transition-colors"
+          >
+            {t.nav.login}
+          </button>
+        </div>
+      </div>
     )
   }
 
   return <>{children}</>
 }
 
-export default function App() {
+function AppShell() {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -63,9 +62,10 @@ export default function App() {
   }
 
   return (
-    <BrowserRouter>
+    <div className="min-h-screen bg-gray-50">
+      <NavBar session={session} />
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home session={session} />} />
         <Route path="/scan" element={
           <AuthGuard session={session}><Scan /></AuthGuard>
         } />
@@ -78,6 +78,16 @@ export default function App() {
         <Route path="/status" element={<Status />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </BrowserRouter>
+    </div>
+  )
+}
+
+export default function App() {
+  return (
+    <LanguageProvider>
+      <BrowserRouter>
+        <AppShell />
+      </BrowserRouter>
+    </LanguageProvider>
   )
 }

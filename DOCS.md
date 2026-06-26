@@ -1,264 +1,214 @@
 # BliGlömd — Technical Documentation
 
-## Table of Contents
-1. [Architecture Overview](#architecture-overview)
-2. [GitHub & GitHub Pages Configuration](#github--github-pages-configuration)
-3. [Supabase Configuration](#supabase-configuration)
-4. [Edge Functions](#edge-functions)
-5. [Database Schema](#database-schema)
-6. [DNS & Custom Domain](#dns--custom-domain)
-7. [Environment Variables & Secrets](#environment-variables--secrets)
-8. [Adding Companies](#adding-companies)
-9. [Routing](#routing)
-
----
-
-## Architecture Overview
+## Architecture
 
 ```
-User browser
-    │
-    ▼
-bliglömd.se  (GitHub Pages, CDN)
-    │  React SPA (static files)
-    │
-    ├──► Supabase Auth          (login / signup)
-    ├──► Supabase PostgreSQL    (requests, profiles, scans)
-    ├──► Edge Function: scan-email   → XposedOrNot API
-    └──► Edge Function: send-request → Resend API → Company GDPR inbox
+Browser
+  └─ React SPA (GitHub Pages / bliglömd.se)
+        ├─ Supabase Auth (JWT sessions)
+        ├─ Supabase DB (PostgreSQL + RLS)
+        ├─ Edge Function: scan-email  ──► XposedOrNot API
+        └─ Edge Function: send-request ──► Resend API ──► Company GDPR email
 ```
 
-All backend logic lives in Supabase. The frontend is a fully static build deployed to GitHub Pages — no Node.js server in production.
+---
+
+## Routing
+
+All routes are client-side (React Router v6, `BrowserRouter` at root `/`).
+
+| Path | Component | Auth required |
+|------|-----------|---------------|
+| `/` | `Home` | No |
+| `/scan` | `Scan` | Yes |
+| `/request/:id` | `Request` | Yes |
+| `/dashboard` | `Dashboard` | Yes |
+| `/status` | `Status` | No |
+
+GitHub Pages SPA routing is handled by:
+- `public/404.html` — saves `location.href` to `sessionStorage.redirect`, redirects to `/`
+- `index.html` — restores the path from `sessionStorage.redirect` before React mounts
 
 ---
 
-## GitHub & GitHub Pages Configuration
+## Internationalisation
 
-### Repo
-- URL: `https://github.com/ThorstenGru/bliglomd`
-- Visibility: Public
-- Default branch: `main`
-- Secret scanning: enabled
-- Push protection: enabled
+All UI strings live in [`src/lib/i18n.ts`](src/lib/i18n.ts) as a nested `translations` object with `sv` and `en` keys. The active language is stored in `localStorage('bliglomd-lang')` and exposed via `useLang()` from `src/contexts/LanguageContext.tsx`.
 
-### GitHub Pages
-| Setting | Value |
-|---------|-------|
-| Source | GitHub Actions (`build_type: workflow`) |
-| Custom domain | `xn--bliglmd-e1a.se` (bliglömd.se) |
-| HTTPS enforced | auto-enables after TLS cert issued |
-| CNAME file | `public/CNAME` → persists through every deploy |
+```tsx
+const { t, lang, setLang, toggleLang } = useLang()
+```
 
-### GitHub Actions workflow (`.github/workflows/deploy.yml`)
-Triggers on: push to `main`, manual `workflow_dispatch`
-
-Steps:
-1. `actions/checkout@v4`
-2. `actions/setup-node@v4` (Node 20)
-3. `npm install`
-4. `npm run build` (injects secrets as env vars)
-5. `actions/upload-pages-artifact@v3` (uploads `dist/`)
-6. `actions/deploy-pages@v4` (deploys to Pages)
-
-### GitHub Secrets
-| Secret | Used in |
-|--------|---------|
-| `VITE_SUPABASE_URL` | Build step → baked into JS bundle |
-| `VITE_SUPABASE_ANON_KEY` | Build step → baked into JS bundle |
-
-> Note: `npm install` is used instead of `npm ci` because there is no `package-lock.json`
-> (Node.js is not installed locally; all builds happen in CI).
+**Adding a new translation key:**
+1. Add the key to both `translations.sv` and `translations.en` in `i18n.ts`
+2. TypeScript will show an error in any component trying to use it until both sides are present
 
 ---
 
-## Supabase Configuration
+## Company Data
 
-- **Project ref:** `ydkahdqvuykpmjkpunck`
-- **URL:** `https://ydkahdqvuykpmjkpunck.supabase.co`
-- **Region:** eu-west-1 (Ireland)
+[`src/data/companies.ts`](src/data/companies.ts) contains 26 companies as `Company[]`.
 
-### Auth
-Email + password auth enabled. On successful login/signup, user is redirected to `/scan`.
+`COMPANIES_SORTED` — utgivningsbevis companies first, then others.
 
-User metadata stored in `profiles` table via database trigger on `auth.users`.
+### Company shape
 
-### Edge Function Secrets (set via Supabase Dashboard → Edge Functions → Secrets)
-| Secret | Purpose |
-|--------|---------|
-| `RESEND_API_KEY` | Send transactional email via Resend |
-| `SUPABASE_SERVICE_ROLE_KEY` | Bypass RLS in Edge Functions |
+```ts
+interface Company {
+  id: string
+  name: string
+  category: string
+  country: string
+  gdpr_email: string | null       // null → no L3 available
+  gdpr_url: string
+  instructions_sv: string
+  instructions_en: string
+  level1_available: boolean
+  level2_available: boolean
+  level3_available: boolean       // always false when gdpr_email is null
+  utgivningsbevis: boolean        // Swedish publishing certificate (YGL)
+}
+```
+
+### Utgivningsbevis rule
+
+Companies with `utgivningsbevis: true` have legal protection for editorially published content under YGL (Yttrandefrihetsgrundlagen). They **must** still delete account/subscription/profile data on request; they may only refuse erasure of content in their journalistic archive.
+
+---
+
+## Request Levels
+
+| Level | Method | Tracked |
+|-------|--------|---------|
+| L1 — Find | User reads instructions, visits company's GDPR portal | No |
+| L2 — Send | User copies the generated email template and sends it manually | No |
+| L3 — Monitor | BliGlömd sends the email via Resend + inserts a `requests` row | Yes |
+
+---
+
+## Database Schema
+
+### `profiles`
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | uuid (PK) | = auth.users.id |
+| `full_name` | text | |
+| `created_at` | timestamptz | |
+
+### `requests`
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | uuid (PK) | |
+| `user_id` | uuid (FK → profiles) | |
+| `company_id` | text | |
+| `company_name` | text | |
+| `user_email` | text | email used in the request |
+| `user_name` | text | name used in the request |
+| `status` | text | pending / sent / confirmed / removed / failed / expired |
+| `sent_at` | timestamptz | |
+| `response_at` | timestamptz | |
+| `created_at` | timestamptz | |
+
+### `scans`
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | uuid (PK) | |
+| `user_id` | uuid (FK → profiles) | |
+| `scan_email` | text | |
+| `breach_names` | text[] | added in migration 002 |
+| `breach_count` | int | added in migration 002 |
+| `created_at` | timestamptz | |
+
+> `hibp_breaches` and `category_suggestions` (jsonb) are legacy columns from migration 001 and are no longer written to.
+
+### `reminders`
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | uuid (PK) | |
+| `request_id` | uuid (FK → requests) | |
+| `remind_at` | timestamptz | |
+| `sent` | boolean | |
+
+All tables use Row Level Security (RLS). Users can only read/write their own rows.
 
 ---
 
 ## Edge Functions
 
 ### `scan-email`
-Path: `supabase/functions/scan-email/index.ts`
 
-Checks an email address against the XposedOrNot breach database.
+**Endpoint:** `POST /functions/v1/scan-email`  
+**Auth:** Supabase anon key (Bearer token)  
+**Input:** `{ "email": "user@example.com" }`  
+**Output:** `{ "breaches": [{ breach, xposed_date, domain, xposed_data, xposed_records }] }`
 
-**Request:**
-```json
-{ "email": "user@example.com" }
-```
-
-**Response:**
-```json
-{
-  "breaches": [
-    {
-      "breach": "ExampleBreach",
-      "xposed_date": "2023-01-15",
-      "domain": "example.com",
-      "industry": "Technology",
-      "xposed_data": "Emails, Passwords",
-      "xposed_records": 1200000
-    }
-  ]
-}
-```
-
-Uses `https://api.xposedornot.com/v1/breach-analytics?email=<email>` — no API key required.
-Returns empty array `[]` if no breaches found (404 from XposedOrNot).
+Calls [XposedOrNot](https://xposedornot.com/api_doc) — free, no API key needed. Returns empty array on 404 (no breaches). 10-second timeout. Input-validates email format.
 
 ### `send-request`
-Path: `supabase/functions/send-request/index.ts`
 
-Sends a GDPR Article 17 deletion email to a company on behalf of the user.
-
-**Request:**
+**Endpoint:** `POST /functions/v1/send-request`  
+**Auth:** Supabase anon key (Bearer token)  
+**CORS:** Restricted to `xn--bliglmd-e1a.se` and `localhost`  
+**Input:**
 ```json
 {
-  "companyName": "Google",
-  "gdprEmail": "privacy@google.com",
+  "companyName": "Aftonbladet",
+  "gdprEmail": "integritet@aftonbladet.se",
   "userName": "Anna Svensson",
   "userEmail": "anna@example.com"
 }
 ```
+**Output:** `{ "success": true, "id": "resend-message-id" }`
 
-Sends via Resend from `BliGlömd <noreply@bliglomd.se>`.
-Mail template is a formal Swedish GDPR deletion request citing Article 17.
-
----
-
-## Database Schema
-
-All tables use Row Level Security. Users can only access their own rows.
-
-### `profiles`
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid | FK → auth.users |
-| full_name | text | |
-| email | text | |
-| created_at | timestamptz | |
-
-### `requests`
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid | PK |
-| user_id | uuid | FK → profiles |
-| company_id | text | matches `companies.ts` id |
-| company_name | text | |
-| user_email | text | |
-| user_name | text | |
-| status | text | pending/sent/confirmed/removed/failed/expired |
-| sent_at | timestamptz | |
-| response_at | timestamptz | |
-| created_at | timestamptz | |
-
-### `scans`
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid | PK |
-| user_id | uuid | FK → profiles |
-| email | text | scanned email |
-| breach_count | int | |
-| breaches | jsonb | raw XposedOrNot response |
-| created_at | timestamptz | |
-
-### `reminders`
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid | PK |
-| request_id | uuid | FK → requests |
-| user_id | uuid | FK → profiles |
-| remind_at | timestamptz | |
-| sent | boolean | |
-| created_at | timestamptz | |
+Sends via [Resend](https://resend.com). Requires `RESEND_API_KEY` secret. Validates all inputs. Restricted CORS. 15-second timeout.
 
 ---
 
-## DNS & Custom Domain
+## CI/CD
 
-Domain: `bliglömd.se` (registered at Strato.se)
-Punycode: `xn--bliglmd-e1a.se`
+`.github/workflows/deploy.yml`:
+1. Checkout → `npm install` → `npm run build` (injects `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` from GitHub Secrets)
+2. Upload artifact → Deploy to GitHub Pages
 
-### DNS Records (configured at Strato.se)
-| Type | Name | Value |
-|------|------|-------|
-| A | @ | 185.199.108.153 |
-| AAAA | @ | 2606:50c0:8000::153 |
-| CNAME | www | thorstengru.github.io |
-
-### How custom domain persists through deploys
-`public/CNAME` contains `bliglömd.se`. Vite copies everything in `public/` to `dist/` on build, so the CNAME file is always present in the Pages deployment artifact. GitHub Pages reads it and maintains the custom domain mapping.
-
-### Vite base path
-`vite.config.ts` has `base: '/'` — required for custom domain root deployment.
-(Was `/bliglomd/` when hosted as a subpath at `thorstengru.github.io/bliglomd/`.)
+Edge functions are **not** deployed via CI — deploy manually with the Supabase CLI or via the Dashboard.
 
 ---
 
-## Environment Variables & Secrets
+## Custom Domain
 
-| Variable | Where stored | Committed to git? |
-|----------|-------------|-------------------|
-| `VITE_SUPABASE_URL` | GitHub Secret + `.env.local` | No |
-| `VITE_SUPABASE_ANON_KEY` | GitHub Secret + `.env.local` | No |
-| `RESEND_API_KEY` | Supabase Edge Function Secret only | No |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase Edge Function Secret only | No |
+Domain: `bliglömd.se` (punycode: `xn--bliglmd-e1a.se`)  
+DNS: Strato.se  
+TLS: Let's Encrypt (issued 26 Jun 2026)  
 
-The anon key is safe to expose in client-side bundles — it's designed for public use and all data access is controlled by Row Level Security policies.
-
-The service role key bypasses RLS and must **never** appear in frontend code, GitHub Secrets, or git history.
-
----
-
-## Adding Companies
-
-Edit `src/data/companies.ts`. Each entry:
-
-```typescript
-{
-  id: 'unique-id',
-  name: 'Company Name',
-  category: 'Sociala medier',          // display category
-  country: 'USA',
-  gdpr_email: 'privacy@company.com',   // null if no email (use form instead)
-  gdpr_url: 'https://company.com/privacy/delete',
-  instructions_sv: 'Gå till Inställningar → ...',
-  level1_available: true,
-  level2_available: true,
-  level3_available: true,              // false if no gdpr_email
-}
+DNS records required:
+```
+A     @  185.199.108.153
+A     @  185.199.109.153
+A     @  185.199.110.153
+A     @  185.199.111.153
+AAAA  @  2606:50c0:8000::153  (+ 8001, 8002, 8003)
+CNAME www  thorstengru.github.io
 ```
 
-No backend changes needed — companies are static data in the frontend bundle.
+`public/CNAME` contains `bliglömd.se` and is deployed on every Actions run to preserve the custom domain.
 
 ---
 
-## Routing
+## Supabase Auth Configuration
 
-React Router DOM v6 with `BrowserRouter` (no `basename`).
+| Setting | Value |
+|---------|-------|
+| Site URL | `https://xn--bliglmd-e1a.se` |
+| Redirect URLs | `https://xn--bliglmd-e1a.se/**` |
+| Email confirmations | Enabled |
 
-| Path | Component | Auth required |
-|------|-----------|---------------|
-| `/` | Home | No |
-| `/scan` | Scan | Yes |
-| `/request/:id` | Request | Yes |
-| `/dashboard` | Dashboard | Yes |
-| `/status` | Status | No |
-| `*` | → redirect `/` | — |
+---
 
-Auth is enforced by the `AuthGuard` wrapper in `App.tsx`. Unauthenticated users see a login prompt in-place rather than being redirected.
+## Pending / Future Work
+
+- [ ] Apply DB migration 002 (add `breach_names` / `breach_count` to `scans` table)
+- [ ] Deploy updated edge functions via Supabase CLI
+- [ ] Add more companies (EU market expansion)
+- [ ] Implement reminder emails (30-day follow-up)
+- [ ] Add L2/L3 for companies currently L1-only
+- [ ] User profile page (manage email, delete account)
