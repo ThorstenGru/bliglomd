@@ -12,7 +12,7 @@ export const COMPANIES: Company[] = [
     instructions_sv:
       'Kontakta Aftonbladets integritetsteam via integritet@aftonbladet.se. Ange ditt namn, e-postadress och eventuellt prenumerationsnummer. Observera: Aftonbladet har utgivningsbevis och kan åberopa journalistiskt syfte för redaktionellt publicerat material, men är skyldiga att radera konto- och prenumerationsdata.',
     instructions_en:
-      'Contact Aftonbladet's privacy team at integritet@aftonbladet.se. State your name, email address and any subscription number. Note: Aftonbladet holds a publishing certificate and may retain editorially published material, but must delete account and subscription data.',
+      "Contact Aftonbladet's privacy team at integritet@aftonbladet.se. State your name, email address and any subscription number. Note: Aftonbladet holds a publishing certificate and may retain editorially published material, but must delete account and subscription data.",
     level1_available: true,
     level2_available: true,
     level3_available: true,
@@ -142,7 +142,7 @@ export const COMPANIES: Company[] = [
     instructions_sv:
       'Logga in på spotify.com och gå till Integritetsinställningar. Klicka på "Begär radering". Du kan även kontakta Spotifys dataskyddsombud via privacy@spotify.com och åberopa din rätt enligt GDPR Artikel 17.',
     instructions_en:
-      'Log in to spotify.com and go to Privacy Settings. Click "Request deletion". You can also contact Spotify's Data Protection Officer at privacy@spotify.com citing your rights under GDPR Article 17.',
+      "Log in to spotify.com and go to Privacy Settings. Click \"Request deletion\". You can also contact Spotify's Data Protection Officer at privacy@spotify.com citing your rights under GDPR Article 17.",
     level1_available: true,
     level2_available: true,
     level3_available: true,
@@ -158,7 +158,7 @@ export const COMPANIES: Company[] = [
     instructions_sv:
       'Öppna Klarna-appen och gå till Profil → Inställningar → Integritet → Begär radering. Klarnas DPO nås på dataprivacy@klarna.com. Observera att Klarna är skyldig att spara viss data för redovisningsändamål i 7 år (Bokföringslagen).',
     instructions_en:
-      'Open the Klarna app and go to Profile → Settings → Privacy → Request deletion. Klarna's DPO can be reached at dataprivacy@klarna.com. Note: Klarna is legally required to retain certain accounting data for 7 years under Swedish law.',
+      "Open the Klarna app and go to Profile → Settings → Privacy → Request deletion. Klarna's DPO can be reached at dataprivacy@klarna.com. Note: Klarna is legally required to retain certain accounting data for 7 years under Swedish law.",
     level1_available: true,
     level2_available: true,
     level3_available: true,
@@ -190,7 +190,7 @@ export const COMPANIES: Company[] = [
     instructions_sv:
       'BankID-data hanteras primärt av din utfärdande bank. Kontakta din bank för att spärra och radera BankID. För frågor om Finansiell ID-teknik ABs databehandling: gdpr@bankid.com.',
     instructions_en:
-      'BankID data is primarily managed by your issuing bank. Contact your bank to block and delete your BankID. For questions about Finansiell ID-teknik AB's data processing: gdpr@bankid.com.',
+      "BankID data is primarily managed by your issuing bank. Contact your bank to block and delete your BankID. For questions about Finansiell ID-teknik AB's data processing: gdpr@bankid.com.",
     level1_available: true,
     level2_available: true,
     level3_available: true,
@@ -272,7 +272,7 @@ export const COMPANIES: Company[] = [
     instructions_sv:
       'Logga in på ditt Google-konto och gå till "Data och integritet". Välj "Radera ditt Google-konto" eller radera specifika tjänster. EU-användare kan skicka en formell begäran via Googles integritetssida.',
     instructions_en:
-      'Log in to your Google account and go to "Data and privacy". Select "Delete your Google Account" or delete specific services. EU users can submit a formal request via Google's privacy page.',
+      "Log in to your Google account and go to \"Data and privacy\". Select \"Delete your Google Account\" or delete specific services. EU users can submit a formal request via Google's privacy page.",
     level1_available: true,
     level2_available: true,
     level3_available: false,
@@ -288,7 +288,7 @@ export const COMPANIES: Company[] = [
     instructions_sv:
       'Gå till Facebook Inställningar → Din Facebook-information → Radering och avaktivering. Välj "Radera konto". Alternativt skicka en formell GDPR-begäran via Metas dataprivacy-formulär.',
     instructions_en:
-      'Go to Facebook Settings → Your Facebook information → Deactivation and deletion. Select "Delete account". Or submit a formal GDPR request via Meta's data privacy form.',
+      "Go to Facebook Settings → Your Facebook information → Deactivation and deletion. Select \"Delete account\". Or submit a formal GDPR request via Meta's data privacy form.",
     level1_available: true,
     level2_available: true,
     level3_available: false,
@@ -368,7 +368,7 @@ export const COMPANIES: Company[] = [
     instructions_sv:
       'I TikTok-appen: gå till Profil → Inställningar → Hantera konto → Radera konto. Alternativt skicka en GDPR-begäran till privacy@tiktok.com. TikToks EEA-enhet är registrerad i Irland.',
     instructions_en:
-      'In the TikTok app: go to Profile → Settings → Manage account → Delete account. Or send a GDPR request to privacy@tiktok.com. TikTok's EEA entity is registered in Ireland.',
+      "In the TikTok app: go to Profile → Settings → Manage account → Delete account. Or send a GDPR request to privacy@tiktok.com. TikTok's EEA entity is registered in Ireland.",
     level1_available: true,
     level2_available: true,
     level3_available: true,
