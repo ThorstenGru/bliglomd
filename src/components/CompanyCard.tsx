@@ -35,7 +35,7 @@ export function CompanyCard({ company, showCheckbox, checked, onCheck }: Company
         </div>
       </div>
       <button
-        onClick={() => navigate(`/bliglomd/request/${company.id}`)}
+        onClick={() => navigate(`/request/${company.id}`)}
         className="shrink-0 bg-brand-600 text-white text-sm px-3 py-1.5 rounded-lg hover:bg-brand-700 transition-colors"
       >
         Skicka förfrågan

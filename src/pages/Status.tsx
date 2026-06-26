@@ -35,7 +35,7 @@ const COMPONENTS: ComponentDef[] = [
   {
     id: 'frontend',
     category: 'frontend',
-    docsUrl: 'https://thorstengru.github.io/bliglomd/',
+    docsUrl: 'https://xn--bliglmd-e1a.se/',
     check: async () => ({ status: 'operational', detail: window.location.origin }),
   },
   {
@@ -407,7 +407,7 @@ export function Status() {
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <a href="/bliglomd/" className="text-white/80 hover:text-white text-sm mb-2 inline-block">
+              <a href="/" className="text-white/80 hover:text-white text-sm mb-2 inline-block">
                 {t.backHome}
               </a>
               <h1 className="text-3xl font-bold">{t.title}</h1>

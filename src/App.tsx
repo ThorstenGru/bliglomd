@@ -65,18 +65,18 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/bliglomd/" element={<Home />} />
-        <Route path="/bliglomd/scan" element={
+        <Route path="/" element={<Home />} />
+        <Route path="/scan" element={
           <AuthGuard session={session}><Scan /></AuthGuard>
         } />
-        <Route path="/bliglomd/request/:id" element={
+        <Route path="/request/:id" element={
           <AuthGuard session={session}><Request /></AuthGuard>
         } />
-        <Route path="/bliglomd/dashboard" element={
+        <Route path="/dashboard" element={
           <AuthGuard session={session}><Dashboard /></AuthGuard>
         } />
-        <Route path="/bliglomd/status" element={<Status />} />
-        <Route path="*" element={<Navigate to="/bliglomd/" replace />} />
+        <Route path="/status" element={<Status />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   )

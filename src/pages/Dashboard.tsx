@@ -48,7 +48,7 @@ export function Dashboard() {
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Mina förfrågningar</h1>
           <button
-            onClick={() => navigate('/bliglomd/scan')}
+            onClick={() => navigate('/scan')}
             className="bg-brand-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-brand-700 transition-colors"
           >
             + Ny skärming
@@ -60,7 +60,7 @@ export function Dashboard() {
             <p className="text-gray-500 text-lg mb-4">Inga förfrågningar ännu.</p>
             <p className="text-gray-400 text-sm mb-6">Starta en skärming!</p>
             <button
-              onClick={() => navigate('/bliglomd/scan')}
+              onClick={() => navigate('/scan')}
               className="bg-brand-600 text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-brand-700 transition-colors"
             >
               Skärma min e-post

@@ -21,7 +21,7 @@ export function Request() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600">Företaget hittades inte.</p>
-          <button onClick={() => navigate('/bliglomd/scan')} className="mt-4 text-brand-600 hover:underline">
+          <button onClick={() => navigate('/scan')} className="mt-4 text-brand-600 hover:underline">
             Tillbaka till skärming
           </button>
         </div>
@@ -93,7 +93,7 @@ ${userName || '[DITT NAMN]'}`
             Din GDPR-raderingsförfrågan har skickats till {company.name}. Du kan följa statusen i din dashboard.
           </p>
           <button
-            onClick={() => navigate('/bliglomd/dashboard')}
+            onClick={() => navigate('/dashboard')}
             className="bg-brand-600 text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-brand-700 transition-colors"
           >
             Gå till Dashboard

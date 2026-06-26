@@ -25,7 +25,7 @@ export function AuthModal({ onClose }: AuthModalProps) {
       setError(error.message)
     } else {
       onClose()
-      navigate('/bliglomd/scan')
+      navigate('/scan')
     }
   }
 
@@ -43,7 +43,7 @@ export function AuthModal({ onClose }: AuthModalProps) {
       setError(error.message)
     } else {
       onClose()
-      navigate('/bliglomd/scan')
+      navigate('/scan')
     }
   }
 
