@@ -79,6 +79,9 @@ export function Home() {
       <footer className="border-t border-gray-200 py-8 text-center text-sm text-gray-400">
         <p>© 2026 Thorsten Grund. All rights reserved.</p>
         <p className="mt-1">BliGlömd hjälper dig utöva din rätt enligt GDPR Artikel 17.</p>
+        <a href="/bliglomd/status" className="mt-2 inline-block text-gray-400 hover:text-gray-600 underline">
+          Systemstatus / System Status
+        </a>
       </footer>
     </div>
   )

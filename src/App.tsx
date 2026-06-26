@@ -6,6 +6,7 @@ import { Home } from './pages/Home'
 import { Scan } from './pages/Scan'
 import { Request } from './pages/Request'
 import { Dashboard } from './pages/Dashboard'
+import { Status } from './pages/Status'
 import type { Session } from '@supabase/supabase-js'
 
 function AuthGuard({ session, children }: { session: Session | null; children: ReactNode }) {
@@ -74,6 +75,7 @@ export default function App() {
         <Route path="/bliglomd/dashboard" element={
           <AuthGuard session={session}><Dashboard /></AuthGuard>
         } />
+        <Route path="/bliglomd/status" element={<Status />} />
         <Route path="*" element={<Navigate to="/bliglomd/" replace />} />
       </Routes>
     </BrowserRouter>
