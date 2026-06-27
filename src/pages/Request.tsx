@@ -66,6 +66,7 @@ export function Request() {
 
   async function handleSendL3(e: React.FormEvent) {
     e.preventDefault()
+    if (!company) return
     if (!company.gdpr_email) {
       setError(t.request.webformOnly)
       return
