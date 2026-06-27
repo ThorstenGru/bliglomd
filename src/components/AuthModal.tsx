@@ -34,6 +34,10 @@ export function AuthModal({ onClose }: AuthModalProps) {
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
+    if (password.length < 6) {
+      setError(t.auth.passwordTooShort)
+      return
+    }
     setLoading(true)
     setError(null)
     const { error } = await supabase.auth.signUp({

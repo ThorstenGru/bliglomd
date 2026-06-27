@@ -464,6 +464,127 @@ export const COMPANIES: Company[] = [
     request_type: 'gdpr_art17',
   },
 
+  // ── Group 1c: International companies with EU GDPR obligations ───────────────
+  {
+    id: 'netflix',
+    name: 'Netflix',
+    category: 'Streaming',
+    country: 'US',
+    gdpr_email: 'privacy@netflix.com',
+    gdpr_url: 'https://www.netflix.com/account/security',
+    instructions_sv:
+      'Logga in på netflix.com och gå till Konto → Säkerhet och integritet för att begära radering av ditt konto och data. Du kan också skicka en skriftlig begäran till Netflixs DPO på privacy@netflix.com och åberopa GDPR Artikel 17.',
+    instructions_en:
+      'Log in to netflix.com and go to Account → Security & Privacy to request deletion of your account and data. You can also send a written request to Netflix\'s DPO at privacy@netflix.com citing GDPR Article 17.',
+    level1_available: true,
+    level2_available: true,
+    level3_available: true,
+    utgivningsbevis: false,
+    request_type: 'gdpr_art17',
+  },
+  {
+    id: 'paypal',
+    name: 'PayPal',
+    category: 'Finans',
+    country: 'US',
+    gdpr_email: null,
+    gdpr_url: 'https://www.paypal.com/myaccount/privacy/privacyhub',
+    instructions_sv:
+      'Logga in på paypal.com och gå till Inställningar → Dataintegritet för att hantera och begära radering av dina uppgifter. PayPals EU-enhet är registrerad i Luxemburg och lyder under GDPR. Observera att PayPal är skyldig att behålla transaktionsdata för bokföringsändamål.',
+    instructions_en:
+      'Log in to paypal.com and go to Settings → Data & Privacy to manage and request deletion of your data. PayPal\'s EU entity is registered in Luxembourg and is subject to GDPR. Note: PayPal is required to retain transaction data for accounting purposes.',
+    level1_available: true,
+    level2_available: false,
+    level3_available: false,
+    utgivningsbevis: false,
+    request_type: 'gdpr_art17',
+  },
+  {
+    id: 'booking',
+    name: 'Booking.com',
+    category: 'Övrigt',
+    country: 'NL',
+    gdpr_email: 'dataprotectionoffice@booking.com',
+    gdpr_url: 'https://www.booking.com/content/privacy.html',
+    instructions_sv:
+      'Skicka en GDPR-raderingsförfrågan till Booking.coms dataskyddsombud: dataprotectionoffice@booking.com. Ange ditt fullständiga namn, e-postadress kopplad till kontot och åberopa GDPR Artikel 17. Booking.com (Amsterdam) är ett niederländskt bolag och lyder under GDPR.',
+    instructions_en:
+      'Send a GDPR deletion request to Booking.com\'s Data Protection Officer: dataprotectionoffice@booking.com. Include your full name, account email address and cite GDPR Article 17. Booking.com (Amsterdam) is a Dutch company subject to GDPR.',
+    level1_available: true,
+    level2_available: true,
+    level3_available: true,
+    utgivningsbevis: false,
+    request_type: 'gdpr_art17',
+  },
+  {
+    id: 'adobe',
+    name: 'Adobe',
+    category: 'Övrigt',
+    country: 'US',
+    gdpr_email: null,
+    gdpr_url: 'https://privacyportal.adobe.com/',
+    instructions_sv:
+      'Besök Adobes integritetsportal på privacyportal.adobe.com och logga in med ditt Adobe ID. Välj "Radera mitt konto" eller skicka en GDPR-begäran via portalen. Adobe är skyldigt att hantera begäran inom 30 dagar.',
+    instructions_en:
+      'Visit Adobe\'s privacy portal at privacyportal.adobe.com and log in with your Adobe ID. Select "Delete my account" or submit a GDPR request via the portal. Adobe is required to respond within 30 days.',
+    level1_available: true,
+    level2_available: false,
+    level3_available: false,
+    utgivningsbevis: false,
+    request_type: 'gdpr_art17',
+  },
+  {
+    id: 'uber',
+    name: 'Uber',
+    category: 'Övrigt',
+    country: 'US',
+    gdpr_email: null,
+    gdpr_url: 'https://help.uber.com/riders/article/submit-dsar',
+    instructions_sv:
+      'Besök Ubers DSAR-formulär för att skicka en begäran om radering av personuppgifter. Alternativt: öppna Uber-appen → Konto → Integritet → Hantera sekretessinställningar. Ubers EU-enhet är registrerad i Nederländerna.',
+    instructions_en:
+      'Visit Uber\'s DSAR form to submit a personal data deletion request. Alternatively: open the Uber app → Account → Privacy → Manage privacy settings. Uber\'s EU entity is registered in the Netherlands.',
+    level1_available: true,
+    level2_available: false,
+    level3_available: false,
+    utgivningsbevis: false,
+    request_type: 'gdpr_art17',
+  },
+  {
+    id: 'vinted',
+    name: 'Vinted',
+    category: 'Shopping',
+    country: 'LT',
+    gdpr_email: null,
+    gdpr_url: 'https://www.vinted.se/help/privacy-policy',
+    instructions_sv:
+      'Öppna Vinted-appen, gå till Profil → Inställningar → Integritet → Radera mitt konto. Du kan även begära kontoradering via Vinteds hjälpcenter. Vinted är registrerat i Litauen och lyder under GDPR.',
+    instructions_en:
+      'Open the Vinted app, go to Profile → Settings → Privacy → Delete my account. You can also request account deletion via Vinted\'s help center. Vinted is registered in Lithuania and subject to GDPR.',
+    level1_available: true,
+    level2_available: false,
+    level3_available: false,
+    utgivningsbevis: false,
+    request_type: 'gdpr_art17',
+  },
+  {
+    id: 'ebay',
+    name: 'eBay',
+    category: 'Shopping',
+    country: 'US',
+    gdpr_email: null,
+    gdpr_url: 'https://www.ebay.se/help/policies/member-behaviour-policies/ebays-privacy-notice',
+    instructions_sv:
+      'Logga in på ebay.se och gå till Mitt eBay → Konto → Personuppgifter för att begära radering. eBays europeiska enhet är registrerad i Luxemburg. Skicka en formell GDPR-begäran via deras kundtjänst och åberopa GDPR Artikel 17.',
+    instructions_en:
+      'Log in to ebay.se and go to My eBay → Account → Personal data to request deletion. eBay\'s European entity is registered in Luxembourg. Send a formal GDPR request via their customer service citing GDPR Article 17.',
+    level1_available: true,
+    level2_available: false,
+    level3_available: false,
+    utgivningsbevis: false,
+    request_type: 'gdpr_art17',
+  },
+
   // ── Group 2: Swedish opt-out / people-search sites ─────────────────────────
   // These hold utgivningsbevis and can legally refuse GDPR Art. 17 erasure.
   // They offer voluntary opt-out processes instead.

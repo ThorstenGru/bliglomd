@@ -7,8 +7,14 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+// Opt-out sites with annual protection windows — send reminder 1 month before expiry.
+// All Swedish opt-out/people-search sites below use 12-month BankID protection.
 const REMINDER_COMPANIES: Record<string, { reminderMonths: number; nameSv: string }> = {
-  ratsit: { reminderMonths: 11, nameSv: 'Ratsit' },
+  ratsit:      { reminderMonths: 11, nameSv: 'Ratsit' },
+  merinfo:     { reminderMonths: 11, nameSv: 'Merinfo' },
+  hitta:       { reminderMonths: 11, nameSv: 'Hitta.se' },
+  birthday:    { reminderMonths: 11, nameSv: 'Birthday.se' },
+  mrkoll:      { reminderMonths: 11, nameSv: 'MrKoll' },
 }
 
 serve(async (_req) => {

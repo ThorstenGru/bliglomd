@@ -43,6 +43,7 @@ export function NavBar({ session }: NavBarProps) {
               <div className="hidden sm:flex items-center gap-4 text-sm">
                 <Link to="/scan" className={isActive('/scan')}>{t.nav.scan}</Link>
                 <Link to="/dashboard" className={isActive('/dashboard')}>{t.nav.dashboard}</Link>
+                <Link to="/profile" className={isActive('/profile')}>{t.nav.profile}</Link>
               </div>
             )}
           </div>
@@ -82,6 +83,9 @@ export function NavBar({ session }: NavBarProps) {
             </Link>
             <Link to="/dashboard" className={`flex-1 text-center py-2 ${isActive('/dashboard')}`}>
               {t.nav.dashboard}
+            </Link>
+            <Link to="/profile" className={`flex-1 text-center py-2 ${isActive('/profile')}`}>
+              {t.nav.profile}
             </Link>
           </div>
         )}

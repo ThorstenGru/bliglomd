@@ -45,6 +45,9 @@ export function Dashboard() {
   const [requests, setRequests] = useState<Request[]>([])
   const [loading, setLoading] = useState(true)
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [noteText, setNoteText] = useState('')
+  const [noteSaving, setNoteSaving] = useState(false)
+  const [noteSavedId, setNoteSavedId] = useState<string | null>(null)
 
   useEffect(() => {
     fetchRequests()
@@ -58,6 +61,20 @@ export function Dashboard() {
 
     if (!error && data) setRequests(data as Request[])
     setLoading(false)
+  }
+
+  async function saveNote(id: string) {
+    setNoteSaving(true)
+    const { error } = await supabase
+      .from('requests')
+      .update({ notes: noteText.trim() || null })
+      .eq('id', id)
+    setNoteSaving(false)
+    if (!error) {
+      setRequests((prev) => prev.map((r) => r.id === id ? { ...r, notes: noteText.trim() || null } : r))
+      setNoteSavedId(id)
+      setTimeout(() => setNoteSavedId(null), 2000)
+    }
   }
 
   async function updateStatus(id: string, status: Request['status']) {
@@ -172,7 +189,14 @@ export function Dashboard() {
               >
                 {/* Summary row — always visible, click to expand */}
                 <button
-                  onClick={() => setExpandedId(isExpanded ? null : req.id)}
+                  onClick={() => {
+                    if (isExpanded) {
+                      setExpandedId(null)
+                    } else {
+                      setExpandedId(req.id)
+                      setNoteText(req.notes ?? '')
+                    }
+                  }}
                   className="w-full text-left px-5 py-4 flex items-center gap-4"
                 >
                   <div className="flex-1 min-w-0">
@@ -245,13 +269,36 @@ export function Dashboard() {
                       </select>
 
                       <button
-                        onClick={() => navigate(`/request/${
-                          req.company_id
-                        }`)}
+                        onClick={() => navigate(`/request/${req.company_id}`)}
                         className="text-xs text-brand-600 hover:underline"
                       >
                         {t.dashboard.goToRequest} →
                       </button>
+                    </div>
+
+                    {/* Notes */}
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                      <p className="text-xs font-medium text-gray-500 mb-2">{t.dashboard.addNote}</p>
+                      <div className="flex gap-2">
+                        <textarea
+                          value={noteText}
+                          onChange={(e) => setNoteText(e.target.value)}
+                          rows={2}
+                          placeholder={t.dashboard.notePlaceholder}
+                          className="flex-1 border border-gray-300 rounded-lg px-2.5 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 resize-none"
+                        />
+                        <button
+                          onClick={() => saveNote(req.id)}
+                          disabled={noteSaving}
+                          className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors self-end ${
+                            noteSavedId === req.id
+                              ? 'bg-green-600 text-white'
+                              : 'bg-brand-600 text-white hover:bg-brand-700'
+                          } disabled:opacity-50`}
+                        >
+                          {noteSavedId === req.id ? t.dashboard.noteSaved : noteSaving ? '…' : t.dashboard.saveNote}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}

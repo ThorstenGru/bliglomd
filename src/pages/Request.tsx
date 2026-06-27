@@ -87,7 +87,7 @@ export function Request() {
 
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        await supabase.from('requests').insert({
+        const { error: dbError } = await supabase.from('requests').insert({
           user_id: user.id,
           company_id: company.id,
           company_name: company.name,
@@ -96,6 +96,10 @@ export function Request() {
           status: 'sent',
           sent_at: new Date().toISOString(),
         })
+        if (dbError) {
+          // Email was sent — show success, but warn that tracking failed
+          console.error('Failed to save request record:', dbError.message)
+        }
       }
 
       setSuccess(true)

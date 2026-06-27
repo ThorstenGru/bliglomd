@@ -7,6 +7,7 @@ import { Home } from './pages/Home'
 import { Scan } from './pages/Scan'
 import { Request } from './pages/Request'
 import { Dashboard } from './pages/Dashboard'
+import { Profile } from './pages/Profile'
 import { Status } from './pages/Status'
 import type { Session } from '@supabase/supabase-js'
 
@@ -74,6 +75,9 @@ function AppShell() {
         } />
         <Route path="/dashboard" element={
           <AuthGuard session={session}><Dashboard /></AuthGuard>
+        } />
+        <Route path="/profile" element={
+          <AuthGuard session={session}><Profile /></AuthGuard>
         } />
         <Route path="/status" element={<Status />} />
         <Route path="*" element={<Navigate to="/" replace />} />
