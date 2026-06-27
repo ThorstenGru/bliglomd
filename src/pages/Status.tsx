@@ -21,14 +21,8 @@ interface ComponentDef {
 const SB_URL: string = import.meta.env.VITE_SUPABASE_URL || ''
 const SB_KEY: string = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 
-async function fetchWithTimeout(url: string, opts: RequestInit = {}, ms = 7000): Promise<Response> {
-  const ctrl = new AbortController()
-  const t = setTimeout(() => ctrl.abort(), ms)
-  try {
-    return await fetch(url, { ...opts, signal: ctrl.signal })
-  } finally {
-    clearTimeout(t)
-  }
+function fetchWithTimeout(url: string, opts: RequestInit = {}, ms = 7000): Promise<Response> {
+  return fetch(url, { ...opts, signal: AbortSignal.timeout(ms) })
 }
 
 const COMPONENTS: ComponentDef[] = [

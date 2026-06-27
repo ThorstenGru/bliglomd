@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useLang } from '../contexts/LanguageContext'
@@ -25,11 +25,7 @@ export function Profile() {
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
 
-  useEffect(() => {
-    loadProfile()
-  }, [])
-
-  async function loadProfile() {
+  const loadProfile = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { navigate('/'); return }
     setEmail(user.email ?? '')
@@ -42,7 +38,11 @@ export function Profile() {
 
     if (data) setFullName(data.full_name ?? '')
     setLoading(false)
-  }
+  }, [navigate])
+
+  useEffect(() => {
+    loadProfile()
+  }, [loadProfile])
 
   async function saveName(e: React.FormEvent) {
     e.preventDefault()

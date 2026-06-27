@@ -22,9 +22,12 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - run: npm install
+
+      - name: Typkontroll
+        run: npx tsc --noEmit
 
       - name: Bygg projektet
         env:

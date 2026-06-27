@@ -4,6 +4,11 @@ import { COMPANIES_SORTED } from '../data/companies'
 import { CompanyCard } from '../components/CompanyCard'
 import { useLang } from '../contexts/LanguageContext'
 
+const mediaCompanies   = COMPANIES_SORTED.filter((c) => c.request_type === 'gdpr_art17' && c.utgivningsbevis)
+const gdprCompanies    = COMPANIES_SORTED.filter((c) => c.request_type === 'gdpr_art17' && !c.utgivningsbevis)
+const optOutCompanies  = COMPANIES_SORTED.filter((c) => c.request_type === 'opt_out')
+const authorityEntries = COMPANIES_SORTED.filter((c) => c.request_type === 'authority')
+
 interface XonBreach {
   breach: string
   xposed_date: string
@@ -56,11 +61,6 @@ export function Scan() {
       setLoading(false)
     }
   }
-
-  const mediaCompanies   = COMPANIES_SORTED.filter((c) => c.request_type === 'gdpr_art17' && c.utgivningsbevis)
-  const gdprCompanies    = COMPANIES_SORTED.filter((c) => c.request_type === 'gdpr_art17' && !c.utgivningsbevis)
-  const optOutCompanies  = COMPANIES_SORTED.filter((c) => c.request_type === 'opt_out')
-  const authorityEntries = COMPANIES_SORTED.filter((c) => c.request_type === 'authority')
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">

@@ -4,7 +4,6 @@
 // Currently handles: Ratsit (12-month protection window)
 // Sends reminder 30 days before expiry (at 11 months), then marks status = 'expired'.
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 // Opt-out sites with annual protection windows — send reminder 1 month before expiry.
@@ -17,7 +16,7 @@ const REMINDER_COMPANIES: Record<string, { reminderMonths: number; nameSv: strin
   mrkoll:      { reminderMonths: 11, nameSv: 'MrKoll' },
 }
 
-serve(async (_req) => {
+Deno.serve(async (_req) => {
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const serviceKey  = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   const resendKey   = Deno.env.get('RESEND_API_KEY')

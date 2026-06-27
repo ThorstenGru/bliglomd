@@ -1,5 +1,3 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-
 const ALLOWED_ORIGINS = new Set([
   'https://xn--bliglmd-e1a.se',
   'https://bliglömd.se',
@@ -19,7 +17,7 @@ function corsHeaders(origin: string | null) {
   }
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   const origin = req.headers.get('Origin')
   const headers = corsHeaders(origin)
 
