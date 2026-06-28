@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json().catch(() => ({}))
-    const { companyName, gdprEmail, userName, userEmail } = body
+    const { companyName, gdprEmail, userName, userEmail, lang } = body
 
     // Input validation
     if (!companyName || typeof companyName !== 'string') {
@@ -55,17 +55,15 @@ Deno.serve(async (req) => {
       )
     }
 
-    const mailBody = `Hej,
+    const isEnglish = lang === 'en'
 
-Jag utövar min rätt enligt GDPR Artikel 17 (rätten till radering) och begär att ni omgående raderar alla personuppgifter som ni behandlar avseende mig.
+    const mailBody = isEnglish
+      ? `Hello,\n\nI am exercising my right under GDPR Article 17 (right to erasure) and request that you immediately delete all personal data that you process concerning me.\n\nName: ${userName}\nEmail address: ${userEmail}\n\nPlease confirm in writing when the deletion is complete, no later than 30 days in accordance with GDPR Article 12.\n\nKind regards,\n${userName}`
+      : `Hej,\n\nJag utövar min rätt enligt GDPR Artikel 17 (rätten till radering) och begär att ni omgående raderar alla personuppgifter som ni behandlar avseende mig.\n\nNamn: ${userName}\nE-postadress: ${userEmail}\n\nVänligen bekräfta skriftligen när raderingen är genomförd, senast inom 30 dagar i enlighet med GDPR Artikel 12.\n\nMed vänliga hälsningar,\n${userName}`
 
-Namn: ${userName}
-E-postadress: ${userEmail}
-
-Vänligen bekräfta skriftligen när raderingen är genomförd, senast inom 30 dagar i enlighet med GDPR Artikel 12.
-
-Med vänliga hälsningar,
-${userName}`
+    const subject = isEnglish
+      ? `Personal data deletion request – GDPR Article 17 (${companyName})`
+      : `Begäran om radering av personuppgifter – GDPR Artikel 17 (${companyName})`
 
     const apiKey = Deno.env.get('RESEND_API_KEY')
     if (!apiKey) {
@@ -82,7 +80,7 @@ ${userName}`
         from: 'BliGlömd <noreply@bliglomd.se>',
         to: gdprEmail,
         reply_to: userEmail,
-        subject: `Begäran om radering av personuppgifter – GDPR Artikel 17 (${companyName})`,
+        subject,
         text: mailBody,
       }),
       signal: AbortSignal.timeout(15_000),

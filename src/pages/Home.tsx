@@ -15,6 +15,7 @@ export function Home({ session }: HomeProps) {
       {/* Hero */}
       <section className="max-w-5xl mx-auto px-4 pt-14 pb-12 text-center">
         <BrandLogo variant="large" className="mx-auto mb-8" />
+        <h1 className="sr-only">{t.home.title}</h1>
 
         <div className="inline-flex items-center gap-2 bg-brand-100 text-brand-700 text-sm font-medium px-4 py-1.5 rounded-full mb-5">
           {t.home.badge}

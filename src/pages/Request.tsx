@@ -81,6 +81,7 @@ export function Request() {
           gdprEmail: company.gdpr_email,
           userName,
           userEmail,
+          lang,
         },
       })
 

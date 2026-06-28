@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { StatusBadge } from '../components/StatusBadge'
@@ -49,19 +49,18 @@ export function Dashboard() {
   const [noteSaving, setNoteSaving] = useState(false)
   const [noteSavedId, setNoteSavedId] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetchRequests()
-  }, [])
-
-  async function fetchRequests() {
+  const fetchRequests = useCallback(async () => {
     const { data, error } = await supabase
       .from('requests')
       .select('*')
       .order('created_at', { ascending: false })
-
     if (!error && data) setRequests(data as Request[])
     setLoading(false)
-  }
+  }, [])
+
+  useEffect(() => {
+    fetchRequests()
+  }, [fetchRequests])
 
   async function saveNote(id: string) {
     setNoteSaving(true)
@@ -78,13 +77,23 @@ export function Dashboard() {
   }
 
   async function updateStatus(id: string, status: Request['status']) {
+    const isResponseState = status === 'confirmed' || status === 'removed' ||
+                            status === 'failed' || status === 'expired'
+    const now = new Date().toISOString()
+
     const { error } = await supabase
       .from('requests')
-      .update({ status, response_at: new Date().toISOString() })
+      .update(isResponseState ? { status, response_at: now } : { status })
       .eq('id', id)
 
     if (!error) {
-      setRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status, response_at: new Date().toISOString() } : r)))
+      setRequests((prev) =>
+        prev.map((r) =>
+          r.id === id
+            ? { ...r, status, ...(isResponseState && { response_at: now }) }
+            : r
+        )
+      )
     }
   }
 

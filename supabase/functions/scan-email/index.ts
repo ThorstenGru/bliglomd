@@ -1,13 +1,27 @@
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+const ALLOWED_ORIGINS = new Set([
+  'https://xn--bliglmd-e1a.se',
+  'https://bliglömd.se',
+  'http://localhost:5173',
+  'http://localhost:4173',
+])
+
+function corsHeaders(origin: string | null) {
+  const allowed = origin && ALLOWED_ORIGINS.has(origin) ? origin : 'https://xn--bliglmd-e1a.se'
+  return {
+    'Access-Control-Allow-Origin': allowed,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Vary': 'Origin',
+  }
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 Deno.serve(async (req) => {
+  const origin = req.headers.get('Origin')
+  const headers = corsHeaders(origin)
+
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: CORS_HEADERS })
+    return new Response('ok', { headers })
   }
 
   try {
@@ -17,7 +31,7 @@ Deno.serve(async (req) => {
     if (!email || !EMAIL_RE.test(email)) {
       return new Response(
         JSON.stringify({ breaches: [], error: 'Invalid email address' }),
-        { status: 400, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } }
+        { status: 400, headers: { ...headers, 'Content-Type': 'application/json' } }
       )
     }
 
@@ -33,7 +47,7 @@ Deno.serve(async (req) => {
       // XposedOrNot returns 404 when no breaches found
       return new Response(
         JSON.stringify({ breaches: [] }),
-        { headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } }
+        { headers: { ...headers, 'Content-Type': 'application/json' } }
       )
     }
 
@@ -46,13 +60,13 @@ Deno.serve(async (req) => {
 
     return new Response(
       JSON.stringify({ breaches }),
-      { headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } }
+      { headers: { ...headers, 'Content-Type': 'application/json' } }
     )
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
     return new Response(
       JSON.stringify({ breaches: [], error: message }),
-      { status: 500, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } }
+      { status: 500, headers: { ...headers, 'Content-Type': 'application/json' } }
     )
   }
 })
