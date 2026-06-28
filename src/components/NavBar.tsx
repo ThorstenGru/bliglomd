@@ -34,7 +34,7 @@ export function NavBar({ session }: NavBarProps) {
     <>
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
       <nav className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
+        <div className="max-w-5xl mx-auto px-10 flex items-center justify-between gap-4" style={{ height: 60 }}>
           <div className="flex items-center gap-6">
             <Link to="/" className="shrink-0 leading-none" aria-label="BliGlömd — hem">
               <BrandLogo variant="compact" />

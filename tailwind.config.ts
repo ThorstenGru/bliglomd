@@ -13,7 +13,7 @@ export default {
       colors: {
         brand: {
           // Numeric scale (used throughout existing code)
-          50:      '#F0F5FF',
+          50:      '#ECF0FA',
           100:     '#E8F0FE',
           200:     '#BFDBFE',
           300:     '#93C5FD',

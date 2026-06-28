@@ -9,6 +9,7 @@ import { Request } from './pages/Request'
 import { Dashboard } from './pages/Dashboard'
 import { Profile } from './pages/Profile'
 import { Status } from './pages/Status'
+import { Admin } from './pages/Admin'
 import type { Session } from '@supabase/supabase-js'
 
 function AuthGuard({ session, children }: { session: Session | null; children: ReactNode }) {
@@ -90,7 +91,12 @@ export default function App() {
   return (
     <LanguageProvider>
       <BrowserRouter>
-        <AppShell />
+        <Routes>
+          {/* Admin panel — obscured route, completely outside public shell */}
+          <Route path="/xadm" element={<Admin />} />
+          {/* Public app */}
+          <Route path="*" element={<AppShell />} />
+        </Routes>
       </BrowserRouter>
     </LanguageProvider>
   )
