@@ -8,11 +8,11 @@ BliGlömd helps Swedish internet users exercise their right to erasure under GDP
 
 ## Features
 
-| Level | What it does |
-|-------|-------------|
-| **L1 — Find** | Step-by-step instructions for each company's own GDPR portal |
-| **L2 — Send** | Ready-made, legally correct Swedish/English email to copy-paste |
-| **L3 — Monitor** | BliGlömd sends the email automatically and tracks the response |
+| Tier | What it does |
+|------|-------------|
+| **Eko** (free) | Step-by-step instructions for each company's own GDPR portal |
+| **Skugga** (paid) | Ready-made, legally correct Swedish/English email to copy-paste |
+| **Fantom** (paid) | BliGlömd sends the email automatically and tracks the response |
 
 - **Breach scan** — powered by [XposedOrNot](https://xposedornot.com) (free, no key required)
 - **Bilingual** — full Swedish/English UI, persisted per user in localStorage

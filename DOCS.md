@@ -73,7 +73,7 @@ interface Company {
   name: string
   category: string
   country: string
-  gdpr_email: string | null       // null → L3 unavailable
+  gdpr_email: string | null       // null → Fantom tier unavailable
   gdpr_url: string
   instructions_sv: string
   instructions_en: string
@@ -90,13 +90,13 @@ Companies with `utgivningsbevis: true` have legal protection for editorially pub
 
 ---
 
-## Request Levels
+## Subscription Tiers
 
-| Level | Method | Tracked |
-|-------|--------|---------|
-| L1 — Find | User reads instructions, visits company's GDPR portal | No |
-| L2 — Send | User copies the generated email template and sends it manually | No |
-| L3 — Monitor | BliGlömd sends the email via Resend + inserts a `requests` row | Yes |
+| Tier | Method | Tracked |
+|------|--------|---------|
+| **Eko** (free) | User reads instructions, visits company's GDPR portal | No |
+| **Skugga** (paid) | User copies the generated email template and sends it manually | No |
+| **Fantom** (paid) | BliGlömd sends the email via Resend + inserts a `requests` row | Yes |
 
 ---
 
@@ -107,7 +107,7 @@ Companies with `utgivningsbevis: true` have legal protection for editorially pub
 |--------|------|-------|
 | `id` | uuid PK | = auth.users.id |
 | `full_name` | text | |
-| `level` | int | 1 / 2 / 3; set by admin |
+| `level` | int | 1 (Eko) / 2 (Skugga) / 3 (Fantom); set by admin or Stripe webhook |
 | `created_at` | timestamptz | |
 
 ### `requests`
@@ -239,7 +239,7 @@ Access is gated by `user.user_metadata.role === 'admin'`.
 
 **Översikt**
 - 4 stat cards: total users, total requests, total scans, deletion count
-- Level distribution (L1/L2/L3 with %)
+- Tier distribution (Eko/Skugga/Fantom with %)
 - Recent deletions table
 
 **Användare**
