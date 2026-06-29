@@ -49,8 +49,8 @@ Deno.serve(async (req) => {
     ] = await Promise.all([
       client.auth.admin.listUsers({ perPage: 1000 }),
       client.from('profiles').select('id, full_name, level'),
-      client.from('requests').select('user_id'),
-      client.from('scans').select('user_id'),
+      client.rpc('admin_request_counts'),
+      client.rpc('admin_scan_counts'),
     ])
 
     if (ue) throw ue
@@ -58,8 +58,8 @@ Deno.serve(async (req) => {
     const pm = new Map((profiles ?? []).map((p: { id: string; full_name: string; level: number }) => [p.id, p]))
     const rm = new Map<string, number>()
     const sm = new Map<string, number>()
-    ;(reqs ?? []).forEach((r: { user_id: string }) => rm.set(r.user_id, (rm.get(r.user_id) ?? 0) + 1))
-    ;(scans ?? []).forEach((s: { user_id: string }) => sm.set(s.user_id, (sm.get(s.user_id) ?? 0) + 1))
+    ;(reqs ?? []).forEach((r: { user_id: string; cnt: number }) => rm.set(r.user_id, r.cnt))
+    ;(scans ?? []).forEach((s: { user_id: string; cnt: number }) => sm.set(s.user_id, s.cnt))
 
     const result = (users ?? []).map((u: { id: string; email?: string; created_at: string; last_sign_in_at?: string }) => ({
       id: u.id,

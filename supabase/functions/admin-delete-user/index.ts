@@ -26,11 +26,17 @@ async function verifyAdmin(req: Request) {
   return { user, client }
 }
 
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
 function buildEmailHtml(snapshot: Record<string, unknown>): string {
   const u = snapshot.user as Record<string, string> | undefined
   const profile = snapshot.profile as Record<string, unknown> | undefined
   const requests = (snapshot.requests as unknown[]) ?? []
   const scans = (snapshot.scans as unknown[]) ?? []
+
+  const safeJson = escapeHtml(JSON.stringify(snapshot, null, 2))
 
   return `<!DOCTYPE html>
 <html>
@@ -40,19 +46,19 @@ function buildEmailHtml(snapshot: Record<string, unknown>): string {
     <strong style="color:#DC2626">GDPR Raderingsrapport</strong> — BliGlömd Admin
   </div>
   <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
-    <tr><td style="padding:6px 0;color:#64748B;width:160px">Raderad användare</td><td style="font-weight:600">${u?.email ?? '—'}</td></tr>
-    <tr><td style="padding:6px 0;color:#64748B">Namn</td><td>${profile?.full_name ?? '—'}</td></tr>
-    <tr><td style="padding:6px 0;color:#64748B">Prenumerationsnivå</td><td>L${profile?.level ?? '?'}</td></tr>
-    <tr><td style="padding:6px 0;color:#64748B">Registrerad</td><td>${u?.created_at ?? '—'}</td></tr>
-    <tr><td style="padding:6px 0;color:#64748B">Senast inloggad</td><td>${u?.last_sign_in_at ?? 'Aldrig'}</td></tr>
+    <tr><td style="padding:6px 0;color:#64748B;width:160px">Raderad användare</td><td style="font-weight:600">${escapeHtml(String(u?.email ?? '—'))}</td></tr>
+    <tr><td style="padding:6px 0;color:#64748B">Namn</td><td>${escapeHtml(String(profile?.full_name ?? '—'))}</td></tr>
+    <tr><td style="padding:6px 0;color:#64748B">Prenumerationsnivå</td><td>L${Number(profile?.level ?? 0)}</td></tr>
+    <tr><td style="padding:6px 0;color:#64748B">Registrerad</td><td>${escapeHtml(String(u?.created_at ?? '—'))}</td></tr>
+    <tr><td style="padding:6px 0;color:#64748B">Senast inloggad</td><td>${escapeHtml(String(u?.last_sign_in_at ?? 'Aldrig'))}</td></tr>
     <tr><td style="padding:6px 0;color:#64748B">Totalt förfrågningar</td><td>${requests.length}</td></tr>
     <tr><td style="padding:6px 0;color:#64748B">Totalt skanningar</td><td>${scans.length}</td></tr>
-    <tr><td style="padding:6px 0;color:#64748B">Raderades av</td><td>${snapshot.deleted_by}</td></tr>
-    <tr><td style="padding:6px 0;color:#64748B">Tidpunkt</td><td>${snapshot.deleted_at}</td></tr>
+    <tr><td style="padding:6px 0;color:#64748B">Raderades av</td><td>${escapeHtml(String(snapshot.deleted_by ?? '—'))}</td></tr>
+    <tr><td style="padding:6px 0;color:#64748B">Tidpunkt</td><td>${escapeHtml(String(snapshot.deleted_at ?? '—'))}</td></tr>
   </table>
   <details>
     <summary style="cursor:pointer;color:#2563EB;font-weight:600;margin-bottom:8px">Komplett datasnapshot (JSON)</summary>
-    <pre style="background:#F8FAFC;padding:16px;border-radius:8px;font-size:12px;overflow:auto;white-space:pre-wrap">${JSON.stringify(snapshot, null, 2)}</pre>
+    <pre style="background:#F8FAFC;padding:16px;border-radius:8px;font-size:12px;overflow:auto;white-space:pre-wrap">${safeJson}</pre>
   </details>
 </body>
 </html>`
@@ -136,10 +142,14 @@ Deno.serve(async (req) => {
       metadata: { deleted_email: authUser.email },
     })
 
-    // 4. Email report via Resend
+    // 4. Delete the auth user — CASCADE removes profiles, requests etc via FK
+    const { error: deleteErr } = await client.auth.admin.deleteUser(userId)
+    if (deleteErr) throw deleteErr
+
+    // 5. Email report via Resend (sent after confirmed deletion to avoid false reports)
     const resendKey = Deno.env.get('RESEND_API_KEY')
     if (resendKey) {
-      await fetch('https://api.resend.com/emails', {
+      const emailRes = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${resendKey}`,
@@ -152,11 +162,10 @@ Deno.serve(async (req) => {
           html: buildEmailHtml(snapshot as unknown as Record<string, unknown>),
         }),
       })
+      if (!emailRes.ok) {
+        console.error('Resend email failed:', emailRes.status, await emailRes.text())
+      }
     }
-
-    // 5. Delete the auth user — CASCADE removes profiles, requests etc via FK
-    const { error: deleteErr } = await client.auth.admin.deleteUser(userId)
-    if (deleteErr) throw deleteErr
 
     return new Response(JSON.stringify({ success: true, deleted: authUser.email }), {
       headers: { ...h, 'Content-Type': 'application/json' },

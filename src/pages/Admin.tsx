@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
@@ -31,7 +31,26 @@ interface DeletionRecord {
   created_at: string
 }
 
-type Tab = 'overview' | 'users' | 'audit'
+interface AdminStats {
+  snapshot: {
+    dau: number; wau: number; mau: number
+    retention_pct: number; total_users: number
+    signups_this_week: number; signups_last_week: number
+    reqs_this_week: number; reqs_last_week: number
+    active_reqs: number; stale_reqs: number
+    avg_reqs_per_user: number
+    breach_rate_pct: number; total_breaches: number; avg_breaches: number
+  }
+  signups_per_day: { day: string; cnt: number }[]
+  reqs_per_day: { day: string; cnt: number }[]
+  scans_per_day: { day: string; cnt: number }[]
+  top_companies: { company_name: string; cnt: number }[]
+  request_statuses: { status: string; cnt: number }[]
+  response_times: { company_name: string; avg_days: number; total_confirmed: number }[]
+  generated_at: string
+}
+
+type Tab = 'overview' | 'users' | 'audit' | 'analytics'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -56,15 +75,16 @@ function fmtTimer(secs: number) {
 
 // ── ActionBadge ───────────────────────────────────────────────────────────────
 
+const ACTION_MAP: Record<string, { bg: string; fg: string; label: string }> = {
+  admin_level_change: { bg: '#DBEAFE', fg: '#1D4ED8', label: 'Nivåändring' },
+  admin_delete:       { bg: '#FEE2E2', fg: '#DC2626', label: 'Radering' },
+  admin_export:       { bg: '#FEF9C3', fg: '#92400E', label: 'Export' },
+  scan_email:         { bg: '#D1FAE5', fg: '#15803D', label: 'Skanning' },
+  send_request:       { bg: '#F3E8FF', fg: '#6B21A8', label: 'Förfrågan' },
+}
+
 function ActionBadge({ action }: { action: string }) {
-  const map: Record<string, { bg: string; fg: string; label: string }> = {
-    admin_level_change: { bg: '#DBEAFE', fg: '#1D4ED8', label: 'Nivåändring' },
-    admin_delete:       { bg: '#FEE2E2', fg: '#DC2626', label: 'Radering' },
-    admin_export:       { bg: '#FEF9C3', fg: '#92400E', label: 'Export' },
-    scan_email:         { bg: '#D1FAE5', fg: '#15803D', label: 'Skanning' },
-    send_request:       { bg: '#F3E8FF', fg: '#6B21A8', label: 'Förfrågan' },
-  }
-  const s = map[action] ?? { bg: '#F1F5F9', fg: '#64748B', label: action }
+  const s = ACTION_MAP[action] ?? { bg: '#F1F5F9', fg: '#64748B', label: action }
   return (
     <span style={{ fontSize: 11, fontWeight: 700, color: s.fg, background: s.bg, borderRadius: 20, padding: '2px 9px', whiteSpace: 'nowrap' }}>
       {s.label}
@@ -75,15 +95,115 @@ function ActionBadge({ action }: { action: string }) {
 // ── SidebarIcon ───────────────────────────────────────────────────────────────
 
 const ICONS: Record<Tab, string> = {
-  overview: 'M3 3h7v7H3zm11 0h7v7h-7zM3 14h7v7H3zm11 3h2v-2h-2v-2h-2v2h-2v2h2v2h2zm4 2h2v-2h-2z',
-  users:    'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8z',
-  audit:    'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6M8 13h8M8 17h5',
+  overview:  'M3 3h7v7H3zm11 0h7v7h-7zM3 14h7v7H3zm11 3h2v-2h-2v-2h-2v2h-2v2h2v2h2zm4 2h2v-2h-2z',
+  users:     'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8z',
+  audit:     'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6M8 13h8M8 17h5',
+  analytics: 'M18 20V10M12 20V4M6 20v-6',
 }
 
 const TAB_LABELS: Record<Tab, string> = {
-  overview: 'Översikt',
-  users:    'Användare',
-  audit:    'Granskningslogg',
+  overview:  'Översikt',
+  users:     'Användare',
+  audit:     'Granskningslogg',
+  analytics: 'Statistik',
+}
+
+// ── Analytics chart components ────────────────────────────────────────────────
+
+function KpiCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
+  return (
+    <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E2E8F0', padding: '16px 18px' }}>
+      <p style={{ fontSize: 11, color: '#94A3B8', margin: '0 0 5px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</p>
+      <p style={{ fontSize: 26, fontWeight: 800, color: '#0F172A', margin: 0, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>{value}</p>
+      {sub && <p style={{ fontSize: 11, color: '#94A3B8', margin: '3px 0 0' }}>{sub}</p>}
+    </div>
+  )
+}
+
+function BarChart({ data, color, label }: { data: { day: string; cnt: number }[]; color: string; label: string }) {
+  const max = Math.max(...data.map(d => d.cnt), 1)
+  const W = 420, H = 80
+  const n = data.length || 1
+  const bw = Math.max(2, Math.floor(W / n) - 1)
+  return (
+    <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E2E8F0', padding: '18px 20px' }}>
+      <p style={{ fontSize: 11, fontWeight: 700, color: '#64748B', margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</p>
+      {data.length === 0
+        ? <p style={{ fontSize: 12, color: '#CBD5E1' }}>Ingen data ännu</p>
+        : <svg viewBox={`0 0 ${W} ${H + 18}`} style={{ width: '100%', overflow: 'visible', display: 'block' }}>
+            {data.map((d, i) => {
+              const h = Math.max(2, Math.round((d.cnt / max) * H))
+              const x = Math.round(i * (W / n))
+              return (
+                <g key={d.day}>
+                  <rect x={x} y={H - h} width={bw} height={h} fill={color} rx={2} opacity={0.8} />
+                  {d.cnt > 0 && h > 16 && (
+                    <text x={x + bw / 2} y={H - h + 10} textAnchor="middle" fontSize={8} fill="white" fontWeight="700">{d.cnt}</text>
+                  )}
+                </g>
+              )
+            })}
+            {data.length > 0 && [0, Math.floor((n - 1) / 2), n - 1].filter((v, i, a) => a.indexOf(v) === i).map(i => (
+              <text key={i} x={Math.round(i * (W / n)) + bw / 2} y={H + 14} textAnchor="middle" fontSize={9} fill="#94A3B8">{data[i]?.day.slice(5)}</text>
+            ))}
+          </svg>
+      }
+    </div>
+  )
+}
+
+function HorizBars({ items, color }: { items: { company_name: string; cnt: number }[]; color: string }) {
+  const max = Math.max(...items.map(i => i.cnt), 1)
+  return (
+    <div>
+      {items.length === 0
+        ? <p style={{ fontSize: 12, color: '#CBD5E1' }}>Inga förfrågningar ännu</p>
+        : items.map(item => (
+          <div key={item.company_name} style={{ marginBottom: 10 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
+              <span style={{ fontSize: 12, color: '#374151', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '75%' }}>{item.company_name}</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#0F172A', fontVariantNumeric: 'tabular-nums' }}>{item.cnt}</span>
+            </div>
+            <div style={{ height: 5, background: '#F1F5F9', borderRadius: 3, overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${Math.round(item.cnt / max * 100)}%`, background: color, borderRadius: 3 }} />
+            </div>
+          </div>
+        ))}
+    </div>
+  )
+}
+
+const STATUS_COLORS: Record<string, string> = {
+  pending:   '#F59E0B',
+  sent:      '#3B82F6',
+  confirmed: '#10B981',
+  rejected:  '#EF4444',
+  expired:   '#94A3B8',
+}
+
+function StatusBars({ data }: { data: { status: string; cnt: number }[] }) {
+  const total = data.reduce((s, d) => s + d.cnt, 0)
+  if (total === 0) return <p style={{ fontSize: 12, color: '#CBD5E1' }}>Inga förfrågningar ännu</p>
+  return (
+    <div>
+      <div style={{ display: 'flex', height: 10, borderRadius: 6, overflow: 'hidden', marginBottom: 12 }}>
+        {data.map(d => (
+          <div key={d.status} style={{ width: `${d.cnt / total * 100}%`, background: STATUS_COLORS[d.status] ?? '#CBD5E1' }} />
+        ))}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {data.map(d => (
+          <div key={d.status} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: STATUS_COLORS[d.status] ?? '#CBD5E1', flexShrink: 0 }} />
+              <span style={{ fontSize: 12, color: '#64748B' }}>{d.status}</span>
+            </div>
+            <span style={{ fontSize: 12, fontWeight: 700, color: '#374151', fontVariantNumeric: 'tabular-nums' }}>{d.cnt}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 // ── Admin ─────────────────────────────────────────────────────────────────────
@@ -107,6 +227,16 @@ export function Admin() {
   const [exporting, setExporting]   = useState(false)
   const [timer, setTimer]           = useState(30 * 60)
   const [notice, setNotice]         = useState<{ type: 'ok' | 'err'; msg: string } | null>(null)
+  const [stats, setStats]           = useState<AdminStats | null>(null)
+  const [statsLoading, setStatsLoading] = useState(false)
+  const noticeTimerRef = useRef<ReturnType<typeof setTimeout>>()
+
+  const loadStats = useCallback(async () => {
+    setStatsLoading(true)
+    const { data, error } = await supabase.functions.invoke('admin-stats')
+    if (!error && data) setStats(data as AdminStats)
+    setStatsLoading(false)
+  }, [])
 
   const loadAll = useCallback(async () => {
     setLoading(true)
@@ -142,13 +272,29 @@ export function Admin() {
   }, [navigate, loadAll])
 
   useEffect(() => {
-    const t = setInterval(() => setTimer(s => Math.max(0, s - 1)), 1000)
+    if (!ready) return
+    loadStats()
+    const t = setInterval(loadStats, 5 * 60 * 1000)
     return () => clearInterval(t)
-  }, [])
+  }, [ready, loadStats])
+
+  useEffect(() => {
+    if (!ready) return
+    const t = setInterval(() => setTimer(s => {
+      if (s <= 1) {
+        supabase.auth.signOut()
+        navigate('/', { replace: true })
+        return 0
+      }
+      return s - 1
+    }), 1000)
+    return () => clearInterval(t)
+  }, [ready, navigate])
 
   function showNotice(type: 'ok' | 'err', msg: string) {
+    clearTimeout(noticeTimerRef.current)
     setNotice({ type, msg })
-    setTimeout(() => setNotice(null), 4000)
+    noticeTimerRef.current = setTimeout(() => setNotice(null), 4000)
   }
 
   async function handleLevelChange(userId: string, newLevel: 1 | 2 | 3) {
@@ -202,19 +348,26 @@ export function Admin() {
     loadAll()
   }
 
+  const { lvlCounts, totalReqs, totalScans } = useMemo(() => {
+    const lvlCounts = { 1: 0, 2: 0, 3: 0 } as Record<1 | 2 | 3, number>
+    users.forEach(u => { if (u.level >= 1 && u.level <= 3) lvlCounts[u.level as 1 | 2 | 3]++ })
+    return {
+      lvlCounts,
+      totalReqs:  users.reduce((s, u) => s + u.requests, 0),
+      totalScans: users.reduce((s, u) => s + u.scans, 0),
+    }
+  }, [users])
+
+  const filtered = useMemo(() =>
+    users.filter(u => {
+      const q = search.toLowerCase()
+      const matchSearch = !q || u.email.toLowerCase().includes(q) || u.full_name.toLowerCase().includes(q)
+      const matchLvl = !lvlFilter || u.level === Number(lvlFilter)
+      return matchSearch && matchLvl
+    }),
+  [users, search, lvlFilter])
+
   if (!ready) return null
-
-  const filtered = users.filter(u => {
-    const q = search.toLowerCase()
-    const matchSearch = !q || u.email.toLowerCase().includes(q) || u.full_name.toLowerCase().includes(q)
-    const matchLvl = !lvlFilter || u.level === Number(lvlFilter)
-    return matchSearch && matchLvl
-  })
-
-  const lvlCounts = { 1: 0, 2: 0, 3: 0 } as Record<1 | 2 | 3, number>
-  users.forEach(u => lvlCounts[u.level]++)
-  const totalReqs  = users.reduce((s, u) => s + u.requests, 0)
-  const totalScans = users.reduce((s, u) => s + u.scans, 0)
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', fontFamily: '"Inter", -apple-system, system-ui, sans-serif', fontSize: 14, background: '#EEF2F8' }}>
@@ -238,7 +391,7 @@ export function Admin() {
 
         {/* Nav tabs */}
         <div style={{ padding: '6px 10px', flex: 1 }}>
-          {(['overview', 'users', 'audit'] as Tab[]).map(t => (
+          {(['overview', 'users', 'audit', 'analytics'] as Tab[]).map(t => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -295,7 +448,7 @@ export function Admin() {
             {TAB_LABELS[tab]}
           </h1>
           <button
-            onClick={loadAll}
+            onClick={() => { loadAll(); if (tab === 'analytics') loadStats() }}
             style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 8, border: '1px solid #E2E8F0', background: 'white', cursor: 'pointer', fontSize: 13, color: '#475569', fontWeight: 500 }}
           >
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -483,6 +636,86 @@ export function Admin() {
                     </table>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* ── ANALYTICS TAB ─────────────────────────────────────────── */}
+            {tab === 'analytics' && (
+              <div>
+                {statsLoading && !stats && (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200, color: '#94A3B8' }}>
+                    Laddar statistik...
+                  </div>
+                )}
+                {stats && (
+                  <>
+                    {stats.snapshot.stale_reqs > 0 && (
+                      <div style={{ background: '#FEF9C3', border: '1px solid #FDE68A', borderRadius: 10, padding: '11px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#92400E' }}>
+                        <span style={{ fontWeight: 700 }}>⚠️ {stats.snapshot.stale_reqs} ärenden</span> har inte fått svar på 30+ dagar — kontrollera ärendelistan
+                      </div>
+                    )}
+
+                    <p style={{ fontSize: 11, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px' }}>Användare</p>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 16 }}>
+                      <KpiCard label="Totalt registrerade" value={stats.snapshot.total_users} />
+                      <KpiCard label="Aktiva 30 dagar (MAU)" value={stats.snapshot.mau} sub={`WAU ${stats.snapshot.wau} · DAU ${stats.snapshot.dau}`} />
+                      <KpiCard label="Retention WAU/MAU" value={`${stats.snapshot.retention_pct}%`} />
+                      <KpiCard label="Nya denna vecka" value={stats.snapshot.signups_this_week} sub={`Förra veckan: ${stats.snapshot.signups_last_week}`} />
+                    </div>
+
+                    <p style={{ fontSize: 11, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px' }}>Förfrågningar</p>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 20 }}>
+                      <KpiCard label="Skickade denna vecka" value={stats.snapshot.reqs_this_week} sub={`Förra veckan: ${stats.snapshot.reqs_last_week}`} />
+                      <KpiCard label="Aktiva ärenden" value={stats.snapshot.active_reqs} />
+                      <KpiCard label="Snitt per användare" value={stats.snapshot.avg_reqs_per_user} />
+                      <KpiCard label="Intrångsfrekvens" value={`${stats.snapshot.breach_rate_pct}%`} sub={`${stats.snapshot.total_breaches} funna · snitt ${stats.snapshot.avg_breaches}/skanning`} />
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
+                      <BarChart data={stats.signups_per_day} color="#2563EB" label="Registreringar per dag (30 dgr)" />
+                      <BarChart data={stats.reqs_per_day} color="#7C3AED" label="Förfrågningar per dag (30 dgr)" />
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
+                      <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E2E8F0', padding: '18px 20px' }}>
+                        <p style={{ fontSize: 11, fontWeight: 700, color: '#64748B', margin: '0 0 14px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Topp tjänster (alla tider)</p>
+                        <HorizBars items={stats.top_companies.slice(0, 8)} color="#2563EB" />
+                      </div>
+                      <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E2E8F0', padding: '18px 20px' }}>
+                        <p style={{ fontSize: 11, fontWeight: 700, color: '#64748B', margin: '0 0 14px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Ärendestatus</p>
+                        <StatusBars data={stats.request_statuses} />
+                      </div>
+                    </div>
+
+                    {stats.response_times.length > 0 && (
+                      <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E2E8F0', padding: '18px 20px', marginBottom: 14 }}>
+                        <p style={{ fontSize: 11, fontWeight: 700, color: '#64748B', margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Snabbast svarande tjänster (min 2 bekräftade)</p>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                          <thead>
+                            <tr style={{ borderBottom: '1px solid #F1F5F9' }}>
+                              {['Tjänst', 'Snitt (dagar)', 'Bekräftade'].map(col => (
+                                <th key={col} style={{ padding: '0 0 8px', textAlign: 'left', fontWeight: 600, color: '#94A3B8', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{col}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {stats.response_times.map((r, i) => (
+                              <tr key={r.company_name} style={{ borderTop: i > 0 ? '1px solid #F8FAFC' : undefined }}>
+                                <td style={{ padding: '8px 0', color: '#374151' }}>{r.company_name}</td>
+                                <td style={{ padding: '8px 0', color: '#0F172A', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{r.avg_days}</td>
+                                <td style={{ padding: '8px 0', color: '#64748B', fontVariantNumeric: 'tabular-nums' }}>{r.total_confirmed}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+
+                    <p style={{ fontSize: 11, color: '#CBD5E1', textAlign: 'right', margin: 0 }}>
+                      {statsLoading ? 'Uppdaterar...' : `Hämtat: ${new Date(stats.generated_at).toLocaleString('sv-SE')} · Uppdateras var 5:e minut`}
+                    </p>
+                  </>
+                )}
               </div>
             )}
 

@@ -64,6 +64,13 @@ Deno.serve(async (req) => {
       client.from('scans').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
     ])
 
+    if (!authUser) {
+      return new Response(JSON.stringify({ error: 'User not found' }), {
+        status: 404,
+        headers: { ...h, 'Content-Type': 'application/json' },
+      })
+    }
+
     // Audit log
     await client.from('audit_logs').insert({
       user_id: adminUser.id,

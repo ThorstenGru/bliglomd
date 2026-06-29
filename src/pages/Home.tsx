@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useLang } from '../contexts/LanguageContext'
 import { BrandLogo } from '../components/BrandLogo'
@@ -71,21 +71,27 @@ const TESTIMONIALS = [
 function TestimonialCarousel() {
   const [idx, setIdx]         = useState(0)
   const [visible, setVisible] = useState(true)
+  const fadeRef = useRef<ReturnType<typeof setTimeout>>()
 
   useEffect(() => {
     const id = setInterval(() => {
+      clearTimeout(fadeRef.current)
       setVisible(false)
-      setTimeout(() => {
+      fadeRef.current = setTimeout(() => {
         setIdx(i => (i + 1) % TESTIMONIALS.length)
         setVisible(true)
       }, 340)
     }, 4800)
-    return () => clearInterval(id)
+    return () => {
+      clearInterval(id)
+      clearTimeout(fadeRef.current)
+    }
   }, [])
 
   function jumpTo(i: number) {
+    clearTimeout(fadeRef.current)
     setVisible(false)
-    setTimeout(() => { setIdx(i); setVisible(true) }, 200)
+    fadeRef.current = setTimeout(() => { setIdx(i); setVisible(true) }, 200)
   }
 
   const t = TESTIMONIALS[idx]
