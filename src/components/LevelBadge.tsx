@@ -1,4 +1,4 @@
-import { useLang } from '../contexts/LanguageContext'
+import { TIERS } from '../config/tiers'
 
 interface LevelBadgeProps {
   level: 1 | 2 | 3
@@ -12,10 +12,9 @@ const levelColor = {
 } as const
 
 export function LevelBadge({ level, className = '' }: LevelBadgeProps) {
-  const { t } = useLang()
   return (
     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${levelColor[level]} ${className}`}>
-      {t.levels[level].label}
+      {TIERS[level].name}
     </span>
   )
 }

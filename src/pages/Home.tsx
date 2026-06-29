@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useLang } from '../contexts/LanguageContext'
 import { BrandLogo } from '../components/BrandLogo'
+import { TIERS } from '../config/tiers'
 import type { Session } from '@supabase/supabase-js'
 
 function TreKronor({ size = 22 }: { size?: number }) {
@@ -292,11 +293,11 @@ export function Home({ session }: HomeProps) {
                 <span style={{ fontSize: 18, fontWeight: 700, color: '#16A34A' }}>1</span>
               </div>
               <div>
-                <p style={{ fontSize: 16, fontWeight: 700, color: '#1E293B', marginBottom: 10 }}>{t.home.l1Title}</p>
-                <p style={{ fontSize: 14, color: '#475569', lineHeight: 1.65 }}>{t.home.l1Desc}</p>
+                <p style={{ fontSize: 16, fontWeight: 700, color: '#1E293B', marginBottom: 10 }}>{TIERS[1].name}</p>
+                <p style={{ fontSize: 14, color: '#475569', lineHeight: 1.65 }}>{TIERS[1].description[lang]}</p>
               </div>
               <div style={{ marginTop: 'auto', paddingTop: 8 }}>
-                <span style={{ fontSize: 14, fontWeight: 700, color: '#16A34A' }}>{t.home.l1Tag}</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: '#16A34A' }}>{TIERS[1].tag[lang]}</span>
               </div>
             </div>
 
@@ -306,11 +307,11 @@ export function Home({ session }: HomeProps) {
                 <span style={{ fontSize: 18, fontWeight: 700, color: '#2563EB' }}>2</span>
               </div>
               <div>
-                <p style={{ fontSize: 16, fontWeight: 700, color: '#1E293B', marginBottom: 10 }}>{t.home.l2Title}</p>
-                <p style={{ fontSize: 14, color: '#475569', lineHeight: 1.65 }}>{t.home.l2Desc}</p>
+                <p style={{ fontSize: 16, fontWeight: 700, color: '#1E293B', marginBottom: 10 }}>{TIERS[2].name}</p>
+                <p style={{ fontSize: 14, color: '#475569', lineHeight: 1.65 }}>{TIERS[2].description[lang]}</p>
               </div>
               <div style={{ marginTop: 'auto', paddingTop: 8 }}>
-                <span style={{ fontSize: 14, fontWeight: 700, color: '#2563EB' }}>{t.home.l2Tag}</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: '#2563EB' }}>{TIERS[2].tag[lang]}</span>
               </div>
             </div>
 
@@ -320,11 +321,11 @@ export function Home({ session }: HomeProps) {
                 <span style={{ fontSize: 18, fontWeight: 700, color: '#9333EA' }}>3</span>
               </div>
               <div>
-                <p style={{ fontSize: 16, fontWeight: 700, color: '#1E293B', marginBottom: 10 }}>{t.home.l3Title}</p>
-                <p style={{ fontSize: 14, color: '#475569', lineHeight: 1.65 }}>{t.home.l3Desc}</p>
+                <p style={{ fontSize: 16, fontWeight: 700, color: '#1E293B', marginBottom: 10 }}>{TIERS[3].name}</p>
+                <p style={{ fontSize: 14, color: '#475569', lineHeight: 1.65 }}>{TIERS[3].description[lang]}</p>
               </div>
               <div style={{ marginTop: 'auto', paddingTop: 8 }}>
-                <span style={{ fontSize: 14, fontWeight: 700, color: '#9333EA' }}>{t.home.l3Tag}</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: '#9333EA' }}>{TIERS[3].tag[lang]}</span>
               </div>
             </div>
           </div>

@@ -45,18 +45,6 @@ export const translations = {
       cta: 'Kom igång gratis',
       ctaSub: 'Inget kreditkort krävs',
       levelsTitle: 'Tre nivåer av skydd',
-      l1Title: 'Eko',
-      l1Desc:
-        'Identifiera var dina uppgifter finns. Skärma din e-post mot kända dataintrång och få guidade instruktioner för varje företag.',
-      l1Tag: 'Gratis',
-      l2Title: 'Skugga',
-      l2Desc:
-        'Genererar juridiskt korrekt GDPR-mail åt dig med ett klick. Kopia-klistra och skicka direkt — vi sköter formuleringarna.',
-      l2Tag: 'Skugga',
-      l3Title: 'Fantom',
-      l3Desc:
-        'Vi skickar mailet åt dig och spårar svaret. Påminnelse automatiskt om företaget inte svarar inom 30 dagar.',
-      l3Tag: 'Fantom',
       footer: '© 2026 Thorsten Grund. All rights reserved.',
       footerSub: 'BliGlömd hjälper dig utöva din rätt enligt GDPR Artikel 17.',
       footerStatus: 'Systemstatus',
@@ -137,11 +125,6 @@ export const translations = {
       templateSignOff: 'Med vänliga hälsningar,',
       templateNamePlaceholder: '[DITT NAMN]',
       templateEmailPlaceholder: '[DIN E-POST]',
-      levels: {
-        1: 'Eko',
-        2: 'Skugga',
-        3: 'Fantom',
-      },
     },
     dashboard: {
       title: 'Mina förfrågningar',
@@ -175,7 +158,7 @@ export const translations = {
         elapsed: 'sedan skickat',
         remaining: 'kvar av 30-dagarsgränsen',
         notSentYet: 'Inte skickat än',
-        notSentYetSub: 'Använd Fantom för att skicka automatiskt, eller Skugga för att kopiera och skicka manuellt.',
+        notSentYetSub: 'Uppgradera din plan för att skicka och bevaka automatiskt.',
         confirmed: 'Radering bekräftad av företaget',
         dataDeleted: 'Data raderad',
         failed: 'Misslyckad — inget svar',
@@ -205,11 +188,6 @@ export const translations = {
       deleteConfirmWord: 'radera',
       deleteConfirmBtn: 'Ja, radera allt',
       deleteCancel: 'Avbryt',
-    },
-    levels: {
-      1: { label: 'Eko', short: 'Eko' },
-      2: { label: 'Skugga', short: 'Skugga' },
-      3: { label: 'Fantom', short: 'Fantom' },
     },
     requestStatus: {
       pending: 'Väntar',
@@ -265,18 +243,6 @@ export const translations = {
       cta: 'Get started for free',
       ctaSub: 'No credit card required',
       levelsTitle: 'Three levels of protection',
-      l1Title: 'Eko',
-      l1Desc:
-        'Identify where your data exists. Scan your email against known data breaches and get guided instructions for each company.',
-      l1Tag: 'Free',
-      l2Title: 'Skugga',
-      l2Desc:
-        'Generates a legally correct GDPR email for you in one click. Copy-paste and send directly — we handle the wording.',
-      l2Tag: 'Skugga',
-      l3Title: 'Fantom',
-      l3Desc:
-        'We send the email for you and track the response. Automatic reminder if the company does not respond within 30 days.',
-      l3Tag: 'Fantom',
       footer: '© 2026 Thorsten Grund. All rights reserved.',
       footerSub: 'BliGlömd helps you exercise your rights under GDPR Article 17.',
       footerStatus: 'System Status',
@@ -356,11 +322,6 @@ export const translations = {
       templateSignOff: 'Kind regards,',
       templateNamePlaceholder: '[YOUR NAME]',
       templateEmailPlaceholder: '[YOUR EMAIL]',
-      levels: {
-        1: 'Eko',
-        2: 'Skugga',
-        3: 'Fantom',
-      },
     },
     dashboard: {
       title: 'My requests',
@@ -394,7 +355,7 @@ export const translations = {
         elapsed: 'since sent',
         remaining: 'remaining of 30-day deadline',
         notSentYet: 'Not sent yet',
-        notSentYetSub: 'Use Fantom to send automatically, or Skugga to copy and send manually.',
+        notSentYetSub: 'Upgrade your plan to send and monitor automatically.',
         confirmed: 'Deletion confirmed by company',
         dataDeleted: 'Data deleted',
         failed: 'Failed — no response',
@@ -424,11 +385,6 @@ export const translations = {
       deleteConfirmWord: 'delete',
       deleteConfirmBtn: 'Yes, delete everything',
       deleteCancel: 'Cancel',
-    },
-    levels: {
-      1: { label: 'Eko', short: 'Eko' },
-      2: { label: 'Skugga', short: 'Skugga' },
-      3: { label: 'Fantom', short: 'Fantom' },
     },
     requestStatus: {
       pending: 'Pending',
