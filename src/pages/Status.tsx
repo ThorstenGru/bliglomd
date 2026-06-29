@@ -35,14 +35,16 @@ const COMPONENTS: ComponentDef[] = [
   {
     id: 'supabase_platform',
     category: 'backend',
-    docsUrl: `${SB_URL}/health`,
+    docsUrl: `${SB_URL}/rest/v1/`,
     check: async () => {
-      if (!SB_URL) return { status: 'unconfigured', detail: 'VITE_SUPABASE_URL not set' }
+      if (!SB_URL || !SB_KEY) return { status: 'unconfigured', detail: 'VITE_SUPABASE_URL not set' }
       const t0 = performance.now()
       try {
-        const r = await fetchWithTimeout(`${SB_URL}/health`)
+        const r = await fetchWithTimeout(`${SB_URL}/rest/v1/`, {
+          headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` },
+        })
         const ms = Math.round(performance.now() - t0)
-        return { status: r.ok ? 'operational' : 'degraded', responseTime: ms }
+        return { status: r.ok ? 'operational' : 'degraded', responseTime: ms, detail: r.ok ? undefined : `HTTP ${r.status}` }
       } catch {
         return { status: 'down', responseTime: Math.round(performance.now() - t0) }
       }
