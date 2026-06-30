@@ -97,9 +97,9 @@ export const TIERS: Record<1 | 2 | 3, Tier> = {
       en: 'Upgrade to Ghost to let BliGlömd send and monitor automatically.',
     },
     color: 'blue',
-    monthlyPriceSEK: 49,
-    // SANDBOX — switch to price_1TnwrtAT2u1nHxlj2pvSt28C for live when explicitly instructed
-    stripeMonthlyPriceId: 'price_1TnwtjAR7wxHkiWgAj4NBAID',
+    monthlyPriceSEK: 61,
+    // SANDBOX — switch to price_1TnxQbAT2u1nHxljUfTlrTTT for live when explicitly instructed
+    stripeMonthlyPriceId: 'price_1TnxQdAR7wxHkiWgJINpQ3EZ',
   },
 
   3: {
@@ -136,9 +136,9 @@ export const TIERS: Record<1 | 2 | 3, Tier> = {
       en: '',
     },
     color: 'purple',
-    monthlyPriceSEK: 99,
-    // SANDBOX — switch to price_1Tnwt8AT2u1nHxljnXJhWxXT for live when explicitly instructed
-    stripeMonthlyPriceId: 'price_1TnwtvAR7wxHkiWg8o4VM7ea',
+    monthlyPriceSEK: 124,
+    // SANDBOX — switch to price_1TnxQcAT2u1nHxljSb3UDBSq for live when explicitly instructed
+    stripeMonthlyPriceId: 'price_1TnxQeAR7wxHkiWgMk6H20JZ',
   },
 }
 
