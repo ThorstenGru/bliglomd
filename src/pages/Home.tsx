@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useLang } from '../contexts/LanguageContext'
 import { BrandLogo } from '../components/BrandLogo'
-import { TIERS } from '../config/tiers'
+import { TIERS, ENGANGSSTADNING } from '../config/tiers'
+import { supabase } from '../lib/supabase'
 import type { Session } from '@supabase/supabase-js'
 
 function TreKronor({ size = 22 }: { size?: number }) {
@@ -148,9 +149,33 @@ interface HomeProps {
 }
 
 export function Home({ session }: HomeProps) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const reqCount  = useCountUp(3847)
   const userCount = useCountUp(1200)
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly')
+  const [upgrading, setUpgrading] = useState<string | null>(null)
+  const [stripeError, setStripeError] = useState<string | null>(null)
+
+  async function startCheckout(priceId: string) {
+    setUpgrading(priceId)
+    setStripeError(null)
+    try {
+      const { data, error } = await supabase.functions.invoke('stripe-checkout', { body: { priceId } })
+      if (error || !data?.url) throw new Error(error?.message ?? 'No URL returned')
+      window.location.href = data.url
+    } catch (err) {
+      setStripeError(String(err))
+      setUpgrading(null)
+    }
+  }
+
+  function handleTierCTA(priceId: string) {
+    if (!session) {
+      document.dispatchEvent(new CustomEvent('bliglomd:open-auth'))
+    } else {
+      startCheckout(priceId)
+    }
+  }
 
   return (
     <div style={{ background: '#ECF0FA' }}>
@@ -279,58 +304,285 @@ export function Home({ session }: HomeProps) {
         </div>
       </div>
 
-      {/* ── TRE NIVÅER ───────────────────────────────────────────── */}
-      <section style={{ padding: '20px 24px 80px' }}>
+      {/* ── PRICING ──────────────────────────────────────────────── */}
+      <section style={{ padding: '20px 24px 60px' }}>
         <div style={{ maxWidth: 1000, margin: '0 auto' }}>
-          <h2 style={{ textAlign: 'center', fontWeight: 700, color: '#1E293B', marginBottom: 40, letterSpacing: '-0.02em', fontSize: 'clamp(22px, 3vw, 30px)' }}>
+          <h2 style={{ textAlign: 'center', fontWeight: 700, color: '#1E293B', marginBottom: 24, letterSpacing: '-0.02em', fontSize: 'clamp(22px, 3vw, 30px)' }}>
             {t.home.levelsTitle}
           </h2>
 
+          {/* Billing toggle */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 36 }}>
+            <div style={{ display: 'flex', background: '#E2E8F0', borderRadius: 100, padding: 4, gap: 2 }}>
+              <button
+                onClick={() => setBillingCycle('monthly')}
+                style={{
+                  padding: '8px 22px', borderRadius: 100, border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: billingCycle === 'monthly' ? 600 : 400,
+                  background: billingCycle === 'monthly' ? 'white' : 'transparent',
+                  color: billingCycle === 'monthly' ? '#1E293B' : '#64748B',
+                  boxShadow: billingCycle === 'monthly' ? '0 1px 3px rgba(0,0,0,0.12)' : 'none',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                Månadsvis
+              </button>
+              <button
+                onClick={() => setBillingCycle('annual')}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  padding: '8px 22px', borderRadius: 100, border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: billingCycle === 'annual' ? 600 : 400,
+                  background: billingCycle === 'annual' ? 'white' : 'transparent',
+                  color: billingCycle === 'annual' ? '#1E293B' : '#64748B',
+                  boxShadow: billingCycle === 'annual' ? '0 1px 3px rgba(0,0,0,0.12)' : 'none',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                Årsvis
+                <span style={{ background: '#DCFCE7', color: '#15803D', fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 100 }}>
+                  spara 20%
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {/* Tier cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {/* L1 */}
-            <div style={{ background: 'white', borderRadius: 14, border: '1px solid #E2E8F0', padding: '32px 28px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: '#DCFCE7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ fontSize: 18, fontWeight: 700, color: '#16A34A' }}>1</span>
+
+            {/* L1 — Trace */}
+            <div style={{ background: 'white', borderRadius: 14, border: '1px solid #E2E8F0', padding: '32px 28px', display: 'flex', flexDirection: 'column', gap: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: '#DCFCE7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ fontSize: 15, fontWeight: 700, color: '#16A34A' }}>1</span>
+                </div>
+                <p style={{ fontSize: 17, fontWeight: 700, color: '#1E293B' }}>{TIERS[1].name}</p>
               </div>
-              <div>
-                <p style={{ fontSize: 16, fontWeight: 700, color: '#1E293B', marginBottom: 10 }}>{TIERS[1].name}</p>
-                <p style={{ fontSize: 14, color: '#475569', lineHeight: 1.65 }}>{TIERS[1].description[lang]}</p>
+              <p style={{ fontSize: 14, color: '#475569', lineHeight: 1.55, marginBottom: 20 }}>{TIERS[1].tagline[lang]}</p>
+
+              {/* Price */}
+              <div style={{ marginBottom: 20 }}>
+                <span style={{ fontSize: 32, fontWeight: 800, color: '#16A34A', letterSpacing: '-0.03em' }}>Gratis</span>
               </div>
-              <div style={{ marginTop: 'auto', paddingTop: 8 }}>
-                <span style={{ fontSize: 14, fontWeight: 700, color: '#16A34A' }}>{TIERS[1].tag[lang]}</span>
+
+              {/* Features */}
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {TIERS[1].features[lang].map((f) => (
+                  <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: '#374151' }}>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0, marginTop: 1 }} aria-hidden="true">
+                      <circle cx="8" cy="8" r="8" fill="#DCFCE7" />
+                      <path d="M5 8l2 2 4-4" stroke="#16A34A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+
+              {/* CTA */}
+              <div style={{ marginTop: 'auto' }}>
+                {session ? (
+                  <Link
+                    to="/scan"
+                    style={{ display: 'block', textAlign: 'center', background: '#F0FDF4', color: '#16A34A', border: '1.5px solid #BBF7D0', fontSize: 14, fontWeight: 600, padding: '12px 0', borderRadius: 10, textDecoration: 'none', transition: 'background 0.15s' }}
+                  >
+                    Gå till skanning
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() => document.dispatchEvent(new CustomEvent('bliglomd:open-auth'))}
+                    style={{ width: '100%', background: '#F0FDF4', color: '#16A34A', border: '1.5px solid #BBF7D0', fontSize: 14, fontWeight: 600, padding: '12px 0', borderRadius: 10, cursor: 'pointer', transition: 'background 0.15s' }}
+                  >
+                    Kom igång gratis
+                  </button>
+                )}
               </div>
             </div>
 
-            {/* L2 — highlighted */}
-            <div style={{ background: 'white', borderRadius: 14, border: '2px solid #3B82F6', padding: '32px 28px', display: 'flex', flexDirection: 'column', gap: 16, boxShadow: '0 4px 24px rgba(59,130,246,0.15)' }}>
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: '#DBEAFE', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ fontSize: 18, fontWeight: 700, color: '#2563EB' }}>2</span>
+            {/* L2 — Cipher (highlighted) */}
+            <div style={{ background: 'white', borderRadius: 14, border: '2px solid #3B82F6', padding: '32px 28px', display: 'flex', flexDirection: 'column', gap: 0, boxShadow: '0 4px 24px rgba(59,130,246,0.15)', position: 'relative' }}>
+              {/* Most popular badge */}
+              <div style={{ position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)', background: '#2563EB', color: 'white', fontSize: 11, fontWeight: 700, padding: '4px 14px', borderRadius: 100, whiteSpace: 'nowrap', letterSpacing: '0.04em' }}>
+                POPULÄRAST
               </div>
-              <div>
-                <p style={{ fontSize: 16, fontWeight: 700, color: '#1E293B', marginBottom: 10 }}>{TIERS[2].name}</p>
-                <p style={{ fontSize: 14, color: '#475569', lineHeight: 1.65 }}>{TIERS[2].description[lang]}</p>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: '#DBEAFE', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ fontSize: 15, fontWeight: 700, color: '#2563EB' }}>2</span>
+                </div>
+                <p style={{ fontSize: 17, fontWeight: 700, color: '#1E293B' }}>{TIERS[2].name}</p>
               </div>
-              <div style={{ marginTop: 'auto', paddingTop: 8 }}>
-                <span style={{ fontSize: 14, fontWeight: 700, color: '#2563EB' }}>{TIERS[2].tag[lang]}</span>
+              <p style={{ fontSize: 14, color: '#475569', lineHeight: 1.55, marginBottom: 20 }}>{TIERS[2].tagline[lang]}</p>
+
+              {/* Price */}
+              <div style={{ marginBottom: 20 }}>
+                {billingCycle === 'monthly' ? (
+                  <div>
+                    <span style={{ fontSize: 32, fontWeight: 800, color: '#2563EB', letterSpacing: '-0.03em' }}>{TIERS[2].monthlyPriceSEK} kr</span>
+                    <span style={{ fontSize: 14, color: '#94A3B8' }}>/mån</span>
+                  </div>
+                ) : (
+                  <div>
+                    <span style={{ fontSize: 32, fontWeight: 800, color: '#2563EB', letterSpacing: '-0.03em' }}>{TIERS[2].annualPriceSEK} kr</span>
+                    <span style={{ fontSize: 14, color: '#94A3B8' }}>/år</span>
+                    <p style={{ fontSize: 12, color: '#64748B', marginTop: 2 }}>≈ {Math.round(TIERS[2].annualPriceSEK / 12)} kr/mån</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Features */}
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {TIERS[2].features[lang].map((f) => (
+                  <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: '#374151' }}>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0, marginTop: 1 }} aria-hidden="true">
+                      <circle cx="8" cy="8" r="8" fill="#DBEAFE" />
+                      <path d="M5 8l2 2 4-4" stroke="#2563EB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+
+              {/* CTA */}
+              <div style={{ marginTop: 'auto' }}>
+                <button
+                  onClick={() => {
+                    const priceId = billingCycle === 'annual'
+                      ? TIERS[2].stripeAnnualPriceId!
+                      : TIERS[2].stripeMonthlyPriceId!
+                    handleTierCTA(priceId)
+                  }}
+                  disabled={upgrading !== null}
+                  style={{ width: '100%', background: '#2563EB', color: 'white', border: 'none', fontSize: 14, fontWeight: 600, padding: '13px 0', borderRadius: 10, cursor: upgrading ? 'not-allowed' : 'pointer', opacity: upgrading ? 0.7 : 1, transition: 'opacity 0.15s' }}
+                >
+                  {upgrading === (billingCycle === 'annual' ? TIERS[2].stripeAnnualPriceId : TIERS[2].stripeMonthlyPriceId)
+                    ? 'Laddar...'
+                    : 'Välj Cipher'}
+                </button>
               </div>
             </div>
 
-            {/* L3 */}
-            <div style={{ background: 'white', borderRadius: 14, border: '1px solid #E2E8F0', padding: '32px 28px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: '#F3E8FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ fontSize: 18, fontWeight: 700, color: '#9333EA' }}>3</span>
+            {/* L3 — Ghost */}
+            <div style={{ background: 'white', borderRadius: 14, border: '1px solid #E2E8F0', padding: '32px 28px', display: 'flex', flexDirection: 'column', gap: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: '#F3E8FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ fontSize: 15, fontWeight: 700, color: '#9333EA' }}>3</span>
+                </div>
+                <p style={{ fontSize: 17, fontWeight: 700, color: '#1E293B' }}>{TIERS[3].name}</p>
               </div>
-              <div>
-                <p style={{ fontSize: 16, fontWeight: 700, color: '#1E293B', marginBottom: 10 }}>{TIERS[3].name}</p>
-                <p style={{ fontSize: 14, color: '#475569', lineHeight: 1.65 }}>{TIERS[3].description[lang]}</p>
+              <p style={{ fontSize: 14, color: '#475569', lineHeight: 1.55, marginBottom: 20 }}>{TIERS[3].tagline[lang]}</p>
+
+              {/* Price */}
+              <div style={{ marginBottom: 20 }}>
+                {billingCycle === 'monthly' ? (
+                  <div>
+                    <span style={{ fontSize: 32, fontWeight: 800, color: '#7C3AED', letterSpacing: '-0.03em' }}>{TIERS[3].monthlyPriceSEK} kr</span>
+                    <span style={{ fontSize: 14, color: '#94A3B8' }}>/mån</span>
+                  </div>
+                ) : (
+                  <div>
+                    <span style={{ fontSize: 32, fontWeight: 800, color: '#7C3AED', letterSpacing: '-0.03em' }}>{TIERS[3].annualPriceSEK.toLocaleString('sv-SE')} kr</span>
+                    <span style={{ fontSize: 14, color: '#94A3B8' }}>/år</span>
+                    <p style={{ fontSize: 12, color: '#64748B', marginTop: 2 }}>≈ {Math.round(TIERS[3].annualPriceSEK / 12)} kr/mån</p>
+                  </div>
+                )}
               </div>
-              <div style={{ marginTop: 'auto', paddingTop: 8 }}>
-                <span style={{ fontSize: 14, fontWeight: 700, color: '#9333EA' }}>{TIERS[3].tag[lang]}</span>
+
+              {/* Features */}
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {TIERS[3].features[lang].map((f) => (
+                  <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: '#374151' }}>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0, marginTop: 1 }} aria-hidden="true">
+                      <circle cx="8" cy="8" r="8" fill="#F3E8FF" />
+                      <path d="M5 8l2 2 4-4" stroke="#9333EA" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+
+              {/* CTA */}
+              <div style={{ marginTop: 'auto' }}>
+                <button
+                  onClick={() => {
+                    const priceId = billingCycle === 'annual'
+                      ? TIERS[3].stripeAnnualPriceId!
+                      : TIERS[3].stripeMonthlyPriceId!
+                    handleTierCTA(priceId)
+                  }}
+                  disabled={upgrading !== null}
+                  style={{ width: '100%', background: '#7C3AED', color: 'white', border: 'none', fontSize: 14, fontWeight: 600, padding: '13px 0', borderRadius: 10, cursor: upgrading ? 'not-allowed' : 'pointer', opacity: upgrading ? 0.7 : 1, transition: 'opacity 0.15s' }}
+                >
+                  {upgrading === (billingCycle === 'annual' ? TIERS[3].stripeAnnualPriceId : TIERS[3].stripeMonthlyPriceId)
+                    ? 'Laddar...'
+                    : 'Välj Ghost'}
+                </button>
               </div>
+            </div>
+
+          </div>
+
+          {/* Stripe error */}
+          {stripeError && (
+            <p style={{ textAlign: 'center', fontSize: 13, color: '#DC2626', marginTop: 16 }}>
+              {stripeError}
+            </p>
+          )}
+
+          {/* Checkout trust bar */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: 20, marginTop: 24 }}>
+            {['14 dagars ångerrätt', 'Inga dolda avgifter', 'Avsluta när du vill', 'Säker betalning'].map((item) => (
+              <span key={item} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#64748B' }}>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <circle cx="7" cy="7" r="7" fill="#DCFCE7" />
+                  <path d="M4.5 7l2 2 3-3" stroke="#16A34A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                {item}
+              </span>
+            ))}
+          </div>
+
+          {/* GLOMD10 promo hint */}
+          <p style={{ textAlign: 'center', fontSize: 12, color: '#94A3B8', marginTop: 12 }}>
+            Rabattkod? Ange den i kassan — t.ex. <span style={{ fontFamily: 'monospace', background: '#F1F5F9', padding: '1px 6px', borderRadius: 4 }}>GLOMD10</span> för 10% rabatt på ditt första köp.
+          </p>
+        </div>
+      </section>
+
+      {/* ── ENGÅNGSSTÄDNING ───────────────────────────────────────── */}
+      <div style={{ padding: '0 24px 64px' }}>
+        <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+
+          {/* Divider */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28 }}>
+            <div style={{ flex: 1, height: 1, background: '#E2E8F0' }} />
+            <span style={{ fontSize: 13, color: '#94A3B8', whiteSpace: 'nowrap' }}>eller engångsalternativ</span>
+            <div style={{ flex: 1, height: 1, background: '#E2E8F0' }} />
+          </div>
+
+          <div style={{ background: 'white', borderRadius: 14, border: '1px solid #E2E8F0', padding: '28px 32px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 20 }}>
+            <div style={{ flex: 1, minWidth: 240 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                <p style={{ fontSize: 17, fontWeight: 700, color: '#1E293B' }}>Engångsstädning</p>
+                <span style={{ background: '#FEF3C7', color: '#92400E', fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 100 }}>ENGÅNGSPRIS</span>
+              </div>
+              <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.6, maxWidth: 480 }}>
+                En komplett omgång GDPR-raderingsbegäranden till 26+ företag — skickas och följs upp av BliGlömd. Inget abonnemang, betala en gång.
+              </p>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexShrink: 0 }}>
+              <div style={{ textAlign: 'right' }}>
+                <p style={{ fontSize: 28, fontWeight: 800, color: '#1E293B', letterSpacing: '-0.03em' }}>{ENGANGSSTADNING.priceSEK} kr</p>
+                <p style={{ fontSize: 11, color: '#94A3B8' }}>engångsbetalning</p>
+              </div>
+              <button
+                onClick={() => handleTierCTA(ENGANGSSTADNING.stripePriceId)}
+                disabled={upgrading !== null}
+                style={{ background: '#1E293B', color: 'white', border: 'none', fontSize: 14, fontWeight: 600, padding: '12px 24px', borderRadius: 10, cursor: upgrading ? 'not-allowed' : 'pointer', opacity: upgrading ? 0.7 : 1, whiteSpace: 'nowrap', transition: 'opacity 0.15s' }}
+              >
+                {upgrading === ENGANGSSTADNING.stripePriceId ? 'Laddar...' : 'Köp nu'}
+              </button>
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
       {/* ── FOOTER ───────────────────────────────────────────────── */}
       <footer style={{ background: '#F1F5F9', borderTop: '1px solid #E2E8F0', padding: '32px 40px' }}>

@@ -30,14 +30,23 @@ Deno.serve(async (req) => {
     if (authErr || !user) return json({ error: 'Unauthorized' }, 401, cors)
 
     const { priceId } = await req.json()
-    const validPrices = new Set([
+
+    const subscriptionPrices = new Set([
       Deno.env.get('STRIPE_CIPHER_PRICE_ID'),
       Deno.env.get('STRIPE_GHOST_PRICE_ID'),
+      Deno.env.get('STRIPE_CIPHER_ANNUAL_PRICE_ID'),
+      Deno.env.get('STRIPE_GHOST_ANNUAL_PRICE_ID'),
     ])
-    if (!priceId || !validPrices.has(priceId)) {
+    const onetimePrices = new Set([
+      Deno.env.get('STRIPE_ONETIME_PRICE_ID'),
+    ])
+    const allValid = new Set([...subscriptionPrices, ...onetimePrices])
+
+    if (!priceId || !allValid.has(priceId)) {
       return json({ error: 'Invalid price' }, 400, cors)
     }
 
+    const isOnetime = onetimePrices.has(priceId)
     const STRIPE_KEY = Deno.env.get('STRIPE_SECRET_KEY')!
     const stripeAuth = `Basic ${btoa(STRIPE_KEY + ':')}`
 
@@ -70,19 +79,25 @@ Deno.serve(async (req) => {
       await sbAdmin.from('profiles').update({ stripe_customer_id: customerId }).eq('id', user.id)
     }
 
+    const sessionParams = new URLSearchParams({
+      customer: customerId!,
+      'line_items[0][price]': priceId,
+      'line_items[0][quantity]': '1',
+      mode: isOnetime ? 'payment' : 'subscription',
+      success_url: `https://xn--bliglmd-e1a.se/${isOnetime ? '?cleaned=1' : 'dashboard?upgraded=1'}`,
+      cancel_url: 'https://xn--bliglmd-e1a.se/profile',
+      client_reference_id: user.id,
+      allow_promotion_codes: 'true',
+    })
+
+    if (!isOnetime) {
+      sessionParams.append('subscription_data[metadata][supabase_user_id]', user.id)
+    }
+
     const sessionRes = await fetch(`${STRIPE_BASE}/checkout/sessions`, {
       method: 'POST',
       headers: { Authorization: stripeAuth, 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        customer: customerId!,
-        'line_items[0][price]': priceId,
-        'line_items[0][quantity]': '1',
-        mode: 'subscription',
-        success_url: 'https://xn--bliglmd-e1a.se/dashboard?upgraded=1',
-        cancel_url: 'https://xn--bliglmd-e1a.se/profile',
-        client_reference_id: user.id,
-        'subscription_data[metadata][supabase_user_id]': user.id,
-      }),
+      body: sessionParams,
     })
     const session = await sessionRes.json()
     if (!session.url) throw new Error(session.error?.message ?? 'No session URL')

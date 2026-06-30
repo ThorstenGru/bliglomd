@@ -21,13 +21,20 @@ export interface Tier {
   color: 'green' | 'blue' | 'purple'
   /** Display price in SEK (0 = free). Change freely — backend is unaffected. */
   monthlyPriceSEK: number
+  /** Annual price in SEK (0 = free). 20% off monthly × 12. */
+  annualPriceSEK: number
   /**
-   * Stripe recurring price ID for this tier.
+   * Stripe recurring monthly price ID.
    * null  = free tier, no Stripe product.
    * The webhook identifies tiers via Stripe product metadata
    * { bliglomd_level: "2" } — never by this name.
    */
   stripeMonthlyPriceId: string | null
+  /**
+   * Stripe recurring annual price ID.
+   * null  = free tier, no Stripe product.
+   */
+  stripeAnnualPriceId: string | null
 }
 
 export const TIERS: Record<1 | 2 | 3, Tier> = {
@@ -62,7 +69,9 @@ export const TIERS: Record<1 | 2 | 3, Tier> = {
     },
     color: 'green',
     monthlyPriceSEK: 0,
+    annualPriceSEK: 0,
     stripeMonthlyPriceId: null,
+    stripeAnnualPriceId: null,
   },
 
   2: {
@@ -98,8 +107,11 @@ export const TIERS: Record<1 | 2 | 3, Tier> = {
     },
     color: 'blue',
     monthlyPriceSEK: 61,
+    annualPriceSEK: 586,
     // SANDBOX — switch to price_1TnxQbAT2u1nHxljUfTlrTTT for live when explicitly instructed
     stripeMonthlyPriceId: 'price_1TnxQdAR7wxHkiWgJINpQ3EZ',
+    // SANDBOX — switch to price_1To2AuAT2u1nHxljRxAA6KV9 for live when explicitly instructed
+    stripeAnnualPriceId: 'price_1To2AsAR7wxHkiWgfrIUhoEQ',
   },
 
   3: {
@@ -137,8 +149,11 @@ export const TIERS: Record<1 | 2 | 3, Tier> = {
     },
     color: 'purple',
     monthlyPriceSEK: 124,
+    annualPriceSEK: 1190,
     // SANDBOX — switch to price_1TnxQcAT2u1nHxljSb3UDBSq for live when explicitly instructed
     stripeMonthlyPriceId: 'price_1TnxQeAR7wxHkiWgMk6H20JZ',
+    // SANDBOX — switch to price_1To2AuAT2u1nHxljKE1sN1U3 for live when explicitly instructed
+    stripeAnnualPriceId: 'price_1To2AsAR7wxHkiWgONTMlkE5',
   },
 }
 
@@ -146,3 +161,10 @@ export const TIERS: Record<1 | 2 | 3, Tier> = {
 export function tierByKey(key: Tier['key']): Tier {
   return Object.values(TIERS).find(t => t.key === key)!
 }
+
+/** One-time Engångsstädning product (no recurring subscription) */
+export const ENGANGSSTADNING = {
+  // SANDBOX — switch to price_1To2AvAT2u1nHxljFzYjF0Q0 for live when explicitly instructed
+  stripePriceId: 'price_1To2AtAR7wxHkiWg9gHAQ4o9',
+  priceSEK: 199,
+} as const
