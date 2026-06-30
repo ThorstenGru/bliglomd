@@ -19,10 +19,11 @@ export interface Tier {
   timelineHint: Record<Lang, string>
   /** Tailwind color ramp used by LevelBadge */
   color: 'green' | 'blue' | 'purple'
+  /** Display price in SEK (0 = free). Change freely — backend is unaffected. */
+  monthlyPriceSEK: number
   /**
    * Stripe recurring price ID for this tier.
    * null  = free tier, no Stripe product.
-   * Set to the real price_xxx value after Stripe setup.
    * The webhook identifies tiers via Stripe product metadata
    * { bliglomd_level: "2" } — never by this name.
    */
@@ -60,6 +61,7 @@ export const TIERS: Record<1 | 2 | 3, Tier> = {
       en: 'Upgrade to Cipher or Ghost to send directly through BliGlömd.',
     },
     color: 'green',
+    monthlyPriceSEK: 0,
     stripeMonthlyPriceId: null,
   },
 
@@ -95,7 +97,8 @@ export const TIERS: Record<1 | 2 | 3, Tier> = {
       en: 'Upgrade to Ghost to let BliGlömd send and monitor automatically.',
     },
     color: 'blue',
-    stripeMonthlyPriceId: null, // set after Stripe setup
+    monthlyPriceSEK: 49,
+    stripeMonthlyPriceId: 'price_1TnvuMAR7wxHkiWgUBaOpsgY',
   },
 
   3: {
@@ -132,7 +135,8 @@ export const TIERS: Record<1 | 2 | 3, Tier> = {
       en: '',
     },
     color: 'purple',
-    stripeMonthlyPriceId: null, // set after Stripe setup
+    monthlyPriceSEK: 99,
+    stripeMonthlyPriceId: 'price_1Tnvv0AR7wxHkiWgfK6Wl6eL',
   },
 }
 

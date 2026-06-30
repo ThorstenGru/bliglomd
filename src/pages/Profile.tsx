@@ -2,15 +2,26 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useLang } from '../contexts/LanguageContext'
+import { LevelBadge } from '../components/LevelBadge'
+import { TIERS } from '../config/tiers'
+
+const tierColor = {
+  green:  { ring: 'border-green-300',  bg: 'bg-green-50',  btn: 'bg-green-600 hover:bg-green-700',  text: 'text-green-700'  },
+  blue:   { ring: 'border-blue-300',   bg: 'bg-blue-50',   btn: 'bg-blue-600 hover:bg-blue-700',   text: 'text-blue-700'   },
+  purple: { ring: 'border-purple-300', bg: 'bg-purple-50', btn: 'bg-purple-600 hover:bg-purple-700', text: 'text-purple-700' },
+} as const
 
 export function Profile() {
   const navigate = useNavigate()
-  const { t } = useLang()
+  const { t, lang } = useLang()
 
   const [loading, setLoading] = useState(true)
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [newEmail, setNewEmail] = useState('')
+  const [level, setLevel] = useState<1 | 2 | 3>(1)
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string>('inactive')
+  const [stripeCustomerId, setStripeCustomerId] = useState<string | null>(null)
 
   const [nameSaving, setNameSaving] = useState(false)
   const [nameSaved, setNameSaved] = useState(false)
@@ -19,6 +30,10 @@ export function Profile() {
   const [emailSaving, setEmailSaving] = useState(false)
   const [emailDone, setEmailDone] = useState(false)
   const [emailError, setEmailError] = useState<string | null>(null)
+
+  const [upgrading, setUpgrading] = useState<string | null>(null)
+  const [portalLoading, setPortalLoading] = useState(false)
+  const [stripeError, setStripeError] = useState<string | null>(null)
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteWord, setDeleteWord] = useState('')
@@ -32,17 +47,20 @@ export function Profile() {
 
     const { data } = await supabase
       .from('profiles')
-      .select('full_name')
+      .select('full_name, level, subscription_status, stripe_customer_id')
       .eq('id', user.id)
       .single()
 
-    if (data) setFullName(data.full_name ?? '')
+    if (data) {
+      setFullName(data.full_name ?? '')
+      setLevel((data.level as 1 | 2 | 3) ?? 1)
+      setSubscriptionStatus(data.subscription_status ?? 'inactive')
+      setStripeCustomerId(data.stripe_customer_id ?? null)
+    }
     setLoading(false)
   }, [navigate])
 
-  useEffect(() => {
-    loadProfile()
-  }, [loadProfile])
+  useEffect(() => { loadProfile() }, [loadProfile])
 
   async function saveName(e: React.FormEvent) {
     e.preventDefault()
@@ -50,10 +68,7 @@ export function Profile() {
     setNameError(null)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
-    const { error } = await supabase
-      .from('profiles')
-      .update({ full_name: fullName.trim() })
-      .eq('id', user.id)
+    const { error } = await supabase.from('profiles').update({ full_name: fullName.trim() }).eq('id', user.id)
     setNameSaving(false)
     if (error) { setNameError(error.message); return }
     setNameSaved(true)
@@ -71,16 +86,38 @@ export function Profile() {
     setNewEmail('')
   }
 
+  async function startCheckout(priceId: string) {
+    setUpgrading(priceId)
+    setStripeError(null)
+    try {
+      const { data, error } = await supabase.functions.invoke('stripe-checkout', { body: { priceId } })
+      if (error || !data?.url) throw new Error(error?.message ?? 'No URL returned')
+      window.location.href = data.url
+    } catch (err) {
+      setStripeError(String(err))
+      setUpgrading(null)
+    }
+  }
+
+  async function openPortal() {
+    setPortalLoading(true)
+    setStripeError(null)
+    try {
+      const { data, error } = await supabase.functions.invoke('stripe-portal', { body: {} })
+      if (error || !data?.url) throw new Error(error?.message ?? 'No URL returned')
+      window.location.href = data.url
+    } catch (err) {
+      setStripeError(String(err))
+      setPortalLoading(false)
+    }
+  }
+
   async function deleteAccount() {
     if (deleteWord.toLowerCase() !== t.profile.deleteConfirmWord) return
     setDeleting(true)
     setDeleteError(null)
     const { error } = await supabase.functions.invoke('delete-account', { body: {} })
-    if (error) {
-      setDeleting(false)
-      setDeleteError(error.message)
-      return
-    }
+    if (error) { setDeleting(false); setDeleteError(error.message); return }
     await supabase.auth.signOut()
     navigate('/')
   }
@@ -92,6 +129,9 @@ export function Profile() {
       </div>
     )
   }
+
+  const upgradableTiers = ([2, 3] as const).filter(l => l > level)
+  const hasActiveSubscription = stripeCustomerId !== null && level > 1
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-12 space-y-6">
@@ -125,7 +165,6 @@ export function Profile() {
       <div className="bg-white rounded-2xl border border-gray-200 p-6">
         <h2 className="font-semibold text-gray-900 mb-2">{t.profile.emailLabel}</h2>
         <p className="text-sm text-gray-500 font-mono mb-5">{email}</p>
-
         <h3 className="text-sm font-medium text-gray-700 mb-3">{t.profile.changeEmail}</h3>
         {emailDone ? (
           <p className="text-sm text-green-700 bg-green-50 rounded-lg px-3 py-2">{t.profile.changeEmailDone}</p>
@@ -151,6 +190,77 @@ export function Profile() {
         {emailError && <p className="text-xs text-red-600 mt-2">{emailError}</p>}
       </div>
 
+      {/* Subscription */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-5">
+        <h2 className="font-semibold text-gray-900">{t.profile.subscription}</h2>
+
+        {/* Current plan */}
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs text-gray-500 mb-1">{t.profile.currentPlan}</p>
+            <div className="flex items-center gap-2">
+              <LevelBadge level={level} />
+              {level > 1 && (
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                  subscriptionStatus === 'active' ? 'bg-green-100 text-green-700' :
+                  subscriptionStatus === 'past_due' ? 'bg-yellow-100 text-yellow-700' :
+                  subscriptionStatus === 'canceled' ? 'bg-red-100 text-red-700' :
+                  'bg-gray-100 text-gray-600'
+                }`}>
+                  {subscriptionStatus === 'active' ? t.profile.statusActive :
+                   subscriptionStatus === 'past_due' ? t.profile.statusPastDue :
+                   subscriptionStatus === 'canceled' ? t.profile.statusCanceled :
+                   subscriptionStatus}
+                </span>
+              )}
+            </div>
+          </div>
+          {hasActiveSubscription && (
+            <button
+              onClick={openPortal}
+              disabled={portalLoading}
+              className="text-sm text-gray-600 hover:text-gray-900 underline underline-offset-2 transition-colors disabled:opacity-50"
+            >
+              {portalLoading ? t.profile.upgrading : t.profile.manageBtn}
+            </button>
+          )}
+        </div>
+
+        {/* Upgrade cards */}
+        {upgradableTiers.length > 0 && (
+          <div>
+            <p className="text-sm font-medium text-gray-700 mb-3">{t.profile.upgradeTitle}</p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {upgradableTiers.map((l) => {
+                const tier = TIERS[l]
+                const c = tierColor[tier.color]
+                const isLoading = upgrading === tier.stripeMonthlyPriceId
+                return (
+                  <div key={l} className={`rounded-xl border-2 ${c.ring} ${c.bg} p-4 flex flex-col gap-2`}>
+                    <div className="flex items-center justify-between">
+                      <span className={`font-semibold text-sm ${c.text}`}>{tier.name}</span>
+                      <span className={`text-sm font-medium ${c.text}`}>
+                        {tier.monthlyPriceSEK} kr{t.profile.perMonth}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-600 leading-relaxed">{tier.tagline[lang]}</p>
+                    <button
+                      onClick={() => tier.stripeMonthlyPriceId && startCheckout(tier.stripeMonthlyPriceId)}
+                      disabled={!!upgrading || isLoading}
+                      className={`mt-1 w-full py-2 rounded-lg text-white text-sm font-medium transition-colors disabled:opacity-50 ${c.btn}`}
+                    >
+                      {isLoading ? t.profile.upgrading : `${t.profile.upgradeBtn} ${tier.name}`}
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {stripeError && <p className="text-xs text-red-600">{stripeError}</p>}
+      </div>
+
       {/* Your data */}
       <div className="bg-white rounded-2xl border border-gray-200 p-6">
         <h2 className="font-semibold text-gray-900 mb-3">{t.profile.yourData}</h2>
@@ -161,7 +271,6 @@ export function Profile() {
       <div className="bg-white rounded-2xl border border-red-200 p-6">
         <h2 className="font-semibold text-red-800 mb-2">{t.profile.deleteSection}</h2>
         <p className="text-sm text-gray-600 mb-4">{t.profile.deleteWarning}</p>
-
         {!showDeleteConfirm ? (
           <button
             onClick={() => setShowDeleteConfirm(true)}
