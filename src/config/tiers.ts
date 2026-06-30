@@ -98,7 +98,8 @@ export const TIERS: Record<1 | 2 | 3, Tier> = {
     },
     color: 'blue',
     monthlyPriceSEK: 49,
-    stripeMonthlyPriceId: 'price_1TnvuMAR7wxHkiWgUBaOpsgY',
+    // SANDBOX — switch to price_1TnwrtAT2u1nHxlj2pvSt28C for live when explicitly instructed
+    stripeMonthlyPriceId: 'price_1TnwtjAR7wxHkiWgAj4NBAID',
   },
 
   3: {
@@ -136,7 +137,8 @@ export const TIERS: Record<1 | 2 | 3, Tier> = {
     },
     color: 'purple',
     monthlyPriceSEK: 99,
-    stripeMonthlyPriceId: 'price_1Tnvv0AR7wxHkiWgfK6Wl6eL',
+    // SANDBOX — switch to price_1Tnwt8AT2u1nHxljnXJhWxXT for live when explicitly instructed
+    stripeMonthlyPriceId: 'price_1TnwtvAR7wxHkiWg8o4VM7ea',
   },
 }
 
