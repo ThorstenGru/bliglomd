@@ -1,4 +1,5 @@
 import { useId } from 'react'
+import { useLang } from '../contexts/LanguageContext'
 
 interface BrandLogoProps {
   variant?: 'large' | 'compact' | 'symbol'
@@ -67,6 +68,7 @@ function ShieldHero({ gradId }: { gradId: string }) {
 export function BrandLogo({ variant = 'compact', className = '' }: BrandLogoProps) {
   const uid = useId().replace(/:/g, '_')
   const gradId = `bliglomd-sg-${uid}`
+  const { t } = useLang()
 
   if (variant === 'symbol') {
     return (
@@ -100,9 +102,10 @@ export function BrandLogo({ variant = 'compact', className = '' }: BrandLogoProp
             lineHeight: 1.6,
             marginTop: 16,
             textAlign: 'center',
+            whiteSpace: 'pre-line',
           }}
         >
-          Din rätt att försvinna från internet.<br />Vi ser till att det händer.
+          {t.home.logoTagline}
         </p>
       </div>
     )
@@ -126,7 +129,7 @@ export function BrandLogo({ variant = 'compact', className = '' }: BrandLogoProp
             textTransform: 'uppercase',
           }}
         >
-          DIN RÄTT ATT FÖRSVINNA · VI SER TILL ATT DET HÄNDER.
+          {t.home.logoTaglineCompact}
         </div>
       </div>
     </div>

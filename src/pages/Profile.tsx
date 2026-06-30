@@ -34,6 +34,7 @@ export function Profile() {
   const [upgrading, setUpgrading] = useState<string | null>(null)
   const [portalLoading, setPortalLoading] = useState(false)
   const [stripeError, setStripeError] = useState<string | null>(null)
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly')
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteWord, setDeleteWord] = useState('')
@@ -229,23 +230,53 @@ export function Profile() {
         {/* Upgrade cards */}
         {upgradableTiers.length > 0 && (
           <div>
-            <p className="text-sm font-medium text-gray-700 mb-3">{t.profile.upgradeTitle}</p>
+            <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+              <p className="text-sm font-medium text-gray-700">{t.profile.upgradeTitle}</p>
+              {/* Billing cycle toggle */}
+              <div className="flex bg-gray-100 rounded-full p-0.5 gap-0.5">
+                <button
+                  onClick={() => setBillingCycle('monthly')}
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                    billingCycle === 'monthly' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'
+                  }`}
+                >
+                  {t.profile.billMonthly}
+                </button>
+                <button
+                  onClick={() => setBillingCycle('annual')}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                    billingCycle === 'annual' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'
+                  }`}
+                >
+                  {t.profile.billAnnual}
+                  <span className="bg-green-100 text-green-700 text-xs font-semibold px-1.5 py-0.5 rounded-full leading-none">
+                    {t.profile.save20}
+                  </span>
+                </button>
+              </div>
+            </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {upgradableTiers.map((l) => {
                 const tier = TIERS[l]
                 const c = tierColor[tier.color]
-                const isLoading = upgrading === tier.stripeMonthlyPriceId
+                const priceId = billingCycle === 'annual' ? tier.stripeAnnualPriceId : tier.stripeMonthlyPriceId
+                const price = billingCycle === 'annual' ? tier.annualPriceSEK : tier.monthlyPriceSEK
+                const perLabel = billingCycle === 'annual' ? t.profile.perYear : t.profile.perMonth
+                const isLoading = upgrading === priceId
                 return (
                   <div key={l} className={`rounded-xl border-2 ${c.ring} ${c.bg} p-4 flex flex-col gap-2`}>
                     <div className="flex items-center justify-between">
                       <span className={`font-semibold text-sm ${c.text}`}>{tier.name}</span>
                       <span className={`text-sm font-medium ${c.text}`}>
-                        {tier.monthlyPriceSEK} kr{t.profile.perMonth}
+                        {price} kr{perLabel}
                       </span>
                     </div>
+                    {billingCycle === 'annual' && (
+                      <p className="text-xs text-gray-500">≈ {Math.round(tier.annualPriceSEK / 12)} kr{t.profile.perMonth}</p>
+                    )}
                     <p className="text-xs text-gray-600 leading-relaxed">{tier.tagline[lang]}</p>
                     <button
-                      onClick={() => tier.stripeMonthlyPriceId && startCheckout(tier.stripeMonthlyPriceId)}
+                      onClick={() => priceId && startCheckout(priceId)}
                       disabled={!!upgrading || isLoading}
                       className={`mt-1 w-full py-2 rounded-lg text-white text-sm font-medium transition-colors disabled:opacity-50 ${c.btn}`}
                     >

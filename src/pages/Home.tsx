@@ -189,7 +189,7 @@ export function Home({ session }: HomeProps) {
         <ConsentModal
           priceId={consentPriceId}
           planLabel={consentPlanLabel}
-          onConfirmed={() => { setConsentPriceId(null); startCheckout(consentPriceId) }}
+          onConfirmed={() => { const id = consentPriceId!; setConsentPriceId(null); startCheckout(id) }}
           onClose={() => setConsentPriceId(null)}
         />
       )}

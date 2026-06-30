@@ -170,7 +170,7 @@ export function Dashboard() {
         <div className="mb-6 bg-green-50 border border-green-200 rounded-2xl px-5 py-4 flex items-center gap-3">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
           <p className="text-sm text-green-800 font-medium">
-            {lang === 'sv' ? 'Välkommen! Din plan är nu uppgraderad och aktiv.' : 'Welcome! Your plan has been upgraded and is now active.'}
+            {t.dashboard.upgradedBanner}
           </p>
         </div>
       )}

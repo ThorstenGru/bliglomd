@@ -12,7 +12,14 @@ export function Request() {
   const { t, lang } = useLang()
   const company = COMPANIES.find((c) => c.id === id)
 
-  const [selectedLevel, setSelectedLevel] = useState<1 | 2 | 3>(1)
+  const defaultLevel: 1 | 2 | 3 = company
+    ? ([3, 2, 1] as const).find((l) =>
+        (l === 1 && company.level1_available) ||
+        (l === 2 && company.level2_available) ||
+        (l === 3 && company.level3_available)
+      ) ?? 1
+    : 1
+  const [selectedLevel, setSelectedLevel] = useState<1 | 2 | 3>(defaultLevel)
   const [userName, setUserName] = useState('')
   const [userEmail, setUserEmail] = useState('')
   const [loading, setLoading] = useState(false)
@@ -116,7 +123,12 @@ export function Request() {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="bg-white rounded-2xl p-8 text-center shadow-sm border border-gray-200 max-w-md w-full mx-4">
-          <div className="text-5xl mb-4">✓</div>
+          <div className="flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mx-auto mb-4">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+          </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">{t.request.successTitle}</h2>
           <p className="text-gray-600 mb-6">
             {t.request.successMsg} {company.name}. {t.request.successSub}
