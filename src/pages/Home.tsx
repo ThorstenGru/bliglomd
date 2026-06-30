@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useLang } from '../contexts/LanguageContext'
-
 import { BrandLogo } from '../components/BrandLogo'
 import { TIERS, ENGANGSSTADNING } from '../config/tiers'
+import { ConsentModal } from '../components/ConsentModal'
 import { supabase } from '../lib/supabase'
 import type { Session } from '@supabase/supabase-js'
 
@@ -157,6 +157,8 @@ export function Home({ session }: HomeProps) {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly')
   const [upgrading, setUpgrading] = useState<string | null>(null)
   const [stripeError, setStripeError] = useState<string | null>(null)
+  const [consentPriceId, setConsentPriceId] = useState<string | null>(null)
+  const [consentPlanLabel, setConsentPlanLabel] = useState<string>('')
 
   async function startCheckout(priceId: string) {
     setUpgrading(priceId)
@@ -171,16 +173,26 @@ export function Home({ session }: HomeProps) {
     }
   }
 
-  function handleTierCTA(priceId: string) {
+  function handleTierCTA(priceId: string, planLabel: string) {
     if (!session) {
       document.dispatchEvent(new CustomEvent('bliglomd:open-auth'))
     } else {
-      startCheckout(priceId)
+      setConsentPriceId(priceId)
+      setConsentPlanLabel(planLabel)
     }
   }
 
   return (
     <div style={{ background: '#ECF0FA' }}>
+
+      {consentPriceId && (
+        <ConsentModal
+          priceId={consentPriceId}
+          planLabel={consentPlanLabel}
+          onConfirmed={() => { setConsentPriceId(null); startCheckout(consentPriceId) }}
+          onClose={() => setConsentPriceId(null)}
+        />
+      )}
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <section style={{ padding: '72px 24px 64px', textAlign: 'center' }}>
@@ -449,7 +461,7 @@ export function Home({ session }: HomeProps) {
                     const priceId = billingCycle === 'annual'
                       ? TIERS[2].stripeAnnualPriceId!
                       : TIERS[2].stripeMonthlyPriceId!
-                    handleTierCTA(priceId)
+                    handleTierCTA(priceId, `Cipher ${billingCycle === 'annual' ? TIERS[2].annualPriceSEK : TIERS[2].monthlyPriceSEK} kr`)
                   }}
                   disabled={upgrading !== null}
                   style={{ width: '100%', background: '#2563EB', color: 'white', border: 'none', fontSize: 14, fontWeight: 600, padding: '13px 0', borderRadius: 10, cursor: upgrading ? 'not-allowed' : 'pointer', opacity: upgrading ? 0.7 : 1, transition: 'opacity 0.15s' }}
@@ -507,7 +519,7 @@ export function Home({ session }: HomeProps) {
                     const priceId = billingCycle === 'annual'
                       ? TIERS[3].stripeAnnualPriceId!
                       : TIERS[3].stripeMonthlyPriceId!
-                    handleTierCTA(priceId)
+                    handleTierCTA(priceId, `Ghost ${billingCycle === 'annual' ? TIERS[3].annualPriceSEK : TIERS[3].monthlyPriceSEK} kr`)
                   }}
                   disabled={upgrading !== null}
                   style={{ width: '100%', background: '#7C3AED', color: 'white', border: 'none', fontSize: 14, fontWeight: 600, padding: '13px 0', borderRadius: 10, cursor: upgrading ? 'not-allowed' : 'pointer', opacity: upgrading ? 0.7 : 1, transition: 'opacity 0.15s' }}
@@ -580,7 +592,7 @@ export function Home({ session }: HomeProps) {
                 <p style={{ fontSize: 11, color: '#94A3B8' }}>{t.home.oncePerPayment}</p>
               </div>
               <button
-                onClick={() => handleTierCTA(ENGANGSSTADNING.stripePriceId)}
+                onClick={() => handleTierCTA(ENGANGSSTADNING.stripePriceId, `${t.home.onceTitle} ${ENGANGSSTADNING.priceSEK} kr`)}
                 disabled={upgrading !== null}
                 style={{ background: '#1E293B', color: 'white', border: 'none', fontSize: 14, fontWeight: 600, padding: '12px 24px', borderRadius: 10, cursor: upgrading ? 'not-allowed' : 'pointer', opacity: upgrading ? 0.7 : 1, whiteSpace: 'nowrap', transition: 'opacity 0.15s' }}
               >
@@ -615,8 +627,8 @@ export function Home({ session }: HomeProps) {
 
           {/* Right */}
           <div style={{ display: 'flex', gap: 24 }}>
-            <a href="#" style={{ fontSize: 12, color: '#94A3B8', textDecoration: 'none' }}>{t.home.footerPrivacy}</a>
-            <a href="#" style={{ fontSize: 12, color: '#94A3B8', textDecoration: 'none' }}>{t.home.footerTerms}</a>
+            <Link to="/privacy" style={{ fontSize: 12, color: '#94A3B8', textDecoration: 'none' }}>{t.home.footerPrivacy}</Link>
+            <Link to="/terms" style={{ fontSize: 12, color: '#94A3B8', textDecoration: 'none' }}>{t.home.footerTerms}</Link>
             <Link to="/status" style={{ fontSize: 12, color: '#94A3B8', textDecoration: 'none' }}>
               {t.home.footerStatus}
             </Link>

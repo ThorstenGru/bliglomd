@@ -10,6 +10,8 @@ import { Dashboard } from './pages/Dashboard'
 import { Profile } from './pages/Profile'
 import { Status } from './pages/Status'
 import { Admin } from './pages/Admin'
+import { Terms } from './pages/Terms'
+import { Privacy } from './pages/Privacy'
 import type { Session } from '@supabase/supabase-js'
 
 function AuthGuard({ session, children }: { session: Session | null; children: ReactNode }) {
@@ -81,6 +83,8 @@ function AppShell() {
           <AuthGuard session={session}><Profile /></AuthGuard>
         } />
         <Route path="/status" element={<Status />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
