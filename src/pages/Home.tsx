@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useLang } from '../contexts/LanguageContext'
+
 import { BrandLogo } from '../components/BrandLogo'
 import { TIERS, ENGANGSSTADNING } from '../config/tiers'
 import { supabase } from '../lib/supabase'
@@ -71,6 +72,7 @@ const TESTIMONIALS = [
 ]
 
 function TestimonialCarousel() {
+  const { t } = useLang()
   const [idx, setIdx]         = useState(0)
   const [visible, setVisible] = useState(true)
   const fadeRef = useRef<ReturnType<typeof setTimeout>>()
@@ -96,7 +98,7 @@ function TestimonialCarousel() {
     fadeRef.current = setTimeout(() => { setIdx(i); setVisible(true) }, 200)
   }
 
-  const t = TESTIMONIALS[idx]
+  const item = TESTIMONIALS[idx]
 
   return (
     <div style={{ maxWidth: 520, margin: '0 auto' }}>
@@ -110,15 +112,15 @@ function TestimonialCarousel() {
       >
         <p style={{ fontSize: 15, color: '#F59E0B', marginBottom: 10, letterSpacing: 1 }}>★★★★★</p>
         <p style={{ fontSize: 14, color: '#374151', lineHeight: 1.65, marginBottom: 16, fontStyle: 'italic' }}>
-          "{t.quote}"
+          "{item.quote}"
         </p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 34, height: 34, borderRadius: '50%', background: t.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, color: t.fg, flexShrink: 0 }}>
-            {t.initials}
+          <div style={{ width: 34, height: 34, borderRadius: '50%', background: item.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, color: item.fg, flexShrink: 0 }}>
+            {item.initials}
           </div>
           <div>
-            <p style={{ fontSize: 13, fontWeight: 600, color: '#1E293B' }}>{t.name}</p>
-            <p style={{ fontSize: 11, color: '#94A3B8' }}>{t.city} · verifierad användare</p>
+            <p style={{ fontSize: 13, fontWeight: 600, color: '#1E293B' }}>{item.name}</p>
+            <p style={{ fontSize: 11, color: '#94A3B8' }}>{item.city} · {t.home.verifiedUser}</p>
           </div>
         </div>
       </div>
@@ -223,7 +225,7 @@ export function Home({ session }: HomeProps) {
             <p style={{ fontSize: 26, fontWeight: 800, color: '#1E3A8A', letterSpacing: '-0.03em', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
               {reqCount.toLocaleString('sv-SE')}
             </p>
-            <p style={{ fontSize: 12, color: '#94A3B8', marginTop: 3 }}>förfrågningar skickade</p>
+            <p style={{ fontSize: 12, color: '#94A3B8', marginTop: 3 }}>{t.home.requestsSent}</p>
           </div>
           <div style={{ width: 1, height: 36, background: '#E2E8F0' }} aria-hidden="true" />
           <div style={{ textAlign: 'center' }}>
@@ -233,14 +235,14 @@ export function Home({ session }: HomeProps) {
                 <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
               </svg>
             </div>
-            <p style={{ fontSize: 12, color: '#94A3B8' }}>snittbetyg</p>
+            <p style={{ fontSize: 12, color: '#94A3B8' }}>{t.home.avgRating}</p>
           </div>
           <div style={{ width: 1, height: 36, background: '#E2E8F0' }} aria-hidden="true" />
           <div style={{ textAlign: 'center' }}>
             <p style={{ fontSize: 26, fontWeight: 800, color: '#1E3A8A', letterSpacing: '-0.03em', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
               {userCount.toLocaleString('sv-SE')}+
             </p>
-            <p style={{ fontSize: 12, color: '#94A3B8', marginTop: 3 }}>aktiva användare</p>
+            <p style={{ fontSize: 12, color: '#94A3B8', marginTop: 3 }}>{t.home.activeUsers}</p>
           </div>
         </div>
 
@@ -252,8 +254,8 @@ export function Home({ session }: HomeProps) {
               <path d="M9 12l2 2 4-4" />
             </svg>
             <div>
-              <p style={{ fontSize: 12, fontWeight: 700, color: '#1D4ED8', lineHeight: 1.2 }}>GDPR Artikel 17</p>
-              <p style={{ fontSize: 10, color: '#60A5FA', lineHeight: 1.2 }}>Rätten till radering</p>
+              <p style={{ fontSize: 12, fontWeight: 700, color: '#1D4ED8', lineHeight: 1.2 }}>{t.home.gdprBadgeTitle}</p>
+              <p style={{ fontSize: 10, color: '#60A5FA', lineHeight: 1.2 }}>{t.home.gdprBadgeSub}</p>
             </div>
           </div>
 
@@ -263,16 +265,16 @@ export function Home({ session }: HomeProps) {
               <path d="M14 2v6h6M9 13h6M9 17h4" />
             </svg>
             <div>
-              <p style={{ fontSize: 12, fontWeight: 700, color: '#15803D', lineHeight: 1.2 }}>Juridiskt granskad</p>
-              <p style={{ fontSize: 10, color: '#4ADE80', lineHeight: 1.2 }}>Av svensk integritetsjurist</p>
+              <p style={{ fontSize: 12, fontWeight: 700, color: '#15803D', lineHeight: 1.2 }}>{t.home.legalBadgeTitle}</p>
+              <p style={{ fontSize: 10, color: '#4ADE80', lineHeight: 1.2 }}>{t.home.legalBadgeSub}</p>
             </div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'white', border: '1.5px solid #FEE2E2', borderRadius: 10, padding: '10px 18px' }}>
             <TreKronor size={22} />
             <div>
-              <p style={{ fontSize: 12, fontWeight: 700, color: '#DC2626', lineHeight: 1.2 }}>Data lagras i Sverige</p>
-              <p style={{ fontSize: 10, color: '#F87171', lineHeight: 1.2 }}>Inga tredjeland-överföringar</p>
+              <p style={{ fontSize: 12, fontWeight: 700, color: '#DC2626', lineHeight: 1.2 }}>{t.home.dataBadgeTitle}</p>
+              <p style={{ fontSize: 10, color: '#F87171', lineHeight: 1.2 }}>{t.home.dataBadgeSub}</p>
             </div>
           </div>
         </div>
@@ -281,13 +283,13 @@ export function Home({ session }: HomeProps) {
       {/* ── TRUST STRIP + TESTIMONIAL CAROUSEL ───────────────────── */}
       <div style={{ padding: '20px 24px 28px', textAlign: 'center' }}>
         <div className="flex items-center justify-center flex-wrap gap-6 mb-7">
-          <span style={{ fontSize: 12, color: '#64748B' }}>✓ Vi säljer aldrig dina uppgifter</span>
+          <span style={{ fontSize: 12, color: '#64748B' }}>✓ {t.home.trustNeverSell}</span>
           <span style={{ color: '#CBD5E1' }}>|</span>
-          <span style={{ fontSize: 12, color: '#64748B' }}>✓ Avbryt när som helst</span>
+          <span style={{ fontSize: 12, color: '#64748B' }}>✓ {t.home.trustCancelAnytime}</span>
           <span style={{ color: '#CBD5E1' }}>|</span>
-          <span style={{ fontSize: 12, color: '#64748B' }}>✓ Inga dolda avgifter</span>
+          <span style={{ fontSize: 12, color: '#64748B' }}>✓ {t.home.trustNoHiddenFees}</span>
           <span style={{ color: '#CBD5E1' }}>|</span>
-          <span style={{ fontSize: 12, color: '#64748B' }}>✓ 256-bit kryptering</span>
+          <span style={{ fontSize: 12, color: '#64748B' }}>✓ {t.home.trust256bit}</span>
         </div>
 
         <TestimonialCarousel />
@@ -324,7 +326,7 @@ export function Home({ session }: HomeProps) {
                   transition: 'all 0.2s ease',
                 }}
               >
-                Månadsvis
+                {t.home.monthly}
               </button>
               <button
                 onClick={() => setBillingCycle('annual')}
@@ -337,9 +339,9 @@ export function Home({ session }: HomeProps) {
                   transition: 'all 0.2s ease',
                 }}
               >
-                Årsvis
+                {t.home.annual}
                 <span style={{ background: '#DCFCE7', color: '#15803D', fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 100 }}>
-                  spara 20%
+                  {t.home.save20}
                 </span>
               </button>
             </div>
@@ -360,7 +362,7 @@ export function Home({ session }: HomeProps) {
 
               {/* Price */}
               <div style={{ marginBottom: 20 }}>
-                <span style={{ fontSize: 32, fontWeight: 800, color: '#16A34A', letterSpacing: '-0.03em' }}>Gratis</span>
+                <span style={{ fontSize: 32, fontWeight: 800, color: '#16A34A', letterSpacing: '-0.03em' }}>{t.home.free}</span>
               </div>
 
               {/* Features */}
@@ -383,14 +385,14 @@ export function Home({ session }: HomeProps) {
                     to="/scan"
                     style={{ display: 'block', textAlign: 'center', background: '#F0FDF4', color: '#16A34A', border: '1.5px solid #BBF7D0', fontSize: 14, fontWeight: 600, padding: '12px 0', borderRadius: 10, textDecoration: 'none', transition: 'background 0.15s' }}
                   >
-                    Gå till skanning
+                    {t.home.goToScan}
                   </Link>
                 ) : (
                   <button
                     onClick={() => document.dispatchEvent(new CustomEvent('bliglomd:open-auth'))}
                     style={{ width: '100%', background: '#F0FDF4', color: '#16A34A', border: '1.5px solid #BBF7D0', fontSize: 14, fontWeight: 600, padding: '12px 0', borderRadius: 10, cursor: 'pointer', transition: 'background 0.15s' }}
                   >
-                    Kom igång gratis
+                    {t.home.cta}
                   </button>
                 )}
               </div>
@@ -400,7 +402,7 @@ export function Home({ session }: HomeProps) {
             <div style={{ background: 'white', borderRadius: 14, border: '2px solid #3B82F6', padding: '32px 28px', display: 'flex', flexDirection: 'column', gap: 0, boxShadow: '0 4px 24px rgba(59,130,246,0.15)', position: 'relative' }}>
               {/* Most popular badge */}
               <div style={{ position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)', background: '#2563EB', color: 'white', fontSize: 11, fontWeight: 700, padding: '4px 14px', borderRadius: 100, whiteSpace: 'nowrap', letterSpacing: '0.04em' }}>
-                POPULÄRAST
+                {t.home.mostPopular}
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
@@ -416,13 +418,13 @@ export function Home({ session }: HomeProps) {
                 {billingCycle === 'monthly' ? (
                   <div>
                     <span style={{ fontSize: 32, fontWeight: 800, color: '#2563EB', letterSpacing: '-0.03em' }}>{TIERS[2].monthlyPriceSEK} kr</span>
-                    <span style={{ fontSize: 14, color: '#94A3B8' }}>/mån</span>
+                    <span style={{ fontSize: 14, color: '#94A3B8' }}>{t.home.perMonth}</span>
                   </div>
                 ) : (
                   <div>
                     <span style={{ fontSize: 32, fontWeight: 800, color: '#2563EB', letterSpacing: '-0.03em' }}>{TIERS[2].annualPriceSEK} kr</span>
-                    <span style={{ fontSize: 14, color: '#94A3B8' }}>/år</span>
-                    <p style={{ fontSize: 12, color: '#64748B', marginTop: 2 }}>≈ {Math.round(TIERS[2].annualPriceSEK / 12)} kr/mån</p>
+                    <span style={{ fontSize: 14, color: '#94A3B8' }}>{t.home.perYear}</span>
+                    <p style={{ fontSize: 12, color: '#64748B', marginTop: 2 }}>≈ {Math.round(TIERS[2].annualPriceSEK / 12)} kr{t.home.perMonth}</p>
                   </div>
                 )}
               </div>
@@ -453,8 +455,8 @@ export function Home({ session }: HomeProps) {
                   style={{ width: '100%', background: '#2563EB', color: 'white', border: 'none', fontSize: 14, fontWeight: 600, padding: '13px 0', borderRadius: 10, cursor: upgrading ? 'not-allowed' : 'pointer', opacity: upgrading ? 0.7 : 1, transition: 'opacity 0.15s' }}
                 >
                   {upgrading === (billingCycle === 'annual' ? TIERS[2].stripeAnnualPriceId : TIERS[2].stripeMonthlyPriceId)
-                    ? 'Laddar...'
-                    : 'Välj Cipher'}
+                    ? t.common.loading
+                    : t.home.chooseCipher}
                 </button>
               </div>
             </div>
@@ -474,13 +476,13 @@ export function Home({ session }: HomeProps) {
                 {billingCycle === 'monthly' ? (
                   <div>
                     <span style={{ fontSize: 32, fontWeight: 800, color: '#7C3AED', letterSpacing: '-0.03em' }}>{TIERS[3].monthlyPriceSEK} kr</span>
-                    <span style={{ fontSize: 14, color: '#94A3B8' }}>/mån</span>
+                    <span style={{ fontSize: 14, color: '#94A3B8' }}>{t.home.perMonth}</span>
                   </div>
                 ) : (
                   <div>
                     <span style={{ fontSize: 32, fontWeight: 800, color: '#7C3AED', letterSpacing: '-0.03em' }}>{TIERS[3].annualPriceSEK.toLocaleString('sv-SE')} kr</span>
-                    <span style={{ fontSize: 14, color: '#94A3B8' }}>/år</span>
-                    <p style={{ fontSize: 12, color: '#64748B', marginTop: 2 }}>≈ {Math.round(TIERS[3].annualPriceSEK / 12)} kr/mån</p>
+                    <span style={{ fontSize: 14, color: '#94A3B8' }}>{t.home.perYear}</span>
+                    <p style={{ fontSize: 12, color: '#64748B', marginTop: 2 }}>≈ {Math.round(TIERS[3].annualPriceSEK / 12)} kr{t.home.perMonth}</p>
                   </div>
                 )}
               </div>
@@ -511,8 +513,8 @@ export function Home({ session }: HomeProps) {
                   style={{ width: '100%', background: '#7C3AED', color: 'white', border: 'none', fontSize: 14, fontWeight: 600, padding: '13px 0', borderRadius: 10, cursor: upgrading ? 'not-allowed' : 'pointer', opacity: upgrading ? 0.7 : 1, transition: 'opacity 0.15s' }}
                 >
                   {upgrading === (billingCycle === 'annual' ? TIERS[3].stripeAnnualPriceId : TIERS[3].stripeMonthlyPriceId)
-                    ? 'Laddar...'
-                    : 'Välj Ghost'}
+                    ? t.common.loading
+                    : t.home.chooseGhost}
                 </button>
               </div>
             </div>
@@ -528,7 +530,12 @@ export function Home({ session }: HomeProps) {
 
           {/* Checkout trust bar */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: 20, marginTop: 24 }}>
-            {['14 dagars ångerrätt', 'Inga dolda avgifter', 'Avsluta när du vill', 'Säker betalning'].map((item) => (
+            {([
+              t.home.trustRight14,
+              t.home.trustNoHiddenFees,
+              t.home.trustCancelWhenYouWant,
+              t.home.trustSecurePayment,
+            ] as string[]).map((item) => (
               <span key={item} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#64748B' }}>
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                   <circle cx="7" cy="7" r="7" fill="#DCFCE7" />
@@ -541,7 +548,7 @@ export function Home({ session }: HomeProps) {
 
           {/* GLOMD10 promo hint */}
           <p style={{ textAlign: 'center', fontSize: 12, color: '#94A3B8', marginTop: 12 }}>
-            Rabattkod? Ange den i kassan — t.ex. <span style={{ fontFamily: 'monospace', background: '#F1F5F9', padding: '1px 6px', borderRadius: 4 }}>GLOMD10</span> för 10% rabatt på ditt första köp.
+            {t.home.promoHint}
           </p>
         </div>
       </section>
@@ -553,31 +560,31 @@ export function Home({ session }: HomeProps) {
           {/* Divider */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28 }}>
             <div style={{ flex: 1, height: 1, background: '#E2E8F0' }} />
-            <span style={{ fontSize: 13, color: '#94A3B8', whiteSpace: 'nowrap' }}>eller engångsalternativ</span>
+            <span style={{ fontSize: 13, color: '#94A3B8', whiteSpace: 'nowrap' }}>{t.home.oneTimeOption}</span>
             <div style={{ flex: 1, height: 1, background: '#E2E8F0' }} />
           </div>
 
           <div style={{ background: 'white', borderRadius: 14, border: '1px solid #E2E8F0', padding: '28px 32px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 20 }}>
             <div style={{ flex: 1, minWidth: 240 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                <p style={{ fontSize: 17, fontWeight: 700, color: '#1E293B' }}>Engångsstädning</p>
-                <span style={{ background: '#FEF3C7', color: '#92400E', fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 100 }}>ENGÅNGSPRIS</span>
+                <p style={{ fontSize: 17, fontWeight: 700, color: '#1E293B' }}>{t.home.onceTitle}</p>
+                <span style={{ background: '#FEF3C7', color: '#92400E', fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 100 }}>{t.home.onceBadge}</span>
               </div>
               <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.6, maxWidth: 480 }}>
-                En komplett omgång GDPR-raderingsbegäranden till 26+ företag — skickas och följs upp av BliGlömd. Inget abonnemang, betala en gång.
+                {t.home.onceDesc}
               </p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexShrink: 0 }}>
               <div style={{ textAlign: 'right' }}>
                 <p style={{ fontSize: 28, fontWeight: 800, color: '#1E293B', letterSpacing: '-0.03em' }}>{ENGANGSSTADNING.priceSEK} kr</p>
-                <p style={{ fontSize: 11, color: '#94A3B8' }}>engångsbetalning</p>
+                <p style={{ fontSize: 11, color: '#94A3B8' }}>{t.home.oncePerPayment}</p>
               </div>
               <button
                 onClick={() => handleTierCTA(ENGANGSSTADNING.stripePriceId)}
                 disabled={upgrading !== null}
                 style={{ background: '#1E293B', color: 'white', border: 'none', fontSize: 14, fontWeight: 600, padding: '12px 24px', borderRadius: 10, cursor: upgrading ? 'not-allowed' : 'pointer', opacity: upgrading ? 0.7 : 1, whiteSpace: 'nowrap', transition: 'opacity 0.15s' }}
               >
-                {upgrading === ENGANGSSTADNING.stripePriceId ? 'Laddar...' : 'Köp nu'}
+                {upgrading === ENGANGSSTADNING.stripePriceId ? t.common.loading : t.home.onceBuyNow}
               </button>
             </div>
           </div>
@@ -597,19 +604,19 @@ export function Home({ session }: HomeProps) {
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5, borderLeft: '1px solid #E2E8F0', paddingLeft: 10, marginLeft: 2 }}>
               <TreKronor size={18} />
-              <span style={{ fontSize: 10, color: '#94A3B8', letterSpacing: '0.04em' }}>Svensk tjänst</span>
+              <span style={{ fontSize: 10, color: '#94A3B8', letterSpacing: '0.04em' }}>{t.home.footerSwedishService}</span>
             </div>
           </div>
 
           {/* Center */}
           <p style={{ fontSize: 12, color: '#94A3B8' }}>
-            Data lagras i Sverige · © 2026 BliGlömd · Stockholm
+            {t.home.footerCopyright}
           </p>
 
           {/* Right */}
           <div style={{ display: 'flex', gap: 24 }}>
-            <a href="#" style={{ fontSize: 12, color: '#94A3B8', textDecoration: 'none' }}>Integritetspolicy</a>
-            <a href="#" style={{ fontSize: 12, color: '#94A3B8', textDecoration: 'none' }}>Villkor</a>
+            <a href="#" style={{ fontSize: 12, color: '#94A3B8', textDecoration: 'none' }}>{t.home.footerPrivacy}</a>
+            <a href="#" style={{ fontSize: 12, color: '#94A3B8', textDecoration: 'none' }}>{t.home.footerTerms}</a>
             <Link to="/status" style={{ fontSize: 12, color: '#94A3B8', textDecoration: 'none' }}>
               {t.home.footerStatus}
             </Link>
