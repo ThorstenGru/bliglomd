@@ -79,14 +79,14 @@ export function ConsentModal({ priceId, planLabel, onConfirmed, onClose }: Conse
               'Right of withdrawal is waived upon immediate digital delivery.',
               'If the service shuts down, no refund or compensation is owed.',
               'Liability is capped at the lower of 3 months\' fees or SEK 500.',
-              'Disputes resolved in Stockholm, Swedish law governs.',
+              'Disputes resolved in Helsingborg, Swedish law governs.',
             ] : [
               'Tjänsten levereras som "bästa ansträngning" — inga garanterade utfall.',
               'Inga återbetalningar ges efter genomförd betalning.',
               'Ångerrätten upphör vid omedelbar aktivering av digital tjänst.',
               'Vid nedläggning av tjänsten ges ingen återbetalning eller ersättning.',
               'Ansvar begränsat till lägst 3 månaders avgifter eller 500 kr.',
-              'Tvister avgörs i Stockholms tingsrätt under svensk lag.',
+              'Tvister avgörs i Helsingborgs tingsrätt under svensk lag.',
             ]).map((point) => (
               <li key={point} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: '#374151', lineHeight: 1.5 }}>
                 <span style={{ color: '#DC2626', fontWeight: 700, flexShrink: 0, marginTop: 1 }}>•</span>

@@ -85,7 +85,7 @@ const SV_SECTIONS: Section[] = [
     num: '11', title: 'Tillämplig lag och tvistlösning',
     body: [
       'Detta avtal regleras av svensk rätt.',
-      'Eventuella tvister ska i första hand lösas genom direkta förhandlingar. Om förhandling inte löser tvisten inom trettio (30) dagar ska den avgöras slutgiltigt av Stockholms tingsrätt som exklusivt forum.',
+      'Eventuella tvister ska i första hand lösas genom direkta förhandlingar. Om förhandling inte löser tvisten inom trettio (30) dagar ska den avgöras slutgiltigt av Helsingborgs tingsrätt som exklusivt forum.',
       'Förlorande part är skyldig att ersätta vinnande parts skäliga rättegångskostnader.',
     ],
   },
@@ -176,7 +176,7 @@ const EN_SECTIONS: Section[] = [
     num: '11', title: 'Governing law and dispute resolution',
     body: [
       'This agreement is governed by Swedish law.',
-      'Any disputes shall first be resolved through direct negotiations. If negotiations do not resolve the dispute within thirty (30) days, it shall be finally determined by Stockholm District Court as the exclusive forum.',
+      'Any disputes shall first be resolved through direct negotiations. If negotiations do not resolve the dispute within thirty (30) days, it shall be finally determined by Helsingborg District Court as the exclusive forum.',
       'The losing party shall pay the winning party\'s reasonable legal costs.',
     ],
   },
