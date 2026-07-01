@@ -347,6 +347,11 @@ export function Admin() {
   const [auditSearch, setAuditSearch]             = useState('')
   const [snapshotView, setSnapshotView]           = useState<DeletionRecord | null>(null)
   const [showStale, setShowStale]                 = useState(false)
+  const [loginChecked, setLoginChecked]           = useState(false)
+  const [loginEmail, setLoginEmail]               = useState('')
+  const [loginPassword, setLoginPassword]         = useState('')
+  const [loginError, setLoginError]               = useState<string | null>(null)
+  const [loginLoading, setLoginLoading]           = useState(false)
   const noticeTimerRef = useRef<ReturnType<typeof setTimeout>>()
 
   const loadStats = useCallback(async () => {
@@ -404,27 +409,40 @@ export function Admin() {
   }, [])
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      // user_metadata is self-editable by any logged-in user — role alone is
-      // not a safe boundary. The exact admin email is the real check.
-      if (!user || user.user_metadata?.role !== 'admin' || user.email !== ADMIN_EMAIL) {
-        navigate('/', { replace: true })
-        return
-      }
-      setAdminEmail(user.email ?? '')
-      setReady(true)
-      loadAll()
-      loadConsents()
-      // Admin actions are audited, but admin logins never were — close that gap.
-      supabase.from('audit_logs').insert({
-        user_id: user.id,
-        user_email: user.email,
-        action: 'admin_login',
-        resource: null,
-        metadata: { user_agent: navigator.userAgent },
-      })
+    // Supabase persists sessions in localStorage — without this, reopening /xadm
+    // with an old session (admin or otherwise) would skip straight past login.
+    // The admin route must always demand fresh credentials, never reuse a session.
+    supabase.auth.signOut().finally(() => setLoginChecked(true))
+  }, [])
+
+  async function handleAdminLogin(e: React.FormEvent) {
+    e.preventDefault()
+    setLoginLoading(true)
+    setLoginError(null)
+    const { data, error } = await supabase.auth.signInWithPassword({ email: loginEmail, password: loginPassword })
+    // user_metadata is self-editable by any logged-in user — role alone is not a
+    // safe boundary. The exact admin email is the real authorization check.
+    if (error || !data.user || data.user.user_metadata?.role !== 'admin' || data.user.email !== ADMIN_EMAIL) {
+      if (data?.user) await supabase.auth.signOut()
+      setLoginError('Felaktiga inloggningsuppgifter')
+      setLoginLoading(false)
+      return
+    }
+    setAdminEmail(data.user.email ?? '')
+    setReady(true)
+    setLoginLoading(false)
+    setLoginPassword('')
+    loadAll()
+    loadConsents()
+    // Admin actions are audited, but admin logins never were — close that gap.
+    supabase.from('audit_logs').insert({
+      user_id: data.user.id,
+      user_email: data.user.email,
+      action: 'admin_login',
+      resource: null,
+      metadata: { user_agent: navigator.userAgent },
     })
-  }, [navigate, loadAll, loadConsents])
+  }
 
   useEffect(() => {
     if (selected) loadUserDetail(selected.id)
@@ -537,7 +555,65 @@ export function Admin() {
     }),
   [audit, auditSearch, auditActionFilter])
 
-  if (!ready) return null
+  if (!loginChecked) return null
+
+  if (!ready) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#0F172A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"Inter", -apple-system, system-ui, sans-serif', padding: 24 }}>
+        <form onSubmit={handleAdminLogin} style={{ background: 'white', borderRadius: 16, padding: '32px 30px', width: '100%', maxWidth: 360, boxShadow: '0 24px 64px rgba(0,0,0,0.4)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
+            <div style={{ width: 34, height: 34, borderRadius: 9, background: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <svg width="18" height="20" viewBox="0 0 40 40" fill="white" aria-hidden="true">
+                <path d="M20 3L6 9V19C6 28 12.5 35 20 38C27.5 35 34 28 34 19V9L20 3Z" />
+              </svg>
+            </div>
+            <div>
+              <p style={{ fontSize: 14, fontWeight: 700, color: '#0F172A', margin: 0 }}>BliGlömd</p>
+              <p style={{ fontSize: 10, color: '#94A3B8', margin: 0, letterSpacing: '0.07em', textTransform: 'uppercase' }}>Admin</p>
+            </div>
+          </div>
+
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>E-postadress</label>
+          <input
+            type="email"
+            required
+            autoComplete="username"
+            value={loginEmail}
+            onChange={e => setLoginEmail(e.target.value)}
+            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13, color: '#1E293B', outline: 'none', boxSizing: 'border-box', marginBottom: 14 }}
+          />
+
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Lösenord</label>
+          <input
+            type="password"
+            required
+            autoComplete="current-password"
+            value={loginPassword}
+            onChange={e => setLoginPassword(e.target.value)}
+            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13, color: '#1E293B', outline: 'none', boxSizing: 'border-box', marginBottom: 16 }}
+          />
+
+          {loginError && (
+            <p style={{ fontSize: 12, color: '#DC2626', background: '#FEE2E2', borderRadius: 8, padding: '8px 12px', margin: '0 0 16px' }}>
+              {loginError}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={loginLoading}
+            style={{ width: '100%', padding: '11px', borderRadius: 8, border: 'none', background: '#2563EB', color: 'white', fontWeight: 700, fontSize: 13, cursor: 'pointer', opacity: loginLoading ? 0.6 : 1 }}
+          >
+            {loginLoading ? 'Loggar in...' : 'Logga in'}
+          </button>
+
+          <p style={{ fontSize: 11, color: '#94A3B8', textAlign: 'center', margin: '16px 0 0' }}>
+            Kräver alltid inloggning — sessioner sparas inte för detta konto.
+          </p>
+        </form>
+      </div>
+    )
+  }
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', fontFamily: '"Inter", -apple-system, system-ui, sans-serif', fontSize: 14, background: '#EEF2F8' }}>
