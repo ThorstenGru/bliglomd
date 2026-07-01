@@ -208,7 +208,7 @@ Exports all data for a user as a JSON blob. Used for GDPR Article 20 (data porta
 - **Rankings:** top companies, request status breakdown, response times
 
 ### `admin-weekly-digest`
-Called every Monday 07:00 UTC by pg_cron. Builds and sends an HTML report email to `ThorstenGrund@icloud.com` with:
+Called every Monday 07:00 UTC by pg_cron. Builds and sends an HTML report email to `admin@bliglömd.se` with:
 - Week-over-week trends (signups, requests, retention, active/stale)
 - Stale-request warning if any requests > 30 days old
 - Top 5 companies, breach stats

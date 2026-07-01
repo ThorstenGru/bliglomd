@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const ADMIN_EMAIL = 'ThorstenGrund@icloud.com'
+const ADMIN_EMAIL = 'admin@xn--bliglmd-e1a.se'
 
 const ONE_DAY = 86_400_000
 const WEEK    = 7 * ONE_DAY

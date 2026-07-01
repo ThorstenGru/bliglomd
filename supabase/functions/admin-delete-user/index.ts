@@ -7,7 +7,7 @@ const ALLOWED = new Set([
   'http://localhost:4173',
 ])
 
-const ADMIN_EMAIL = 'thorsten.grund@climber.se'
+const ADMIN_EMAIL = 'admin@xn--bliglmd-e1a.se'
 
 function cors(origin: string | null) {
   return {

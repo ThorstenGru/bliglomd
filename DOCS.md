@@ -227,7 +227,7 @@ DAU/WAU/MAU and signup trends computed client-side from `listUsers` result. Retu
 
 ### `admin-weekly-digest`
 Checks `Authorization: Bearer <DIGEST_SECRET>` (soft — skipped if secret not set in env).
-Queries 6 parallel RPCs + listUsers. Builds and sends an HTML email report to `ThorstenGrund@icloud.com` via Resend. Called by pg_cron every Monday 07:00 UTC; the cron job retrieves the secret from Supabase Vault at runtime.
+Queries 6 parallel RPCs + listUsers. Builds and sends an HTML email report to `admin@bliglömd.se` via Resend. Called by pg_cron every Monday 07:00 UTC; the cron job retrieves the secret from Supabase Vault at runtime.
 
 ---
 
