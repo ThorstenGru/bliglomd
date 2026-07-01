@@ -108,7 +108,9 @@ export const translations = {
       signupDoneTitle: 'Bekräftelselänk skickad!',
       signupDoneMsg: 'Vi skickade en bekräftelselänk till',
       signupDoneAction: 'Klicka på länken för att aktivera ditt konto.',
+      signupDoneExpiry: 'Viktigt: Länken är giltig i 10 minuter. Bekräftar du inte inom 10 minuter raderas kontot automatiskt.',
       passwordTooShort: 'Lösenordet måste vara minst 6 tecken.',
+      consentRequired: 'Du måste godkänna Användarvillkoren och Integritetspolicyn för att skapa ett konto.',
     },
     scan: {
       title: 'Skärma din e-post',
@@ -362,7 +364,9 @@ export const translations = {
       signupDoneTitle: 'Confirmation link sent!',
       signupDoneMsg: 'We sent a confirmation link to',
       signupDoneAction: 'Click the link to activate your account.',
+      signupDoneExpiry: 'Important: The link is valid for 10 minutes. If you do not confirm within 10 minutes, your account will be automatically deleted.',
       passwordTooShort: 'Password must be at least 6 characters.',
+      consentRequired: 'You must accept the Terms of Service and Privacy Policy to create an account.',
     },
     scan: {
       title: 'Scan your email',

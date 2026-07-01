@@ -1,9 +1,45 @@
-// Increment TERMS_VERSION whenever the T&C text changes.
-// Old consent records retain their snapshot, so audit trail stays intact.
-export const TERMS_VERSION = '2026-06-30-v1'
+-- Signup consent: tracks every user's explicit agreement to Terms + Privacy at account creation.
+-- Kept separate from consent_records (checkout-specific — has a required price_id).
+create table public.signup_consent_records (
+  id               uuid default uuid_generate_v4() primary key,
+  user_id          uuid references auth.users(id) on delete cascade not null,
+  consented_at     timestamptz default now() not null,
+  terms_version    text not null,
+  terms_snapshot   text not null,    -- full text of Terms of Service accepted (immutable record)
+  privacy_version  text not null,
+  privacy_snapshot text not null,    -- full text of Privacy Policy accepted (immutable record)
+  consent_text     text not null     -- exact checkbox label the user ticked
+);
 
-export const TERMS_FULL_TEXT = `KÖPAVTAL / ALLMÄNNA VILLKOR — BLIGLÖMD
-Version ${TERMS_VERSION}
+alter table public.signup_consent_records enable row level security;
+
+create policy "Users read their own signup consent"
+  on public.signup_consent_records for select
+  using (auth.uid() = user_id);
+
+-- No insert policy: rows are only ever written by the trigger below (security definer),
+-- never directly by the client — there is no session yet at signup time to satisfy auth.uid().
+
+-- Trigger: record consent atomically with account creation, and BLOCK account creation
+-- if consent wasn't given. Signup_consent_text/version are passed via signUp() options.data,
+-- but the actual accepted text is always the current server-side snapshot below — never
+-- trusted from the client — so the record can't be tampered with.
+create or replace function public.handle_new_user_signup_consent()
+returns trigger as $$
+declare
+  consent_text text := new.raw_user_meta_data->>'signup_consent_text';
+begin
+  if consent_text is null or length(trim(consent_text)) = 0 then
+    raise exception 'Consent to Terms of Service and Privacy Policy is required to create an account';
+  end if;
+
+  insert into public.signup_consent_records (
+    user_id, terms_version, terms_snapshot, privacy_version, privacy_snapshot, consent_text
+  ) values (
+    new.id,
+    '2026-06-30-v1',
+    $SNAPSHOT$KÖPAVTAL / ALLMÄNNA VILLKOR — BLIGLÖMD
+Version 2026-06-30-v1
 Gäller fr.o.m. 2026-06-30
 
 1. PARTER
@@ -57,16 +93,10 @@ Detta avtal regleras av svensk rätt. Eventuella tvister ska i första hand lös
 12. FULLSTÄNDIGT AVTAL
 Dessa villkor, tillsammans med integritetspolicyn, utgör det fullständiga avtalet mellan parterna och ersätter alla tidigare överenskommelser avseende tjänsten.
 
-Avtalsslutet registreras digitalt vid genomförd betalning med tidsstämpel, versionsangivelse och bekräftelsetext.`
-
-export const CONSENT_CHECKBOX_TEXT =
-  'Jag har läst och accepterar Köpavtalet. Jag samtycker uttryckligen till omedelbar aktivering av digital tjänst — min ångerrätt upphör härmed. Jag förstår att inga återbetalningar ges och att tjänsten levereras utan garantier.'
-
-// Increment PRIVACY_VERSION whenever the privacy policy text changes.
-export const PRIVACY_VERSION = '2026-06-30-v1'
-
-export const PRIVACY_FULL_TEXT = `INTEGRITETSPOLICY — BLIGLÖMD
-Version ${PRIVACY_VERSION}
+Avtalsslutet registreras digitalt vid genomförd betalning med tidsstämpel, versionsangivelse och bekräftelsetext.$SNAPSHOT$,
+    '2026-06-30-v1',
+    $SNAPSHOT2$INTEGRITETSPOLICY — BLIGLÖMD
+Version 2026-06-30-v1
 Gäller fr.o.m. 2026-06-30
 
 1. VEM ANSVARAR FÖR DINA UPPGIFTER?
@@ -91,10 +121,14 @@ Du har rätt att begära tillgång till, rättelse eller radering av dina person
 BliGlömd använder strikt nödvändiga sessionscookies som sätts av Supabase för autentisering. Dessa cookies krävs för att tjänsten ska fungera och kräver inte samtycke enligt Lagen om elektronisk kommunikation (LEK). Inga reklam- eller spårningscookies används.
 
 8. KONTAKT
-För dataskyddsfrågor: support@bliglomd.se. Vi strävar efter att svara inom 30 dagar.`
+För dataskyddsfrågor: support@bliglomd.se. Vi strävar efter att svara inom 30 dagar.$SNAPSHOT2$,
+    consent_text
+  );
 
-export const SIGNUP_CONSENT_TEXT_SV =
-  `Jag har läst och godkänner Användarvillkoren (version ${TERMS_VERSION}) och Integritetspolicyn (version ${PRIVACY_VERSION}).`
+  return new;
+end;
+$$ language plpgsql security definer set search_path = public;
 
-export const SIGNUP_CONSENT_TEXT_EN =
-  `I have read and accept the Terms of Service (version ${TERMS_VERSION}) and the Privacy Policy (version ${PRIVACY_VERSION}).`
+create trigger on_auth_user_created_signup_consent
+  after insert on auth.users
+  for each row execute procedure public.handle_new_user_signup_consent();

@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useLang } from '../contexts/LanguageContext'
+import { SIGNUP_CONSENT_TEXT_SV, SIGNUP_CONSENT_TEXT_EN } from '../config/terms'
 
 interface AuthModalProps {
   onClose: () => void
@@ -9,11 +10,12 @@ interface AuthModalProps {
 
 export function AuthModal({ onClose }: AuthModalProps) {
   const navigate = useNavigate()
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const [tab, setTab] = useState<'login' | 'signup'>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
+  const [consentChecked, setConsentChecked] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [signupDone, setSignupDone] = useState(false)
@@ -42,12 +44,17 @@ export function AuthModal({ onClose }: AuthModalProps) {
       setError(t.auth.passwordTooShort)
       return
     }
+    if (!consentChecked) {
+      setError(t.auth.consentRequired)
+      return
+    }
     setLoading(true)
     setError(null)
+    const signupConsentText = lang === 'en' ? SIGNUP_CONSENT_TEXT_EN : SIGNUP_CONSENT_TEXT_SV
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: fullName } },
+      options: { data: { full_name: fullName, signup_consent_text: signupConsentText } },
     })
     setLoading(false)
     if (error) {
@@ -80,8 +87,11 @@ export function AuthModal({ onClose }: AuthModalProps) {
               <p className="text-gray-700 font-medium mb-1">
                 {t.auth.signupDoneTitle}
               </p>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 mb-3">
                 {t.auth.signupDoneMsg} <strong>{email}</strong>. {t.auth.signupDoneAction}
+              </p>
+              <p className="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2 text-left">
+                {t.auth.signupDoneExpiry}
               </p>
             </div>
           ) : (
@@ -151,13 +161,31 @@ export function AuthModal({ onClose }: AuthModalProps) {
                   />
                 </div>
 
+                {tab === 'signup' && (
+                  <label className="flex items-start gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={consentChecked}
+                      onChange={(e) => setConsentChecked(e.target.checked)}
+                      className="mt-0.5 w-4 h-4 shrink-0 accent-brand-600 cursor-pointer"
+                    />
+                    <span className="text-xs text-gray-600 leading-relaxed">
+                      {lang === 'en' ? (
+                        <>I have read and accept the <Link to="/terms" target="_blank" className="text-brand-600 underline">Terms of Service</Link> and the <Link to="/privacy" target="_blank" className="text-brand-600 underline">Privacy Policy</Link>.</>
+                      ) : (
+                        <>Jag har läst och godkänner <Link to="/terms" target="_blank" className="text-brand-600 underline">Användarvillkoren</Link> och <Link to="/privacy" target="_blank" className="text-brand-600 underline">Integritetspolicyn</Link>.</>
+                      )}
+                    </span>
+                  </label>
+                )}
+
                 {error && (
                   <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
                 )}
 
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || (tab === 'signup' && !consentChecked)}
                   className="w-full bg-brand-600 text-white py-2.5 rounded-lg font-medium hover:bg-brand-700 transition-colors disabled:opacity-50"
                 >
                   {loading ? t.auth.waiting : tab === 'login' ? t.auth.loginBtn : t.auth.signupBtn}
