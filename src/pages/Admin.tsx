@@ -60,10 +60,12 @@ interface ConsentRow {
   user_email: string
   consented_at: string
   terms_version: string
+  terms_snapshot: string
   consent_text: string
   price_id?: string
   consent_context?: string
   privacy_version?: string
+  privacy_snapshot?: string
 }
 
 interface UserDetail {
@@ -346,6 +348,7 @@ export function Admin() {
   const [auditActionFilter, setAuditActionFilter] = useState('')
   const [auditSearch, setAuditSearch]             = useState('')
   const [snapshotView, setSnapshotView]           = useState<DeletionRecord | null>(null)
+  const [consentTextView, setConsentTextView]     = useState<ConsentRow | null>(null)
   const [showStale, setShowStale]                 = useState(false)
   const [loginChecked, setLoginChecked]           = useState(false)
   const [loginEmail, setLoginEmail]               = useState('')
@@ -1206,8 +1209,8 @@ export function Admin() {
                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                           <thead style={{ background: '#F8FAFC' }}>
                             <tr>
-                              {['Tidpunkt', 'Användare', 'Villkorsversion', 'Policyversion'].map(col => (
-                                <th key={col} style={{ padding: '10px 16px', textAlign: 'left', fontWeight: 600, color: '#94A3B8', fontSize: 11, letterSpacing: '0.05em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{col}</th>
+                              {['Tidpunkt', 'Användare', 'Villkorsversion', 'Policyversion', ''].map(col => (
+                                <th key={col} style={{ padding: '10px 16px', textAlign: col === '' ? 'right' : 'left', fontWeight: 600, color: '#94A3B8', fontSize: 11, letterSpacing: '0.05em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{col}</th>
                               ))}
                             </tr>
                           </thead>
@@ -1218,10 +1221,18 @@ export function Admin() {
                                 <td style={{ padding: '10px 16px', color: '#374151' }}>{c.user_email}</td>
                                 <td style={{ padding: '10px 16px', color: '#374151', fontFamily: 'monospace', fontSize: 12 }}>{c.terms_version}</td>
                                 <td style={{ padding: '10px 16px', color: '#374151', fontFamily: 'monospace', fontSize: 12 }}>{c.privacy_version ?? '—'}</td>
+                                <td style={{ padding: '10px 16px', textAlign: 'right' }}>
+                                  <button
+                                    onClick={() => setConsentTextView(c)}
+                                    style={{ padding: '3px 10px', background: '#F1F5F9', color: '#475569', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 11, fontWeight: 600 }}
+                                  >
+                                    Visa innehåll
+                                  </button>
+                                </td>
                               </tr>
                             ))}
                             {signupConsents.length === 0 && (
-                              <tr><td colSpan={4} style={{ padding: 24, textAlign: 'center', color: '#94A3B8' }}>Inget registreringssamtycke ännu</td></tr>
+                              <tr><td colSpan={5} style={{ padding: 24, textAlign: 'center', color: '#94A3B8' }}>Inget registreringssamtycke ännu</td></tr>
                             )}
                           </tbody>
                         </table>
@@ -1242,8 +1253,8 @@ export function Admin() {
                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                           <thead style={{ background: '#F8FAFC' }}>
                             <tr>
-                              {['Tidpunkt', 'Användare', 'Villkorsversion', 'Pris-ID'].map(col => (
-                                <th key={col} style={{ padding: '10px 16px', textAlign: 'left', fontWeight: 600, color: '#94A3B8', fontSize: 11, letterSpacing: '0.05em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{col}</th>
+                              {['Tidpunkt', 'Användare', 'Villkorsversion', 'Pris-ID', ''].map(col => (
+                                <th key={col} style={{ padding: '10px 16px', textAlign: col === '' ? 'right' : 'left', fontWeight: 600, color: '#94A3B8', fontSize: 11, letterSpacing: '0.05em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{col}</th>
                               ))}
                             </tr>
                           </thead>
@@ -1254,10 +1265,18 @@ export function Admin() {
                                 <td style={{ padding: '10px 16px', color: '#374151' }}>{c.user_email}</td>
                                 <td style={{ padding: '10px 16px', color: '#374151', fontFamily: 'monospace', fontSize: 12 }}>{c.terms_version}</td>
                                 <td style={{ padding: '10px 16px', color: '#94A3B8', fontFamily: 'monospace', fontSize: 11, maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.price_id ?? '—'}</td>
+                                <td style={{ padding: '10px 16px', textAlign: 'right' }}>
+                                  <button
+                                    onClick={() => setConsentTextView(c)}
+                                    style={{ padding: '3px 10px', background: '#F1F5F9', color: '#475569', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 11, fontWeight: 600 }}
+                                  >
+                                    Visa innehåll
+                                  </button>
+                                </td>
                               </tr>
                             ))}
                             {checkoutConsents.length === 0 && (
-                              <tr><td colSpan={4} style={{ padding: 24, textAlign: 'center', color: '#94A3B8' }}>Inget köpsamtycke ännu</td></tr>
+                              <tr><td colSpan={5} style={{ padding: 24, textAlign: 'center', color: '#94A3B8' }}>Inget köpsamtycke ännu</td></tr>
                             )}
                           </tbody>
                         </table>
@@ -1394,13 +1413,19 @@ export function Admin() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     {detail.signup_consent.map(c => (
                       <div key={c.id} style={{ background: '#F0FDF4', borderRadius: 8, padding: '8px 10px', fontSize: 12 }}>
-                        <div style={{ fontWeight: 600, color: '#166534' }}>Registrering — villkor {c.terms_version} / policy {c.privacy_version}</div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div style={{ fontWeight: 600, color: '#166534' }}>Registrering — villkor {c.terms_version} / policy {c.privacy_version}</div>
+                          <button onClick={() => setConsentTextView({ ...c, user_email: selected.email })} style={{ padding: '2px 8px', background: 'white', border: 'none', borderRadius: 5, cursor: 'pointer', fontSize: 10, fontWeight: 600, color: '#166534' }}>Visa</button>
+                        </div>
                         <span style={{ color: '#94A3B8', fontSize: 11 }}>{fmtDate(c.consented_at)}</span>
                       </div>
                     ))}
                     {detail.checkout_consents.map(c => (
                       <div key={c.id} style={{ background: '#EFF6FF', borderRadius: 8, padding: '8px 10px', fontSize: 12 }}>
-                        <div style={{ fontWeight: 600, color: '#1D4ED8' }}>Köp — villkor {c.terms_version}</div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div style={{ fontWeight: 600, color: '#1D4ED8' }}>Köp — villkor {c.terms_version}</div>
+                          <button onClick={() => setConsentTextView({ ...c, user_email: selected.email })} style={{ padding: '2px 8px', background: 'white', border: 'none', borderRadius: 5, cursor: 'pointer', fontSize: 10, fontWeight: 600, color: '#1D4ED8' }}>Visa</button>
+                        </div>
                         <span style={{ color: '#94A3B8', fontSize: 11 }}>{fmtDate(c.consented_at)}</span>
                       </div>
                     ))}
@@ -1527,6 +1552,48 @@ export function Admin() {
             <pre style={{ background: '#F8FAFC', borderRadius: 8, padding: 16, fontSize: 11, overflow: 'auto', margin: 0, color: '#374151', flex: 1 }}>
               {JSON.stringify(snapshotView.snapshot ?? { info: 'Ingen detaljerad snapshot sparad för denna post.' }, null, 2)}
             </pre>
+          </div>
+        </div>
+      )}
+
+      {/* ── CONSENT TEXT VIEWER ──────────────────────────────────────────── */}
+      {consentTextView && (
+        <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60, padding: 24 }}>
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)' }} onClick={() => setConsentTextView(null)} />
+          <div style={{ position: 'relative', background: 'white', borderRadius: 14, padding: '24px 24px 20px', width: '100%', maxWidth: 680, maxHeight: '82vh', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 64px rgba(0,0,0,0.3)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4, flexShrink: 0 }}>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: '#0F172A', margin: 0 }}>Samtycke — {consentTextView.user_email}</h3>
+              <button
+                onClick={() => setConsentTextView(null)}
+                style={{ width: 26, height: 26, borderRadius: '50%', border: 'none', background: '#F1F5F9', cursor: 'pointer', fontSize: 12, color: '#64748B' }}
+                aria-label="Stäng"
+              >
+                ✕
+              </button>
+            </div>
+            <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 14px', flexShrink: 0 }}>
+              Godkänt {fmtTime(consentTextView.consented_at)} · exakt kryssrutetext: <em>&ldquo;{consentTextView.consent_text}&rdquo;</em>
+            </p>
+            <div style={{ overflow: 'auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div>
+                <p style={{ fontSize: 11, fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 6px' }}>
+                  Villkor (version {consentTextView.terms_version})
+                </p>
+                <pre style={{ background: '#F8FAFC', borderRadius: 8, padding: 14, fontSize: 12, whiteSpace: 'pre-wrap', margin: 0, color: '#374151', lineHeight: 1.6 }}>
+                  {consentTextView.terms_snapshot || 'Ingen sparad text.'}
+                </pre>
+              </div>
+              {consentTextView.privacy_snapshot && (
+                <div>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 6px' }}>
+                    Integritetspolicy (version {consentTextView.privacy_version})
+                  </p>
+                  <pre style={{ background: '#F8FAFC', borderRadius: 8, padding: 14, fontSize: 12, whiteSpace: 'pre-wrap', margin: 0, color: '#374151', lineHeight: 1.6 }}>
+                    {consentTextView.privacy_snapshot}
+                  </pre>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

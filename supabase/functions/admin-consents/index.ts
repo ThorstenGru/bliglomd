@@ -50,11 +50,11 @@ Deno.serve(async (req) => {
     ] = await Promise.all([
       client.auth.admin.listUsers({ perPage: 1000 }),
       client.from('consent_records')
-        .select('id, user_id, consented_at, terms_version, consent_text, price_id, consent_context')
+        .select('id, user_id, consented_at, terms_version, terms_snapshot, consent_text, price_id, consent_context')
         .order('consented_at', { ascending: false })
         .limit(500),
       client.from('signup_consent_records')
-        .select('id, user_id, consented_at, terms_version, privacy_version, consent_text')
+        .select('id, user_id, consented_at, terms_version, terms_snapshot, privacy_version, privacy_snapshot, consent_text')
         .order('consented_at', { ascending: false })
         .limit(500),
     ])
