@@ -4,6 +4,7 @@ import { COMPANIES } from '../data/companies'
 import { LevelBadge } from '../components/LevelBadge'
 import { RequestTypeBadge } from '../components/RequestTypeBadge'
 import { supabase } from '../lib/supabase'
+import { trackFunnel } from '../lib/analytics'
 import { useLang } from '../contexts/LanguageContext'
 
 export function Request() {
@@ -112,6 +113,7 @@ export function Request() {
       }
 
       setSuccess(true)
+      trackFunnel('request_sent', { company_id: company.id })
     } catch (err) {
       setError(err instanceof Error ? err.message : t.common.error)
     } finally {

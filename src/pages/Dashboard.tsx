@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { StatusBadge } from '../components/StatusBadge'
+import { trackFunnel } from '../lib/analytics'
 import { useLang } from '../contexts/LanguageContext'
 import type { Request } from '../types'
 
@@ -50,6 +51,10 @@ export function Dashboard() {
   const [noteText, setNoteText] = useState('')
   const [noteSaving, setNoteSaving] = useState(false)
   const [noteSavedId, setNoteSavedId] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (upgraded) trackFunnel('checkout_completed')
+  }, [upgraded])
 
   const fetchRequests = useCallback(async () => {
     const { data, error } = await supabase

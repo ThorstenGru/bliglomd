@@ -114,7 +114,17 @@ interface AdminStats {
   generated_at: string
 }
 
-type Tab = 'overview' | 'users' | 'audit' | 'analytics' | 'consents'
+type Tab = 'overview' | 'users' | 'audit' | 'analytics' | 'consents' | 'trafik'
+
+interface TrafficData {
+  referrers: { referrer_domain: string; cnt: number }[]
+  landing_pages: { path: string; cnt: number }[]
+  exit_pages: { path: string; cnt: number }[]
+  funnel: { key: string; label: string; count: number }[]
+  unmatched_searches: { search_term: string; cnt: number; last_searched: string }[]
+  lang_split: { lang: string; cnt: number }[]
+  generated_at: string
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -167,6 +177,7 @@ const ICONS: Record<Tab, string> = {
   audit:     'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6M8 13h8M8 17h5',
   analytics: 'M18 20V10M12 20V4M6 20v-6',
   consents:  'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+  trafik:    'M3 11l18-8-8 18-2-8-8-2z',
 }
 
 const TAB_LABELS: Record<Tab, string> = {
@@ -175,6 +186,7 @@ const TAB_LABELS: Record<Tab, string> = {
   audit:     'Granskningslogg',
   analytics: 'Statistik',
   consents:  'Samtycke',
+  trafik:    'Trafik',
 }
 
 const SUB_STATUS_LABEL: Record<AdminUser['subscription_status'], string> = {
@@ -350,6 +362,8 @@ export function Admin() {
   const [snapshotView, setSnapshotView]           = useState<DeletionRecord | null>(null)
   const [consentTextView, setConsentTextView]     = useState<ConsentRow | null>(null)
   const [showStale, setShowStale]                 = useState(false)
+  const [traffic, setTraffic]                     = useState<TrafficData | null>(null)
+  const [trafficLoading, setTrafficLoading]       = useState(false)
   const [loginChecked, setLoginChecked]           = useState(false)
   const [loginEmail, setLoginEmail]               = useState('')
   const [loginPassword, setLoginPassword]         = useState('')
@@ -383,6 +397,13 @@ export function Admin() {
     if (!auditRes.error)  setAudit(auditRes.data ?? [])
     if (!deletionsRes.error) setDeletions(deletionsRes.data ?? [])
     setLoading(false)
+  }, [])
+
+  const loadTraffic = useCallback(async () => {
+    setTrafficLoading(true)
+    const { data, error } = await supabase.functions.invoke('admin-traffic')
+    if (!error && data) setTraffic(data as TrafficData)
+    setTrafficLoading(false)
   }, [])
 
   const loadConsents = useCallback(async () => {
@@ -437,6 +458,7 @@ export function Admin() {
     setLoginPassword('')
     loadAll()
     loadConsents()
+    loadTraffic()
     // Admin actions are audited, but admin logins never were — close that gap.
     supabase.from('audit_logs').insert({
       user_id: data.user.id,
@@ -640,7 +662,7 @@ export function Admin() {
 
         {/* Nav tabs */}
         <div style={{ padding: '6px 10px', flex: 1 }}>
-          {(['overview', 'users', 'audit', 'analytics', 'consents'] as Tab[]).map(t => (
+          {(['overview', 'users', 'audit', 'analytics', 'consents', 'trafik'] as Tab[]).map(t => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -697,7 +719,7 @@ export function Admin() {
             {TAB_LABELS[tab]}
           </h1>
           <button
-            onClick={() => { loadAll(); if (tab === 'analytics') loadStats(); if (tab === 'consents') loadConsents() }}
+            onClick={() => { loadAll(); if (tab === 'analytics') loadStats(); if (tab === 'consents') loadConsents(); if (tab === 'trafik') loadTraffic() }}
             style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 8, border: '1px solid #E2E8F0', background: 'white', cursor: 'pointer', fontSize: 13, color: '#475569', fontWeight: 500 }}
           >
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -1282,6 +1304,131 @@ export function Admin() {
                         </table>
                       </div>
                     </div>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* ── TRAFIK TAB ────────────────────────────────────────────── */}
+            {tab === 'trafik' && (
+              <div>
+                {trafficLoading && !traffic ? (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200, color: '#94A3B8' }}>
+                    Laddar trafikdata...
+                  </div>
+                ) : !traffic ? (
+                  <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E2E8F0', padding: '48px', textAlign: 'center', color: '#94A3B8' }}>
+                    Ingen trafikdata ännu.
+                  </div>
+                ) : (
+                  <>
+                    {/* Funnel */}
+                    <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E2E8F0', padding: '20px 24px', marginBottom: 16 }}>
+                      <h2 style={{ fontSize: 13, fontWeight: 700, color: '#64748B', margin: '0 0 16px', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                        Konverteringstratt (sedan mätningen startade)
+                      </h2>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        {traffic.funnel.map((stage, i) => {
+                          const prev = i > 0 ? traffic.funnel[i - 1].count : stage.count
+                          const pct = prev > 0 ? Math.round((stage.count / prev) * 100) : 0
+                          const ofTotal = traffic.funnel[0].count > 0 ? Math.round((stage.count / traffic.funnel[0].count) * 100) : 0
+                          return (
+                            <div key={stage.key}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                                <span style={{ fontSize: 13, color: '#374151', fontWeight: 600 }}>{stage.label}</span>
+                                <span style={{ fontSize: 12, color: '#64748B' }}>
+                                  <strong style={{ color: '#0F172A', fontVariantNumeric: 'tabular-nums' }}>{stage.count.toLocaleString('sv-SE')}</strong>
+                                  {' '}({ofTotal}% av alla besökare{i > 0 ? `, ${pct}% av föregående steg` : ''})
+                                </span>
+                              </div>
+                              <div style={{ height: 10, background: '#F1F5F9', borderRadius: 6, overflow: 'hidden' }}>
+                                <div style={{ height: '100%', width: `${ofTotal}%`, background: '#2563EB', borderRadius: 6 }} />
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
+                      {/* Referrers */}
+                      <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E2E8F0', padding: '18px 20px' }}>
+                        <p style={{ fontSize: 11, fontWeight: 700, color: '#64748B', margin: '0 0 14px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          Varifrån besökare kommer (30 dgr)
+                        </p>
+                        <HorizBars items={traffic.referrers.map(r => ({ company_name: r.referrer_domain, cnt: r.cnt }))} color="#2563EB" />
+                      </div>
+                      {/* Language split */}
+                      <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E2E8F0', padding: '18px 20px' }}>
+                        <p style={{ fontSize: 11, fontWeight: 700, color: '#64748B', margin: '0 0 14px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          Språkfördelning (30 dgr)
+                        </p>
+                        <HorizBars items={traffic.lang_split.map(l => ({ company_name: l.lang === 'sv' ? 'Svenska' : l.lang === 'en' ? 'Engelska' : l.lang, cnt: l.cnt }))} color="#7C3AED" />
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
+                      {/* Landing pages */}
+                      <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E2E8F0', padding: '18px 20px' }}>
+                        <p style={{ fontSize: 11, fontWeight: 700, color: '#64748B', margin: '0 0 14px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          Vanligaste ingångssidor (30 dgr)
+                        </p>
+                        <HorizBars items={traffic.landing_pages.map(p => ({ company_name: p.path || '/', cnt: p.cnt }))} color="#16A34A" />
+                      </div>
+                      {/* Exit pages */}
+                      <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E2E8F0', padding: '18px 20px' }}>
+                        <p style={{ fontSize: 11, fontWeight: 700, color: '#64748B', margin: '0 0 14px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          Vanligaste utgångssidor (30 dgr)
+                        </p>
+                        <HorizBars items={traffic.exit_pages.map(p => ({ company_name: p.path || '/', cnt: p.cnt }))} color="#DC2626" />
+                      </div>
+                    </div>
+
+                    {/* Unmatched searches */}
+                    <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E2E8F0', padding: '18px 20px', marginBottom: 14 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                        <p style={{ fontSize: 11, fontWeight: 700, color: '#64748B', margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          Sökningar utan träff (90 dgr) — vad kunder saknar
+                        </p>
+                        {traffic.unmatched_searches.length > 0 && (
+                          <button
+                            onClick={() => downloadCsv('bliglomd-osokta-foretag.csv', traffic.unmatched_searches as unknown as Record<string, unknown>[])}
+                            style={{ padding: '5px 12px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 6, cursor: 'pointer', fontSize: 11, color: '#475569', fontWeight: 600 }}
+                          >
+                            Exportera CSV
+                          </button>
+                        )}
+                      </div>
+                      <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 14px' }}>
+                        Företag kunder sökte efter i katalogen men inte hittade — direkt underlag för vilka företag att lägga till härnäst.
+                      </p>
+                      {traffic.unmatched_searches.length === 0 ? (
+                        <p style={{ fontSize: 12, color: '#CBD5E1' }}>Inga osökta träffar registrerade ännu</p>
+                      ) : (
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                          <thead>
+                            <tr style={{ borderBottom: '1px solid #F1F5F9' }}>
+                              {['Söktext', 'Antal', 'Senast sökt'].map(col => (
+                                <th key={col} style={{ padding: '0 0 8px', textAlign: 'left', fontWeight: 600, color: '#94A3B8', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{col}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {traffic.unmatched_searches.map((s, i) => (
+                              <tr key={s.search_term} style={{ borderTop: i > 0 ? '1px solid #F8FAFC' : undefined }}>
+                                <td style={{ padding: '8px 0', color: '#374151', fontWeight: 600 }}>{s.search_term}</td>
+                                <td style={{ padding: '8px 0', color: '#0F172A', fontVariantNumeric: 'tabular-nums' }}>{s.cnt}</td>
+                                <td style={{ padding: '8px 0', color: '#94A3B8' }}>{fmtDate(s.last_searched)}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      )}
+                    </div>
+
+                    <p style={{ fontSize: 11, color: '#CBD5E1', textAlign: 'right', margin: 0 }}>
+                      {trafficLoading ? 'Uppdaterar...' : `Hämtat: ${new Date(traffic.generated_at).toLocaleString('sv-SE')}`}
+                    </p>
                   </>
                 )}
               </div>

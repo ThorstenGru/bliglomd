@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, type ReactNode } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { supabase } from './lib/supabase'
+import { trackPageview } from './lib/analytics'
 import { LanguageProvider, useLang } from './contexts/LanguageContext'
 import { NavBar } from './components/NavBar'
 import { Home } from './pages/Home'
@@ -43,6 +44,8 @@ function AuthGuard({ session, children }: { session: Session | null; children: R
 function AppShell() {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
+  const location = useLocation()
+  const { lang } = useLang()
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -56,6 +59,10 @@ function AppShell() {
 
     return () => subscription.unsubscribe()
   }, [])
+
+  useEffect(() => {
+    trackPageview(location.pathname, lang)
+  }, [location.pathname, lang])
 
   if (loading) {
     return (

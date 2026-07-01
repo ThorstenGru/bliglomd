@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useLang } from '../contexts/LanguageContext'
 import { SIGNUP_CONSENT_TEXT_SV, SIGNUP_CONSENT_TEXT_EN } from '../config/terms'
+import { trackFunnel } from '../lib/analytics'
 
 interface AuthModalProps {
   onClose: () => void
@@ -50,6 +51,7 @@ export function AuthModal({ onClose }: AuthModalProps) {
     }
     setLoading(true)
     setError(null)
+    trackFunnel('signup_started')
     const signupConsentText = lang === 'en' ? SIGNUP_CONSENT_TEXT_EN : SIGNUP_CONSENT_TEXT_SV
     const { error } = await supabase.auth.signUp({
       email,
@@ -61,6 +63,7 @@ export function AuthModal({ onClose }: AuthModalProps) {
       setError(error.message)
     } else {
       setSignupDone(true)
+      trackFunnel('signup_completed')
     }
   }
 

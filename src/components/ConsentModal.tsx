@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useLang } from '../contexts/LanguageContext'
 import { TERMS_VERSION, TERMS_FULL_TEXT, CONSENT_CHECKBOX_TEXT } from '../config/terms'
+import { trackFunnel } from '../lib/analytics'
 
 interface ConsentModalProps {
   priceId: string
@@ -34,6 +35,7 @@ export function ConsentModal({ priceId, planLabel, onConfirmed, onClose }: Conse
         consent_context: 'checkout',
       })
       if (error) throw error
+      trackFunnel('checkout_started', { price_id: priceId })
       onConfirmed()
     } catch (e) {
       setErr(lang === 'sv' ? 'Kunde inte spara samtycke. Försök igen.' : 'Could not save consent. Please try again.')

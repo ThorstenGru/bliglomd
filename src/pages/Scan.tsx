@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
 import { COMPANIES_SORTED } from '../data/companies'
 import { CompanyCard } from '../components/CompanyCard'
+import { trackFunnel, trackSearchNoMatch } from '../lib/analytics'
 import { useLang } from '../contexts/LanguageContext'
 
 const mediaCompanies   = COMPANIES_SORTED.filter((c) => c.request_type === 'gdpr_art17' && c.utgivningsbevis)
@@ -25,6 +26,22 @@ export function Scan() {
   const [breaches, setBreaches] = useState<XonBreach[]>([])
   const [hasScanned, setHasScanned] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [companySearch, setCompanySearch] = useState('')
+
+  const q = companySearch.trim().toLowerCase()
+  const matchesQuery = (name: string) => !q || name.toLowerCase().includes(q)
+  const filteredMedia    = useMemo(() => mediaCompanies.filter((c) => matchesQuery(c.name)), [q])
+  const filteredGdpr     = useMemo(() => gdprCompanies.filter((c) => matchesQuery(c.name)), [q])
+  const filteredOptOut   = useMemo(() => optOutCompanies.filter((c) => matchesQuery(c.name)), [q])
+  const filteredAuthority = useMemo(() => authorityEntries.filter((c) => matchesQuery(c.name)), [q])
+  const totalMatches = filteredMedia.length + filteredGdpr.length + filteredOptOut.length + filteredAuthority.length
+
+  // Debounced — only log once the visitor pauses, and only for a real zero-result search.
+  useEffect(() => {
+    if (q.length < 2 || totalMatches > 0) return
+    const timer = setTimeout(() => trackSearchNoMatch(q), 800)
+    return () => clearTimeout(timer)
+  }, [q, totalMatches])
 
   async function handleScan(e: React.FormEvent) {
     e.preventDefault()
@@ -41,6 +58,7 @@ export function Scan() {
       const foundBreaches: XonBreach[] = data?.breaches ?? []
       setBreaches(foundBreaches)
       setHasScanned(true)
+      trackFunnel('scan_completed', { breach_count: foundBreaches.length })
 
       // Save scan history — non-blocking; requires migration 002
       supabase.auth.getUser().then(({ data: { user } }) => {
@@ -132,41 +150,73 @@ export function Scan() {
           <div>
             <h2 className="text-xl font-semibold text-gray-900 mb-4">{t.scan.companiesTitle}</h2>
 
-            <h3 className="text-sm font-semibold text-amber-700 uppercase tracking-wide mb-3 flex items-center gap-2">
-              <span>📰</span> {t.scan.mediaFirst}
-            </h3>
-            <div className="space-y-3 mb-8">
-              {mediaCompanies.map((company) => (
-                <CompanyCard key={company.id} company={company} />
-              ))}
-            </div>
+            <input
+              type="search"
+              value={companySearch}
+              onChange={(e) => setCompanySearch(e.target.value)}
+              placeholder={t.scan.searchPlaceholder}
+              className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm mb-6 focus:outline-none focus:ring-2 focus:ring-brand-500"
+            />
 
-            <h3 className="text-sm font-semibold text-green-700 uppercase tracking-wide mb-3 flex items-center gap-2">
-              <span>✅</span> {t.scan.gdprCompanies}
-            </h3>
-            <div className="space-y-3 mb-8">
-              {gdprCompanies.map((company) => (
-                <CompanyCard key={company.id} company={company} />
-              ))}
-            </div>
+            {q.length >= 2 && totalMatches === 0 ? (
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-600">
+                {t.scan.noSearchResults}
+              </div>
+            ) : (
+              <>
+                {filteredMedia.length > 0 && (
+                  <>
+                    <h3 className="text-sm font-semibold text-amber-700 uppercase tracking-wide mb-3 flex items-center gap-2">
+                      <span>📰</span> {t.scan.mediaFirst}
+                    </h3>
+                    <div className="space-y-3 mb-8">
+                      {filteredMedia.map((company) => (
+                        <CompanyCard key={company.id} company={company} />
+                      ))}
+                    </div>
+                  </>
+                )}
 
-            <h3 className="text-sm font-semibold text-amber-600 uppercase tracking-wide mb-3 flex items-center gap-2">
-              <span>🔒</span> {t.scan.optOutSites}
-            </h3>
-            <div className="space-y-3 mb-8">
-              {optOutCompanies.map((company) => (
-                <CompanyCard key={company.id} company={company} />
-              ))}
-            </div>
+                {filteredGdpr.length > 0 && (
+                  <>
+                    <h3 className="text-sm font-semibold text-green-700 uppercase tracking-wide mb-3 flex items-center gap-2">
+                      <span>✅</span> {t.scan.gdprCompanies}
+                    </h3>
+                    <div className="space-y-3 mb-8">
+                      {filteredGdpr.map((company) => (
+                        <CompanyCard key={company.id} company={company} />
+                      ))}
+                    </div>
+                  </>
+                )}
 
-            <h3 className="text-sm font-semibold text-blue-700 uppercase tracking-wide mb-3 flex items-center gap-2">
-              <span>🏛️</span> {t.scan.authorityTools}
-            </h3>
-            <div className="space-y-3">
-              {authorityEntries.map((company) => (
-                <CompanyCard key={company.id} company={company} />
-              ))}
-            </div>
+                {filteredOptOut.length > 0 && (
+                  <>
+                    <h3 className="text-sm font-semibold text-amber-600 uppercase tracking-wide mb-3 flex items-center gap-2">
+                      <span>🔒</span> {t.scan.optOutSites}
+                    </h3>
+                    <div className="space-y-3 mb-8">
+                      {filteredOptOut.map((company) => (
+                        <CompanyCard key={company.id} company={company} />
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {filteredAuthority.length > 0 && (
+                  <>
+                    <h3 className="text-sm font-semibold text-blue-700 uppercase tracking-wide mb-3 flex items-center gap-2">
+                      <span>🏛️</span> {t.scan.authorityTools}
+                    </h3>
+                    <div className="space-y-3">
+                      {filteredAuthority.map((company) => (
+                        <CompanyCard key={company.id} company={company} />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </>
+            )}
           </div>
         </>
       )}
