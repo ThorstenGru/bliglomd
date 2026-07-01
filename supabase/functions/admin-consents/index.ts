@@ -31,49 +31,45 @@ async function verifyAdmin(req: Request) {
 Deno.serve(async (req) => {
   const origin = req.headers.get('Origin')
   const h = cors(origin)
-
   if (req.method === 'OPTIONS') return new Response('ok', { headers: h })
 
   try {
     const ctx = await verifyAdmin(req)
     if (!ctx) {
       return new Response(JSON.stringify({ error: 'Forbidden' }), {
-        status: 403,
-        headers: { ...h, 'Content-Type': 'application/json' },
+        status: 403, headers: { ...h, 'Content-Type': 'application/json' },
       })
     }
 
-    const body = await req.json()
-    const { userId, level } = body as { userId: string; level: number }
+    const { client } = ctx
 
-    if (!userId || ![1, 2, 3].includes(level)) {
-      return new Response(JSON.stringify({ error: 'Invalid input' }), {
-        status: 400,
-        headers: { ...h, 'Content-Type': 'application/json' },
-      })
-    }
+    const [
+      { data: { users } },
+      { data: checkoutConsents },
+      { data: signupConsents },
+    ] = await Promise.all([
+      client.auth.admin.listUsers({ perPage: 1000 }),
+      client.from('consent_records')
+        .select('id, user_id, consented_at, terms_version, consent_text, price_id, consent_context')
+        .order('consented_at', { ascending: false })
+        .limit(500),
+      client.from('signup_consent_records')
+        .select('id, user_id, consented_at, terms_version, privacy_version, consent_text')
+        .order('consented_at', { ascending: false })
+        .limit(500),
+    ])
 
-    const { client, user: adminUser } = ctx
+    const emailByUserId = new Map((users ?? []).map(u => [u.id, u.email ?? '']))
 
-    const { error } = await client.from('profiles').update({ level }).eq('id', userId)
-    if (error) throw error
+    const checkout = (checkoutConsents ?? []).map(c => ({ ...c, user_email: emailByUserId.get(c.user_id) ?? 'okänd' }))
+    const signup = (signupConsents ?? []).map(c => ({ ...c, user_email: emailByUserId.get(c.user_id) ?? 'okänd' }))
 
-    // Audit log
-    await client.from('audit_logs').insert({
-      user_id: adminUser.id,
-      user_email: adminUser.email,
-      action: 'admin_level_change',
-      resource: userId,
-      metadata: { new_level: level },
-    })
-
-    return new Response(JSON.stringify({ success: true }), {
+    return new Response(JSON.stringify({ checkout_consents: checkout, signup_consents: signup }), {
       headers: { ...h, 'Content-Type': 'application/json' },
     })
   } catch (err) {
     return new Response(JSON.stringify({ error: String(err) }), {
-      status: 500,
-      headers: { ...h, 'Content-Type': 'application/json' },
+      status: 500, headers: { ...h, 'Content-Type': 'application/json' },
     })
   }
 })

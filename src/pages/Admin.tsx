@@ -4,6 +4,8 @@ import { supabase } from '../lib/supabase'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
+const ADMIN_EMAIL = 'admin@xn--bliglmd-e1a.se'
+
 interface AdminUser {
   id: string
   email: string
@@ -13,6 +15,9 @@ interface AdminUser {
   last_sign_in_at: string | null
   requests: number
   scans: number
+  subscription_status: 'inactive' | 'active' | 'past_due' | 'canceled'
+  stripe_customer_id: string | null
+  stripe_subscription_id: string | null
 }
 
 interface AuditEvent {
@@ -29,6 +34,59 @@ interface DeletionRecord {
   deleted_user_email: string
   deleted_by_email: string
   created_at: string
+  snapshot?: Record<string, unknown>
+}
+
+interface UserRequest {
+  id: string
+  company_name: string
+  status: string
+  sent_at: string | null
+  response_at: string | null
+  created_at: string
+}
+
+interface UserScan {
+  id: string
+  scan_email: string
+  breach_names: string[]
+  breach_count: number
+  created_at: string
+}
+
+interface ConsentRow {
+  id: string
+  user_id: string
+  user_email: string
+  consented_at: string
+  terms_version: string
+  consent_text: string
+  price_id?: string
+  consent_context?: string
+  privacy_version?: string
+}
+
+interface UserDetail {
+  profile: Record<string, unknown> | null
+  requests: UserRequest[]
+  scans: UserScan[]
+  checkout_consents: ConsentRow[]
+  signup_consent: ConsentRow[]
+}
+
+interface StaleRequest {
+  id: string
+  user_email: string
+  company_name: string
+  status: string
+  created_at: string
+}
+
+interface CompanyTrend {
+  company_name: string
+  cnt_this_week: number
+  cnt_last_week: number
+  cnt_all_time: number
 }
 
 interface AdminStats {
@@ -40,6 +98,8 @@ interface AdminStats {
     active_reqs: number; stale_reqs: number
     avg_reqs_per_user: number
     breach_rate_pct: number; total_breaches: number; avg_breaches: number
+    mrr_sek: number
+    revenue_by_tier: Record<number, { active: number; mrr: number }>
   }
   signups_per_day: { day: string; cnt: number }[]
   reqs_per_day: { day: string; cnt: number }[]
@@ -47,10 +107,12 @@ interface AdminStats {
   top_companies: { company_name: string; cnt: number }[]
   request_statuses: { status: string; cnt: number }[]
   response_times: { company_name: string; avg_days: number; total_confirmed: number }[]
+  stale_requests: StaleRequest[]
+  company_trends: CompanyTrend[]
   generated_at: string
 }
 
-type Tab = 'overview' | 'users' | 'audit' | 'analytics'
+type Tab = 'overview' | 'users' | 'audit' | 'analytics' | 'consents'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -79,9 +141,12 @@ const ACTION_MAP: Record<string, { bg: string; fg: string; label: string }> = {
   admin_level_change: { bg: '#DBEAFE', fg: '#1D4ED8', label: 'Nivåändring' },
   admin_delete:       { bg: '#FEE2E2', fg: '#DC2626', label: 'Radering' },
   admin_export:       { bg: '#FEF9C3', fg: '#92400E', label: 'Export' },
+  admin_login:        { bg: '#E0E7FF', fg: '#4338CA', label: 'Admininloggning' },
   scan_email:         { bg: '#D1FAE5', fg: '#15803D', label: 'Skanning' },
   send_request:       { bg: '#F3E8FF', fg: '#6B21A8', label: 'Förfrågan' },
 }
+
+const AUDIT_ACTIONS = ['admin_level_change', 'admin_delete', 'admin_export', 'admin_login', 'scan_email', 'send_request']
 
 function ActionBadge({ action }: { action: string }) {
   const s = ACTION_MAP[action] ?? { bg: '#F1F5F9', fg: '#64748B', label: action }
@@ -99,6 +164,7 @@ const ICONS: Record<Tab, string> = {
   users:     'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8z',
   audit:     'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6M8 13h8M8 17h5',
   analytics: 'M18 20V10M12 20V4M6 20v-6',
+  consents:  'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
 }
 
 const TAB_LABELS: Record<Tab, string> = {
@@ -106,6 +172,48 @@ const TAB_LABELS: Record<Tab, string> = {
   users:     'Användare',
   audit:     'Granskningslogg',
   analytics: 'Statistik',
+  consents:  'Samtycke',
+}
+
+const SUB_STATUS_LABEL: Record<AdminUser['subscription_status'], string> = {
+  inactive: 'Ingen',
+  active: 'Aktiv',
+  past_due: 'Försenad',
+  canceled: 'Avslutad',
+}
+const SUB_STATUS_BG: Record<AdminUser['subscription_status'], string> = {
+  inactive: '#F1F5F9', active: '#DCFCE7', past_due: '#FEF9C3', canceled: '#FEE2E2',
+}
+const SUB_STATUS_FG: Record<AdminUser['subscription_status'], string> = {
+  inactive: '#64748B', active: '#15803D', past_due: '#92400E', canceled: '#DC2626',
+}
+
+function SubBadge({ status }: { status: AdminUser['subscription_status'] }) {
+  return (
+    <span style={{ fontSize: 11, fontWeight: 700, color: SUB_STATUS_FG[status], background: SUB_STATUS_BG[status], borderRadius: 20, padding: '2px 9px', whiteSpace: 'nowrap' }}>
+      {SUB_STATUS_LABEL[status]}
+    </span>
+  )
+}
+
+function toCsv(rows: Record<string, unknown>[]): string {
+  if (rows.length === 0) return ''
+  const cols = Object.keys(rows[0])
+  const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`
+  return [cols.join(','), ...rows.map(r => cols.map(c => esc(r[c])).join(','))].join('\n')
+}
+
+function downloadCsv(filename: string, rows: Record<string, unknown>[]) {
+  const csv = toCsv(rows)
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
 }
 
 // ── Analytics chart components ────────────────────────────────────────────────
@@ -229,6 +337,16 @@ export function Admin() {
   const [notice, setNotice]         = useState<{ type: 'ok' | 'err'; msg: string } | null>(null)
   const [stats, setStats]           = useState<AdminStats | null>(null)
   const [statsLoading, setStatsLoading] = useState(false)
+  const [subFilter, setSubFilter]   = useState<'' | AdminUser['subscription_status']>('')
+  const [detail, setDetail]         = useState<UserDetail | null>(null)
+  const [detailLoading, setDetailLoading] = useState(false)
+  const [checkoutConsents, setCheckoutConsents] = useState<ConsentRow[]>([])
+  const [signupConsents, setSignupConsents]     = useState<ConsentRow[]>([])
+  const [consentsLoading, setConsentsLoading]   = useState(false)
+  const [auditActionFilter, setAuditActionFilter] = useState('')
+  const [auditSearch, setAuditSearch]             = useState('')
+  const [snapshotView, setSnapshotView]           = useState<DeletionRecord | null>(null)
+  const [showStale, setShowStale]                 = useState(false)
   const noticeTimerRef = useRef<ReturnType<typeof setTimeout>>()
 
   const loadStats = useCallback(async () => {
@@ -249,7 +367,7 @@ export function Admin() {
         .limit(200),
       supabase
         .from('admin_deletions')
-        .select('id, deleted_user_email, deleted_by_email, created_at')
+        .select('id, deleted_user_email, deleted_by_email, created_at, snapshot')
         .order('created_at', { ascending: false })
         .limit(100),
     ])
@@ -259,17 +377,59 @@ export function Admin() {
     setLoading(false)
   }, [])
 
+  const loadConsents = useCallback(async () => {
+    setConsentsLoading(true)
+    const { data, error } = await supabase.functions.invoke('admin-consents')
+    if (!error && data) {
+      setCheckoutConsents(data.checkout_consents ?? [])
+      setSignupConsents(data.signup_consents ?? [])
+    }
+    setConsentsLoading(false)
+  }, [])
+
+  const loadUserDetail = useCallback(async (userId: string) => {
+    setDetailLoading(true)
+    setDetail(null)
+    const { data, error } = await supabase.functions.invoke('admin-export-user', { body: { userId } })
+    if (!error && data) {
+      setDetail({
+        profile: data.profile ?? null,
+        requests: data.requests ?? [],
+        scans: data.scans ?? [],
+        checkout_consents: data.checkout_consents ?? [],
+        signup_consent: data.signup_consent ?? [],
+      })
+    }
+    setDetailLoading(false)
+  }, [])
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user || user.user_metadata?.role !== 'admin') {
+      // user_metadata is self-editable by any logged-in user — role alone is
+      // not a safe boundary. The exact admin email is the real check.
+      if (!user || user.user_metadata?.role !== 'admin' || user.email !== ADMIN_EMAIL) {
         navigate('/', { replace: true })
         return
       }
       setAdminEmail(user.email ?? '')
       setReady(true)
       loadAll()
+      loadConsents()
+      // Admin actions are audited, but admin logins never were — close that gap.
+      supabase.from('audit_logs').insert({
+        user_id: user.id,
+        user_email: user.email,
+        action: 'admin_login',
+        resource: null,
+        metadata: { user_agent: navigator.userAgent },
+      })
     })
-  }, [navigate, loadAll])
+  }, [navigate, loadAll, loadConsents])
+
+  useEffect(() => {
+    if (selected) loadUserDetail(selected.id)
+    else setDetail(null)
+  }, [selected, loadUserDetail])
 
   useEffect(() => {
     if (!ready) return
@@ -363,9 +523,19 @@ export function Admin() {
       const q = search.toLowerCase()
       const matchSearch = !q || u.email.toLowerCase().includes(q) || u.full_name.toLowerCase().includes(q)
       const matchLvl = !lvlFilter || u.level === Number(lvlFilter)
-      return matchSearch && matchLvl
+      const matchSub = !subFilter || u.subscription_status === subFilter
+      return matchSearch && matchLvl && matchSub
     }),
-  [users, search, lvlFilter])
+  [users, search, lvlFilter, subFilter])
+
+  const filteredAudit = useMemo(() =>
+    audit.filter(e => {
+      const q = auditSearch.toLowerCase()
+      const matchSearch = !q || (e.user_email ?? '').toLowerCase().includes(q)
+      const matchAction = !auditActionFilter || e.action === auditActionFilter
+      return matchSearch && matchAction
+    }),
+  [audit, auditSearch, auditActionFilter])
 
   if (!ready) return null
 
@@ -391,7 +561,7 @@ export function Admin() {
 
         {/* Nav tabs */}
         <div style={{ padding: '6px 10px', flex: 1 }}>
-          {(['overview', 'users', 'audit', 'analytics'] as Tab[]).map(t => (
+          {(['overview', 'users', 'audit', 'analytics', 'consents'] as Tab[]).map(t => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -448,7 +618,7 @@ export function Admin() {
             {TAB_LABELS[tab]}
           </h1>
           <button
-            onClick={() => { loadAll(); if (tab === 'analytics') loadStats() }}
+            onClick={() => { loadAll(); if (tab === 'analytics') loadStats(); if (tab === 'consents') loadConsents() }}
             style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 8, border: '1px solid #E2E8F0', background: 'white', cursor: 'pointer', fontSize: 13, color: '#475569', fontWeight: 500 }}
           >
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -502,6 +672,40 @@ export function Admin() {
                   ))}
                 </div>
 
+                {/* Revenue */}
+                {stats && (
+                  <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E2E8F0', padding: '20px 24px', marginBottom: 16 }}>
+                    <h2 style={{ fontSize: 13, fontWeight: 700, color: '#64748B', margin: '0 0 14px', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                      Intäkter (MRR, uppskattat)
+                    </h2>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 8 }}>
+                      <div style={{ borderRadius: 10, border: '1.5px solid #DCFCE7', padding: '14px 16px', background: '#F0FDF4' }}>
+                        <p style={{ fontSize: 11, color: '#15803D', fontWeight: 700, margin: '0 0 6px', textTransform: 'uppercase' }}>Totalt MRR</p>
+                        <p style={{ fontSize: 28, fontWeight: 800, color: '#0F172A', margin: 0, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>
+                          {stats.snapshot.mrr_sek.toLocaleString('sv-SE')} kr
+                        </p>
+                      </div>
+                      <div style={{ borderRadius: 10, border: `1.5px solid ${LVL_BG[2]}`, padding: '14px 16px', background: LVL_BG[2] + '55' }}>
+                        <p style={{ fontSize: 11, color: LVL_FG[2], fontWeight: 700, margin: '0 0 6px', textTransform: 'uppercase' }}>Cipher</p>
+                        <p style={{ fontSize: 22, fontWeight: 800, color: '#0F172A', margin: 0, fontVariantNumeric: 'tabular-nums' }}>
+                          {(stats.snapshot.revenue_by_tier[2]?.mrr ?? 0).toLocaleString('sv-SE')} kr
+                        </p>
+                        <p style={{ fontSize: 11, color: '#94A3B8', margin: '2px 0 0' }}>{stats.snapshot.revenue_by_tier[2]?.active ?? 0} aktiva</p>
+                      </div>
+                      <div style={{ borderRadius: 10, border: `1.5px solid ${LVL_BG[3]}`, padding: '14px 16px', background: LVL_BG[3] + '55' }}>
+                        <p style={{ fontSize: 11, color: LVL_FG[3], fontWeight: 700, margin: '0 0 6px', textTransform: 'uppercase' }}>Ghost</p>
+                        <p style={{ fontSize: 22, fontWeight: 800, color: '#0F172A', margin: 0, fontVariantNumeric: 'tabular-nums' }}>
+                          {(stats.snapshot.revenue_by_tier[3]?.mrr ?? 0).toLocaleString('sv-SE')} kr
+                        </p>
+                        <p style={{ fontSize: 11, color: '#94A3B8', margin: '2px 0 0' }}>{stats.snapshot.revenue_by_tier[3]?.active ?? 0} aktiva</p>
+                      </div>
+                    </div>
+                    <p style={{ fontSize: 11, color: '#CBD5E1', margin: 0 }}>
+                      Uppskattning baserad på månadspris per nivå — särskiljer inte månads- och årsabonnemang.
+                    </p>
+                  </div>
+                )}
+
                 {/* Level breakdown */}
                 <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E2E8F0', padding: '20px 24px', marginBottom: 16 }}>
                   <h2 style={{ fontSize: 13, fontWeight: 700, color: '#64748B', margin: '0 0 14px', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
@@ -533,8 +737,8 @@ export function Admin() {
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                       <thead>
                         <tr style={{ borderBottom: '1px solid #F1F5F9' }}>
-                          {['Användare', 'Raderades av', 'Tidpunkt'].map(col => (
-                            <th key={col} style={{ textAlign: 'left', padding: '0 0 8px', fontWeight: 600, color: '#94A3B8', letterSpacing: '0.04em', textTransform: 'uppercase', fontSize: 11 }}>{col}</th>
+                          {['Användare', 'Raderades av', 'Tidpunkt', ''].map(col => (
+                            <th key={col} style={{ textAlign: col === '' ? 'right' : 'left', padding: '0 0 8px', fontWeight: 600, color: '#94A3B8', letterSpacing: '0.04em', textTransform: 'uppercase', fontSize: 11 }}>{col}</th>
                           ))}
                         </tr>
                       </thead>
@@ -544,6 +748,14 @@ export function Admin() {
                             <td style={{ padding: '8px 0', color: '#374151' }}>{d.deleted_user_email}</td>
                             <td style={{ padding: '8px 0', color: '#64748B' }}>{d.deleted_by_email}</td>
                             <td style={{ padding: '8px 0', color: '#94A3B8', fontVariantNumeric: 'tabular-nums' }}>{fmtTime(d.created_at)}</td>
+                            <td style={{ padding: '8px 0', textAlign: 'right' }}>
+                              <button
+                                onClick={() => setSnapshotView(d)}
+                                style={{ padding: '3px 10px', background: '#F1F5F9', color: '#475569', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 11, fontWeight: 600 }}
+                              >
+                                Visa data
+                              </button>
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -580,6 +792,23 @@ export function Admin() {
                     <option value="2">L2 Plus</option>
                     <option value="3">L3 Pro</option>
                   </select>
+                  <select
+                    value={subFilter}
+                    onChange={e => setSubFilter(e.target.value as typeof subFilter)}
+                    style={{ padding: '9px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13, color: '#374151', background: 'white', outline: 'none', cursor: 'pointer' }}
+                  >
+                    <option value="">Alla betalstatus</option>
+                    <option value="active">Aktiv</option>
+                    <option value="past_due">Försenad</option>
+                    <option value="canceled">Avslutad</option>
+                    <option value="inactive">Ingen</option>
+                  </select>
+                  <button
+                    onClick={() => downloadCsv('bliglomd-anvandare.csv', filtered as unknown as Record<string, unknown>[])}
+                    style={{ padding: '9px 14px', borderRadius: 8, border: '1px solid #E2E8F0', background: 'white', cursor: 'pointer', fontSize: 13, color: '#475569', fontWeight: 500, whiteSpace: 'nowrap' }}
+                  >
+                    Exportera CSV
+                  </button>
                 </div>
 
                 {/* Table */}
@@ -588,7 +817,7 @@ export function Admin() {
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                       <thead style={{ background: '#F8FAFC' }}>
                         <tr>
-                          {['E-post', 'Namn', 'Nivå', 'Förfrågn.', 'Skann.', 'Registrerad', 'Senast aktiv', ''].map(col => (
+                          {['E-post', 'Namn', 'Nivå', 'Betalning', 'Förfrågn.', 'Skann.', 'Registrerad', 'Senast aktiv', ''].map(col => (
                             <th key={col} style={{ padding: '10px 14px', textAlign: col === '' ? 'right' : 'left', fontWeight: 600, color: '#94A3B8', fontSize: 11, letterSpacing: '0.05em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
                               {col}
                             </th>
@@ -611,6 +840,7 @@ export function Admin() {
                                 {LVL_LABEL[u.level]}
                               </span>
                             </td>
+                            <td style={{ padding: '11px 14px' }}><SubBadge status={u.subscription_status} /></td>
                             <td style={{ padding: '11px 14px', color: '#64748B', textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>{u.requests}</td>
                             <td style={{ padding: '11px 14px', color: '#64748B', textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>{u.scans}</td>
                             <td style={{ padding: '11px 14px', color: '#94A3B8', whiteSpace: 'nowrap' }}>{fmtDate(u.created_at)}</td>
@@ -627,7 +857,7 @@ export function Admin() {
                         ))}
                         {filtered.length === 0 && (
                           <tr>
-                            <td colSpan={8} style={{ padding: '40px', textAlign: 'center', color: '#94A3B8' }}>
+                            <td colSpan={9} style={{ padding: '40px', textAlign: 'center', color: '#94A3B8' }}>
                               Inga användare hittades
                             </td>
                           </tr>
@@ -650,8 +880,39 @@ export function Admin() {
                 {stats && (
                   <>
                     {stats.snapshot.stale_reqs > 0 && (
-                      <div style={{ background: '#FEF9C3', border: '1px solid #FDE68A', borderRadius: 10, padding: '11px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#92400E' }}>
-                        <span style={{ fontWeight: 700 }}>⚠️ {stats.snapshot.stale_reqs} ärenden</span> har inte fått svar på 30+ dagar — kontrollera ärendelistan
+                      <div style={{ background: '#FEF9C3', border: '1px solid #FDE68A', borderRadius: 10, padding: '11px 16px', marginBottom: 16, fontSize: 13, color: '#92400E' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span><span style={{ fontWeight: 700 }}>⚠️ {stats.snapshot.stale_reqs} ärenden</span> har inte fått svar på 30+ dagar</span>
+                          <button
+                            onClick={() => setShowStale(s => !s)}
+                            style={{ padding: '4px 12px', background: 'white', border: '1px solid #FDE68A', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600, color: '#92400E' }}
+                          >
+                            {showStale ? 'Dölj lista' : 'Visa lista'}
+                          </button>
+                        </div>
+                        {showStale && (
+                          <div style={{ marginTop: 10, maxHeight: 220, overflow: 'auto', background: 'white', borderRadius: 8 }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                              <thead>
+                                <tr style={{ borderBottom: '1px solid #F1F5F9' }}>
+                                  {['Kund', 'Tjänst', 'Status', 'Skapad'].map(col => (
+                                    <th key={col} style={{ padding: '6px 10px', textAlign: 'left', fontWeight: 600, color: '#94A3B8', fontSize: 10, textTransform: 'uppercase' }}>{col}</th>
+                                  ))}
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {stats.stale_requests.map(r => (
+                                  <tr key={r.id} style={{ borderTop: '1px solid #F8FAFC' }}>
+                                    <td style={{ padding: '6px 10px', color: '#374151' }}>{r.user_email}</td>
+                                    <td style={{ padding: '6px 10px', color: '#374151' }}>{r.company_name}</td>
+                                    <td style={{ padding: '6px 10px', color: STATUS_COLORS[r.status] ?? '#64748B', fontWeight: 600 }}>{r.status}</td>
+                                    <td style={{ padding: '6px 10px', color: '#94A3B8' }}>{fmtDate(r.created_at)}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -711,6 +972,48 @@ export function Admin() {
                       </div>
                     )}
 
+                    {stats.company_trends.length > 0 && (
+                      <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E2E8F0', padding: '18px 20px', marginBottom: 14 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                          <p style={{ fontSize: 11, fontWeight: 700, color: '#64748B', margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Trend per tjänst (topp 10)</p>
+                          <button
+                            onClick={() => downloadCsv('bliglomd-tjanstetrender.csv', stats.company_trends as unknown as Record<string, unknown>[])}
+                            style={{ padding: '5px 12px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 6, cursor: 'pointer', fontSize: 11, color: '#475569', fontWeight: 600 }}
+                          >
+                            Exportera CSV
+                          </button>
+                        </div>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                          <thead>
+                            <tr style={{ borderBottom: '1px solid #F1F5F9' }}>
+                              {['Tjänst', 'Denna vecka', 'Förra veckan', 'Alla tider'].map(col => (
+                                <th key={col} style={{ padding: '0 0 8px', textAlign: 'left', fontWeight: 600, color: '#94A3B8', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{col}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {stats.company_trends.map((c, i) => {
+                              const delta = c.cnt_this_week - c.cnt_last_week
+                              return (
+                                <tr key={c.company_name} style={{ borderTop: i > 0 ? '1px solid #F8FAFC' : undefined }}>
+                                  <td style={{ padding: '8px 0', color: '#374151' }}>{c.company_name}</td>
+                                  <td style={{ padding: '8px 0', color: '#0F172A', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
+                                    {c.cnt_this_week} {delta !== 0 && (
+                                      <span style={{ fontSize: 11, fontWeight: 600, color: delta > 0 ? '#16A34A' : '#DC2626' }}>
+                                        {delta > 0 ? '↑' : '↓'}{Math.abs(delta)}
+                                      </span>
+                                    )}
+                                  </td>
+                                  <td style={{ padding: '8px 0', color: '#64748B', fontVariantNumeric: 'tabular-nums' }}>{c.cnt_last_week}</td>
+                                  <td style={{ padding: '8px 0', color: '#94A3B8', fontVariantNumeric: 'tabular-nums' }}>{c.cnt_all_time}</td>
+                                </tr>
+                              )
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+
                     <p style={{ fontSize: 11, color: '#CBD5E1', textAlign: 'right', margin: 0 }}>
                       {statsLoading ? 'Uppdaterar...' : `Hämtat: ${new Date(stats.generated_at).toLocaleString('sv-SE')} · Uppdateras var 5:e minut`}
                     </p>
@@ -722,10 +1025,37 @@ export function Admin() {
             {/* ── AUDIT TAB ─────────────────────────────────────────────── */}
             {tab === 'audit' && (
               <div>
-                {audit.length === 0 && deletions.length === 0 ? (
+                {/* Filters */}
+                <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
+                  <input
+                    type="search"
+                    placeholder="Sök användare…"
+                    value={auditSearch}
+                    onChange={e => setAuditSearch(e.target.value)}
+                    style={{ flex: 1, padding: '9px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13, color: '#374151', outline: 'none', background: 'white', boxSizing: 'border-box' }}
+                  />
+                  <select
+                    value={auditActionFilter}
+                    onChange={e => setAuditActionFilter(e.target.value)}
+                    style={{ padding: '9px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13, color: '#374151', background: 'white', outline: 'none', cursor: 'pointer' }}
+                  >
+                    <option value="">Alla händelser</option>
+                    {AUDIT_ACTIONS.map(a => (
+                      <option key={a} value={a}>{ACTION_MAP[a]?.label ?? a}</option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={() => downloadCsv('bliglomd-granskningslogg.csv', filteredAudit as unknown as Record<string, unknown>[])}
+                    style={{ padding: '9px 14px', borderRadius: 8, border: '1px solid #E2E8F0', background: 'white', cursor: 'pointer', fontSize: 13, color: '#475569', fontWeight: 500, whiteSpace: 'nowrap' }}
+                  >
+                    Exportera CSV
+                  </button>
+                </div>
+
+                {filteredAudit.length === 0 ? (
                   <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E2E8F0', padding: '48px', textAlign: 'center', color: '#94A3B8' }}>
-                    <p style={{ margin: '0 0 8px' }}>Ingen loggdata ännu.</p>
-                    <p style={{ fontSize: 12 }}>Loggen fylls på automatiskt när admin- och användaråtgärder utförs.</p>
+                    <p style={{ margin: '0 0 8px' }}>Ingen loggdata hittades.</p>
+                    <p style={{ fontSize: 12 }}>Loggen fylls på automatiskt när admin- och användaråtgärder utförs (rullande 30 dagar).</p>
                   </div>
                 ) : (
                   <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E2E8F0', overflow: 'hidden' }}>
@@ -733,28 +1063,131 @@ export function Admin() {
                       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                         <thead style={{ background: '#F8FAFC' }}>
                           <tr>
-                            {['Tidpunkt', 'Användare', 'Händelse', 'Resurs'].map(col => (
-                              <th key={col} style={{ padding: '10px 16px', textAlign: 'left', fontWeight: 600, color: '#94A3B8', fontSize: 11, letterSpacing: '0.05em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                            {['Tidpunkt', 'Användare', 'Händelse', 'Resurs', 'Metadata', ''].map(col => (
+                              <th key={col} style={{ padding: '10px 16px', textAlign: col === '' ? 'right' : 'left', fontWeight: 600, color: '#94A3B8', fontSize: 11, letterSpacing: '0.05em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
                                 {col}
                               </th>
                             ))}
                           </tr>
                         </thead>
                         <tbody>
-                          {audit.map((e, i) => (
-                            <tr key={e.id} style={{ borderTop: '1px solid #F1F5F9', background: i % 2 === 0 ? 'white' : '#FAFBFC' }}>
-                              <td style={{ padding: '10px 16px', color: '#94A3B8', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{fmtTime(e.created_at)}</td>
-                              <td style={{ padding: '10px 16px', color: '#475569', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{e.user_email ?? '—'}</td>
-                              <td style={{ padding: '10px 16px' }}><ActionBadge action={e.action} /></td>
-                              <td style={{ padding: '10px 16px', color: '#94A3B8', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'monospace', fontSize: 12 }}>
-                                {e.resource ?? '—'}
-                              </td>
-                            </tr>
-                          ))}
+                          {filteredAudit.map((e, i) => {
+                            const matchingDeletion = e.action === 'admin_delete'
+                              ? deletions.find(d => d.deleted_user_email === (e.metadata?.deleted_email as string | undefined))
+                              : undefined
+                            return (
+                              <tr key={e.id} style={{ borderTop: '1px solid #F1F5F9', background: i % 2 === 0 ? 'white' : '#FAFBFC' }}>
+                                <td style={{ padding: '10px 16px', color: '#94A3B8', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{fmtTime(e.created_at)}</td>
+                                <td style={{ padding: '10px 16px', color: '#475569', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{e.user_email ?? '—'}</td>
+                                <td style={{ padding: '10px 16px' }}><ActionBadge action={e.action} /></td>
+                                <td style={{ padding: '10px 16px', color: '#94A3B8', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'monospace', fontSize: 12 }}>
+                                  {e.resource ?? '—'}
+                                </td>
+                                <td style={{ padding: '10px 16px', color: '#94A3B8', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'monospace', fontSize: 11 }}>
+                                  {e.metadata && Object.keys(e.metadata).length > 0 ? JSON.stringify(e.metadata) : '—'}
+                                </td>
+                                <td style={{ padding: '10px 16px', textAlign: 'right' }}>
+                                  {matchingDeletion && (
+                                    <button
+                                      onClick={() => setSnapshotView(matchingDeletion)}
+                                      style={{ padding: '3px 10px', background: '#F1F5F9', color: '#475569', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 11, fontWeight: 600 }}
+                                    >
+                                      Visa data
+                                    </button>
+                                  )}
+                                </td>
+                              </tr>
+                            )
+                          })}
                         </tbody>
                       </table>
                     </div>
                   </div>
+                )}
+              </div>
+            )}
+
+            {/* ── CONSENTS TAB ──────────────────────────────────────────── */}
+            {tab === 'consents' && (
+              <div>
+                {consentsLoading ? (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200, color: '#94A3B8' }}>
+                    Laddar samtycke...
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E2E8F0', overflow: 'hidden', marginBottom: 20 }}>
+                      <div style={{ padding: '14px 20px', borderBottom: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <p style={{ fontSize: 13, fontWeight: 700, color: '#0F172A', margin: 0 }}>Registreringssamtycke ({signupConsents.length})</p>
+                        <button
+                          onClick={() => downloadCsv('bliglomd-registreringssamtycke.csv', signupConsents as unknown as Record<string, unknown>[])}
+                          style={{ padding: '5px 12px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 6, cursor: 'pointer', fontSize: 11, color: '#475569', fontWeight: 600 }}
+                        >
+                          Exportera CSV
+                        </button>
+                      </div>
+                      <div style={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                          <thead style={{ background: '#F8FAFC' }}>
+                            <tr>
+                              {['Tidpunkt', 'Användare', 'Villkorsversion', 'Policyversion'].map(col => (
+                                <th key={col} style={{ padding: '10px 16px', textAlign: 'left', fontWeight: 600, color: '#94A3B8', fontSize: 11, letterSpacing: '0.05em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{col}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {signupConsents.map((c, i) => (
+                              <tr key={c.id} style={{ borderTop: '1px solid #F1F5F9', background: i % 2 === 0 ? 'white' : '#FAFBFC' }}>
+                                <td style={{ padding: '10px 16px', color: '#94A3B8', whiteSpace: 'nowrap' }}>{fmtTime(c.consented_at)}</td>
+                                <td style={{ padding: '10px 16px', color: '#374151' }}>{c.user_email}</td>
+                                <td style={{ padding: '10px 16px', color: '#374151', fontFamily: 'monospace', fontSize: 12 }}>{c.terms_version}</td>
+                                <td style={{ padding: '10px 16px', color: '#374151', fontFamily: 'monospace', fontSize: 12 }}>{c.privacy_version ?? '—'}</td>
+                              </tr>
+                            ))}
+                            {signupConsents.length === 0 && (
+                              <tr><td colSpan={4} style={{ padding: 24, textAlign: 'center', color: '#94A3B8' }}>Inget registreringssamtycke ännu</td></tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E2E8F0', overflow: 'hidden' }}>
+                      <div style={{ padding: '14px 20px', borderBottom: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <p style={{ fontSize: 13, fontWeight: 700, color: '#0F172A', margin: 0 }}>Köpsamtycke ({checkoutConsents.length})</p>
+                        <button
+                          onClick={() => downloadCsv('bliglomd-kopsamtycke.csv', checkoutConsents as unknown as Record<string, unknown>[])}
+                          style={{ padding: '5px 12px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 6, cursor: 'pointer', fontSize: 11, color: '#475569', fontWeight: 600 }}
+                        >
+                          Exportera CSV
+                        </button>
+                      </div>
+                      <div style={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                          <thead style={{ background: '#F8FAFC' }}>
+                            <tr>
+                              {['Tidpunkt', 'Användare', 'Villkorsversion', 'Pris-ID'].map(col => (
+                                <th key={col} style={{ padding: '10px 16px', textAlign: 'left', fontWeight: 600, color: '#94A3B8', fontSize: 11, letterSpacing: '0.05em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{col}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {checkoutConsents.map((c, i) => (
+                              <tr key={c.id} style={{ borderTop: '1px solid #F1F5F9', background: i % 2 === 0 ? 'white' : '#FAFBFC' }}>
+                                <td style={{ padding: '10px 16px', color: '#94A3B8', whiteSpace: 'nowrap' }}>{fmtTime(c.consented_at)}</td>
+                                <td style={{ padding: '10px 16px', color: '#374151' }}>{c.user_email}</td>
+                                <td style={{ padding: '10px 16px', color: '#374151', fontFamily: 'monospace', fontSize: 12 }}>{c.terms_version}</td>
+                                <td style={{ padding: '10px 16px', color: '#94A3B8', fontFamily: 'monospace', fontSize: 11, maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.price_id ?? '—'}</td>
+                              </tr>
+                            ))}
+                            {checkoutConsents.length === 0 && (
+                              <tr><td colSpan={4} style={{ padding: 24, textAlign: 'center', color: '#94A3B8' }}>Inget köpsamtycke ännu</td></tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </>
                 )}
               </div>
             )}
@@ -807,6 +1240,98 @@ export function Admin() {
                     <p style={{ fontSize: 14, fontWeight: 600, color: '#1E293B', margin: 0, fontVariantNumeric: 'tabular-nums' }}>{value}</p>
                   </div>
                 ))}
+              </div>
+
+              {/* Billing */}
+              <div style={{ marginBottom: 20 }}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: '#475569', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Betalning</p>
+                <div style={{ background: '#F8FAFC', borderRadius: 10, padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 12, color: '#64748B' }}>Status</span>
+                    <SubBadge status={selected.subscription_status} />
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: 12, color: '#64748B' }}>Stripe-kund</span>
+                    <span style={{ fontSize: 11, fontFamily: 'monospace', color: '#1E293B' }}>{selected.stripe_customer_id ?? '—'}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: 12, color: '#64748B' }}>Prenumeration</span>
+                    <span style={{ fontSize: 11, fontFamily: 'monospace', color: '#1E293B' }}>{selected.stripe_subscription_id ?? '—'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Full request history */}
+              <div style={{ marginBottom: 20 }}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: '#475569', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Förfrågningar {detail && `(${detail.requests.length})`}
+                </p>
+                {detailLoading ? (
+                  <p style={{ fontSize: 12, color: '#94A3B8' }}>Laddar...</p>
+                ) : detail && detail.requests.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 180, overflow: 'auto' }}>
+                    {detail.requests.map(r => (
+                      <div key={r.id} style={{ background: '#F8FAFC', borderRadius: 8, padding: '8px 10px', fontSize: 12 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                          <span style={{ fontWeight: 600, color: '#1E293B' }}>{r.company_name}</span>
+                          <span style={{ fontSize: 10, fontWeight: 700, color: STATUS_COLORS[r.status] ?? '#64748B' }}>{r.status}</span>
+                        </div>
+                        <span style={{ color: '#94A3B8', fontSize: 11 }}>{fmtDate(r.created_at)}{r.response_at ? ` · svar ${fmtDate(r.response_at)}` : ''}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p style={{ fontSize: 12, color: '#CBD5E1' }}>Inga förfrågningar ännu</p>
+                )}
+              </div>
+
+              {/* Full scan history */}
+              <div style={{ marginBottom: 20 }}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: '#475569', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Skanningar {detail && `(${detail.scans.length})`}
+                </p>
+                {detailLoading ? (
+                  <p style={{ fontSize: 12, color: '#94A3B8' }}>Laddar...</p>
+                ) : detail && detail.scans.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 160, overflow: 'auto' }}>
+                    {detail.scans.map(s => (
+                      <div key={s.id} style={{ background: '#F8FAFC', borderRadius: 8, padding: '8px 10px', fontSize: 12 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                          <span style={{ fontWeight: 600, color: '#1E293B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 200 }}>{s.scan_email}</span>
+                          <span style={{ fontSize: 10, fontWeight: 700, color: s.breach_count > 0 ? '#DC2626' : '#15803D' }}>{s.breach_count} intrång</span>
+                        </div>
+                        <span style={{ color: '#94A3B8', fontSize: 11 }}>{fmtDate(s.created_at)}{s.breach_names?.length ? ` · ${s.breach_names.slice(0, 3).join(', ')}` : ''}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p style={{ fontSize: 12, color: '#CBD5E1' }}>Inga skanningar ännu</p>
+                )}
+              </div>
+
+              {/* Consent history */}
+              <div style={{ marginBottom: 20 }}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: '#475569', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Samtycke</p>
+                {detailLoading ? (
+                  <p style={{ fontSize: 12, color: '#94A3B8' }}>Laddar...</p>
+                ) : detail && (detail.signup_consent.length > 0 || detail.checkout_consents.length > 0) ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {detail.signup_consent.map(c => (
+                      <div key={c.id} style={{ background: '#F0FDF4', borderRadius: 8, padding: '8px 10px', fontSize: 12 }}>
+                        <div style={{ fontWeight: 600, color: '#166534' }}>Registrering — villkor {c.terms_version} / policy {c.privacy_version}</div>
+                        <span style={{ color: '#94A3B8', fontSize: 11 }}>{fmtDate(c.consented_at)}</span>
+                      </div>
+                    ))}
+                    {detail.checkout_consents.map(c => (
+                      <div key={c.id} style={{ background: '#EFF6FF', borderRadius: 8, padding: '8px 10px', fontSize: 12 }}>
+                        <div style={{ fontWeight: 600, color: '#1D4ED8' }}>Köp — villkor {c.terms_version}</div>
+                        <span style={{ color: '#94A3B8', fontSize: 11 }}>{fmtDate(c.consented_at)}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p style={{ fontSize: 12, color: '#CBD5E1' }}>Inget samtycke registrerat</p>
+                )}
               </div>
 
               {/* Level selector */}
@@ -904,6 +1429,28 @@ export function Admin() {
                 {deleting ? 'Raderar...' : 'Radera permanent'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── DELETION SNAPSHOT VIEWER ─────────────────────────────────────── */}
+      {snapshotView && (
+        <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60, padding: 24 }}>
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)' }} onClick={() => setSnapshotView(null)} />
+          <div style={{ position: 'relative', background: 'white', borderRadius: 14, padding: '24px 24px 20px', width: '100%', maxWidth: 640, maxHeight: '80vh', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 64px rgba(0,0,0,0.3)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexShrink: 0 }}>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: '#0F172A', margin: 0 }}>Raderingssnapshot — {snapshotView.deleted_user_email}</h3>
+              <button
+                onClick={() => setSnapshotView(null)}
+                style={{ width: 26, height: 26, borderRadius: '50%', border: 'none', background: '#F1F5F9', cursor: 'pointer', fontSize: 12, color: '#64748B' }}
+                aria-label="Stäng"
+              >
+                ✕
+              </button>
+            </div>
+            <pre style={{ background: '#F8FAFC', borderRadius: 8, padding: 16, fontSize: 11, overflow: 'auto', margin: 0, color: '#374151', flex: 1 }}>
+              {JSON.stringify(snapshotView.snapshot ?? { info: 'Ingen detaljerad snapshot sparad för denna post.' }, null, 2)}
+            </pre>
           </div>
         </div>
       )}

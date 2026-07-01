@@ -22,7 +22,9 @@ async function verifyAdmin(req: Request) {
   if (!token) return null
   const client = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
   const { data: { user } } = await client.auth.getUser(token)
-  if (!user || user.user_metadata?.role !== 'admin') return null
+  // user_metadata is self-editable by any logged-in user — role alone is not a
+  // safe boundary. The exact admin email is the real authorization check.
+  if (!user || user.user_metadata?.role !== 'admin' || user.email !== ADMIN_EMAIL) return null
   return { user, client }
 }
 
@@ -90,6 +92,15 @@ Deno.serve(async (req) => {
     }
 
     const { client, user: adminUser } = ctx
+
+    // The admin account is protected by a DB trigger too (belt and suspenders) —
+    // this check just gives a clean error instead of a raw Postgres exception.
+    if (userId === adminUser.id) {
+      return new Response(JSON.stringify({ error: 'The admin account cannot be deleted' }), {
+        status: 403,
+        headers: { ...h, 'Content-Type': 'application/json' },
+      })
+    }
 
     // 1. Gather snapshot before deletion
     const [

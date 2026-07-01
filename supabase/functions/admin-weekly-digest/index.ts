@@ -154,8 +154,11 @@ Deno.serve(async (req) => {
       client.rpc('admin_active_and_stale'),
     ])
 
+    // The admin account is not a customer — exclude it from every customer-facing metric.
+    const customerUsers = (users ?? []).filter(u => u.email !== ADMIN_EMAIL)
+
     let dau = 0, wau = 0, mau = 0, signupsThisWeek = 0, signupsLastWeek = 0
-    for (const u of (users ?? [])) {
+    for (const u of customerUsers) {
       if (u.last_sign_in_at) {
         const ago = now - new Date(u.last_sign_in_at).getTime()
         if (ago < ONE_DAY) dau++
@@ -177,7 +180,7 @@ Deno.serve(async (req) => {
       ?? { total_scans: 0, total_breaches: 0, avg_breaches: 0, scans_with_breach: 0 }
     const active = ((activeRows ?? []) as { active_cnt: number; stale_cnt: number }[])[0]
       ?? { active_cnt: 0, stale_cnt: 0 }
-    const totalUsers = (users ?? []).length
+    const totalUsers = customerUsers.length
     const totalReqs  = ((reqStatuses ?? []) as { status: string; cnt: number }[]).reduce((s, r) => s + Number(r.cnt), 0)
 
     const snapshot = {

@@ -7,6 +7,8 @@ const ALLOWED = new Set([
   'http://localhost:4173',
 ])
 
+const ADMIN_EMAIL = 'admin@xn--bliglmd-e1a.se'
+
 function cors(origin: string | null) {
   return {
     'Access-Control-Allow-Origin': origin && ALLOWED.has(origin) ? origin : 'https://xn--bliglmd-e1a.se',
@@ -20,7 +22,9 @@ async function verifyAdmin(req: Request) {
   if (!token) return null
   const client = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
   const { data: { user } } = await client.auth.getUser(token)
-  if (!user || user.user_metadata?.role !== 'admin') return null
+  // user_metadata is self-editable by any logged-in user — role alone is not a
+  // safe boundary. The exact admin email is the real authorization check.
+  if (!user || user.user_metadata?.role !== 'admin' || user.email !== ADMIN_EMAIL) return null
   return { user, client }
 }
 
@@ -57,11 +61,15 @@ Deno.serve(async (req) => {
       { data: profile },
       { data: requests },
       { data: scans },
+      { data: checkoutConsents },
+      { data: signupConsent },
     ] = await Promise.all([
       client.auth.admin.getUserById(userId),
       client.from('profiles').select('*').eq('id', userId).single(),
       client.from('requests').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
       client.from('scans').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+      client.from('consent_records').select('*').eq('user_id', userId).order('consented_at', { ascending: false }),
+      client.from('signup_consent_records').select('*').eq('user_id', userId).order('consented_at', { ascending: false }),
     ])
 
     if (!authUser) {
@@ -92,6 +100,8 @@ Deno.serve(async (req) => {
       profile,
       requests,
       scans,
+      checkout_consents: checkoutConsents,
+      signup_consent: signupConsent,
     }
 
     return new Response(JSON.stringify(snapshot), {

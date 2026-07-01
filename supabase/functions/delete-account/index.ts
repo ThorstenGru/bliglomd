@@ -1,5 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+const ADMIN_EMAIL = 'admin@xn--bliglmd-e1a.se'
+
 const ALLOWED_ORIGINS = new Set([
   'https://xn--bliglmd-e1a.se',
   'https://bliglömd.se',
@@ -49,6 +51,12 @@ Deno.serve(async (req) => {
   const { data: { user }, error: authError } = await userClient.auth.getUser()
   if (authError || !user) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...headers, 'Content-Type': 'application/json' } })
+  }
+
+  // The admin account is protected by a DB trigger too (belt and suspenders) —
+  // this check just gives a clean error instead of a raw Postgres exception.
+  if (user.email === ADMIN_EMAIL) {
+    return new Response(JSON.stringify({ error: 'The admin account cannot be deleted' }), { status: 403, headers: { ...headers, 'Content-Type': 'application/json' } })
   }
 
   // Delete the auth user — CASCADE handles profiles, requests, scans, reminders
