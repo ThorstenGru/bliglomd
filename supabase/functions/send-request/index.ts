@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'BliGlömd <noreply@bliglomd.se>',
+        from: 'BliGlömd <noreply@xn--bliglmd-e1a.se>',
         to: gdprEmail,
         reply_to: userEmail,
         subject,

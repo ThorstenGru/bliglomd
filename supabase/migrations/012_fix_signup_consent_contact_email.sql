@@ -1,9 +1,24 @@
-// Increment TERMS_VERSION whenever the T&C text changes.
-// Old consent records retain their snapshot, so audit trail stays intact.
-export const TERMS_VERSION = '2026-06-30-v1'
+-- Fix: support@bliglomd.se was never a real mailbox (wrong domain — missing the
+-- ö, and that plain-ASCII domain isn't even the one BliGlömd owns). Corrects the
+-- snapshot text recorded by the signup consent trigger going forward.
+-- Does not touch existing signup_consent_records rows — those remain an accurate
+-- historical record of what was actually shown at the time.
+create or replace function public.handle_new_user_signup_consent()
+returns trigger as $$
+declare
+  consent_text text := new.raw_user_meta_data->>'signup_consent_text';
+begin
+  if consent_text is null or length(trim(consent_text)) = 0 then
+    raise exception 'Consent to Terms of Service and Privacy Policy is required to create an account';
+  end if;
 
-export const TERMS_FULL_TEXT = `KÖPAVTAL / ALLMÄNNA VILLKOR — BLIGLÖMD
-Version ${TERMS_VERSION}
+  insert into public.signup_consent_records (
+    user_id, terms_version, terms_snapshot, privacy_version, privacy_snapshot, consent_text
+  ) values (
+    new.id,
+    '2026-06-30-v1',
+    $SNAPSHOT$KÖPAVTAL / ALLMÄNNA VILLKOR — BLIGLÖMD
+Version 2026-06-30-v1
 Gäller fr.o.m. 2026-06-30
 
 1. PARTER
@@ -57,16 +72,10 @@ Detta avtal regleras av svensk rätt. Eventuella tvister ska i första hand lös
 12. FULLSTÄNDIGT AVTAL
 Dessa villkor, tillsammans med integritetspolicyn, utgör det fullständiga avtalet mellan parterna och ersätter alla tidigare överenskommelser avseende tjänsten.
 
-Avtalsslutet registreras digitalt vid genomförd betalning med tidsstämpel, versionsangivelse och bekräftelsetext.`
-
-export const CONSENT_CHECKBOX_TEXT =
-  'Jag har läst och accepterar Köpavtalet. Jag samtycker uttryckligen till omedelbar aktivering av digital tjänst — min ångerrätt upphör härmed. Jag förstår att inga återbetalningar ges och att tjänsten levereras utan garantier.'
-
-// Increment PRIVACY_VERSION whenever the privacy policy text changes.
-export const PRIVACY_VERSION = '2026-06-30-v1'
-
-export const PRIVACY_FULL_TEXT = `INTEGRITETSPOLICY — BLIGLÖMD
-Version ${PRIVACY_VERSION}
+Avtalsslutet registreras digitalt vid genomförd betalning med tidsstämpel, versionsangivelse och bekräftelsetext.$SNAPSHOT$,
+    '2026-06-30-v1',
+    $SNAPSHOT2$INTEGRITETSPOLICY — BLIGLÖMD
+Version 2026-06-30-v1
 Gäller fr.o.m. 2026-06-30
 
 1. VEM ANSVARAR FÖR DINA UPPGIFTER?
@@ -91,10 +100,10 @@ Du har rätt att begära tillgång till, rättelse eller radering av dina person
 BliGlömd använder strikt nödvändiga sessionscookies som sätts av Supabase för autentisering. Dessa cookies krävs för att tjänsten ska fungera och kräver inte samtycke enligt Lagen om elektronisk kommunikation (LEK). Inga reklam- eller spårningscookies används.
 
 8. KONTAKT
-För dataskyddsfrågor: kontakt@bliglömd.se. Vi strävar efter att svara inom 30 dagar.`
+För dataskyddsfrågor: kontakt@bliglömd.se. Vi strävar efter att svara inom 30 dagar.$SNAPSHOT2$,
+    consent_text
+  );
 
-export const SIGNUP_CONSENT_TEXT_SV =
-  `Jag har läst och godkänner Användarvillkoren (version ${TERMS_VERSION}) och Integritetspolicyn (version ${PRIVACY_VERSION}).`
-
-export const SIGNUP_CONSENT_TEXT_EN =
-  `I have read and accept the Terms of Service (version ${TERMS_VERSION}) and the Privacy Policy (version ${PRIVACY_VERSION}).`
+  return new;
+end;
+$$ language plpgsql security definer set search_path = public;

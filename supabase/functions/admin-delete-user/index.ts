@@ -156,7 +156,7 @@ Deno.serve(async (req) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'BliGlömd System <noreply@bliglomd.se>',
+          from: 'BliGlömd System <noreply@xn--bliglmd-e1a.se>',
           to: [ADMIN_EMAIL],
           subject: `[Admin] Raderingsrapport — ${authUser.email}`,
           html: buildEmailHtml(snapshot as unknown as Record<string, unknown>),

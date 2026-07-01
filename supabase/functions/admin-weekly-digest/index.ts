@@ -203,7 +203,7 @@ Deno.serve(async (req) => {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: 'BliGlömd System <noreply@bliglomd.se>',
+        from: 'BliGlömd System <noreply@xn--bliglmd-e1a.se>',
         to: [ADMIN_EMAIL],
         subject: `[BliGlömd] Veckorapport — ${weekLabel}`,
         html: buildDigestHtml({ snapshot, top_companies: topCompanies ?? [] }, weekLabel),

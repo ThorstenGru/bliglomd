@@ -54,7 +54,7 @@ Deno.serve(async (_req) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'BliGlömd <noreply@bliglomd.se>',
+          from: 'BliGlömd <noreply@xn--bliglmd-e1a.se>',
           to: req.user_email,
           subject: `Påminnelse: Ditt ${nameSv}-skydd löper snart ut`,
           text: [
@@ -64,7 +64,7 @@ Deno.serve(async (_req) => {
             '',
             `Kom ihåg att förnya skyddet på ${nameSv}.se via BankID — annars visas dina uppgifter igen.`,
             '',
-            'Logga in på bliglomd.se för att se status på dina förfrågningar.',
+            'Logga in på bliglömd.se för att se status på dina förfrågningar.',
             '',
             '– BliGlömd',
           ].join('\n'),

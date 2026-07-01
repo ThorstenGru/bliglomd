@@ -11,7 +11,7 @@ const SV_SECTIONS: Section[] = [
   {
     num: '1', title: 'Parter',
     body: [
-      'Tjänsten BliGlömd tillhandahålls av Thorsten Grund, enskild firma (nedan "BliGlömd" eller "Tjänsteleverantören"). Kontakt: support@bliglomd.se.',
+      'Tjänsten BliGlömd tillhandahålls av Thorsten Grund, enskild firma (nedan "BliGlömd" eller "Tjänsteleverantören"). Kontakt: kontakt@bliglömd.se.',
       'Den fysiska eller juridiska person som ingår detta avtal benämns "Kunden".',
     ],
   },
@@ -102,7 +102,7 @@ const EN_SECTIONS: Section[] = [
   {
     num: '1', title: 'Parties',
     body: [
-      'The service BliGlömd is provided by Thorsten Grund, sole trader (hereinafter "BliGlömd" or "Service Provider"). Contact: support@bliglomd.se.',
+      'The service BliGlömd is provided by Thorsten Grund, sole trader (hereinafter "BliGlömd" or "Service Provider"). Contact: kontakt@bliglömd.se.',
       'The natural or legal person entering into this agreement is referred to as the "Customer".',
     ],
   },
@@ -253,8 +253,8 @@ export function Terms() {
         <div style={{ marginTop: 48, borderTop: '1px solid #E2E8F0', paddingTop: 24, fontSize: 12, color: '#94A3B8', lineHeight: 1.7 }}>
           <p>
             {isEn
-              ? `© 2026 BliGlömd. Contact: support@bliglomd.se. Terms version: ${TERMS_VERSION}.`
-              : `© 2026 BliGlömd. Kontakt: support@bliglomd.se. Villkorsversion: ${TERMS_VERSION}.`
+              ? `© 2026 BliGlömd. Contact: kontakt@bliglömd.se. Terms version: ${TERMS_VERSION}.`
+              : `© 2026 BliGlömd. Kontakt: kontakt@bliglömd.se. Villkorsversion: ${TERMS_VERSION}.`
             }
           </p>
         </div>

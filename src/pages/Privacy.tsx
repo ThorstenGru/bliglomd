@@ -24,8 +24,8 @@ export function Privacy() {
           {
             title: isEn ? '1. Who is responsible for your data?' : '1. Vem ansvarar för dina uppgifter?',
             body: isEn
-              ? 'BliGlömd (Thorsten Grund, sole trader) is the data controller. Contact for data protection questions: support@bliglomd.se.'
-              : 'BliGlömd (Thorsten Grund, enskild firma) är personuppgiftsansvarig. Kontakt för dataskyddsfrågor: support@bliglomd.se.',
+              ? 'BliGlömd (Thorsten Grund, sole trader) is the data controller. Contact for data protection questions: kontakt@bliglömd.se.'
+              : 'BliGlömd (Thorsten Grund, enskild firma) är personuppgiftsansvarig. Kontakt för dataskyddsfrågor: kontakt@bliglömd.se.',
           },
           {
             title: isEn ? '2. What data do we process?' : '2. Vilka uppgifter behandlar vi?',
@@ -54,8 +54,8 @@ export function Privacy() {
           {
             title: isEn ? '6. Your rights' : '6. Dina rättigheter',
             body: isEn
-              ? 'You have the right to access, correct or delete your personal data; to data portability; to object to processing; and to lodge a complaint with the Swedish Authority for Privacy Protection (IMY), imy.se. To exercise your rights, contact support@bliglomd.se.'
-              : 'Du har rätt att begära tillgång till, rättelse eller radering av dina personuppgifter; dataportabilitet; att invända mot behandling; och att lämna klagomål till IMY (Integritetsskyddsmyndigheten), imy.se. Kontakta support@bliglomd.se för att utöva dina rättigheter.',
+              ? 'You have the right to access, correct or delete your personal data; to data portability; to object to processing; and to lodge a complaint with the Swedish Authority for Privacy Protection (IMY), imy.se. To exercise your rights, contact kontakt@bliglömd.se.'
+              : 'Du har rätt att begära tillgång till, rättelse eller radering av dina personuppgifter; dataportabilitet; att invända mot behandling; och att lämna klagomål till IMY (Integritetsskyddsmyndigheten), imy.se. Kontakta kontakt@bliglömd.se för att utöva dina rättigheter.',
           },
           {
             title: isEn ? '7. Cookies' : '7. Kakor (cookies)',
@@ -66,8 +66,8 @@ export function Privacy() {
           {
             title: isEn ? '8. Contact' : '8. Kontakt',
             body: isEn
-              ? 'For data protection queries: support@bliglomd.se. We aim to respond within 30 days.'
-              : 'För dataskyddsfrågor: support@bliglomd.se. Vi strävar efter att svara inom 30 dagar.',
+              ? 'For data protection queries: kontakt@bliglömd.se. We aim to respond within 30 days.'
+              : 'För dataskyddsfrågor: kontakt@bliglömd.se. Vi strävar efter att svara inom 30 dagar.',
           },
         ].map((section) => (
           <div key={section.title} style={{ borderTop: '1px solid #E2E8F0', padding: '24px 0' }}>
@@ -81,7 +81,7 @@ export function Privacy() {
         ))}
 
         <div style={{ marginTop: 48, borderTop: '1px solid #E2E8F0', paddingTop: 24, fontSize: 12, color: '#94A3B8', lineHeight: 1.7 }}>
-          <p>© 2026 BliGlömd · support@bliglomd.se</p>
+          <p>© 2026 BliGlömd · kontakt@bliglömd.se</p>
         </div>
 
       </div>
