@@ -44,7 +44,18 @@ const COMPONENTS: ComponentDef[] = [
           headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` },
         })
         const ms = Math.round(performance.now() - t0)
-        return { status: r.ok ? 'operational' : 'degraded', responseTime: ms, detail: r.ok ? undefined : `HTTP ${r.status}` }
+        if (r.ok) return { status: 'operational', responseTime: ms }
+        // Publishable keys are deliberately blocked from this OpenAPI introspection
+        // endpoint by Supabase's newer API-key system ("Secret API key required") —
+        // a structured 401 here proves the gateway is alive and enforcing that policy
+        // correctly, not that anything is actually broken.
+        if (r.status === 401) {
+          const body = await r.json().catch(() => null)
+          if (body?.message === 'Secret API key required') {
+            return { status: 'operational', responseTime: ms }
+          }
+        }
+        return { status: 'degraded', responseTime: ms, detail: `HTTP ${r.status}` }
       } catch {
         return { status: 'down', responseTime: Math.round(performance.now() - t0) }
       }
@@ -55,12 +66,15 @@ const COMPONENTS: ComponentDef[] = [
     category: 'backend',
     docsUrl: `${SB_URL}/auth/v1/health`,
     check: async () => {
-      if (!SB_URL) return { status: 'unconfigured' }
+      if (!SB_URL || !SB_KEY) return { status: 'unconfigured' }
       const t0 = performance.now()
       try {
-        const r = await fetchWithTimeout(`${SB_URL}/auth/v1/health`)
+        // Supabase's gateway requires an apikey header on every path, including /health.
+        const r = await fetchWithTimeout(`${SB_URL}/auth/v1/health`, {
+          headers: { apikey: SB_KEY },
+        })
         const ms = Math.round(performance.now() - t0)
-        return { status: r.ok ? 'operational' : 'degraded', responseTime: ms }
+        return { status: r.ok ? 'operational' : 'degraded', responseTime: ms, detail: r.ok ? undefined : `HTTP ${r.status}` }
       } catch {
         return { status: 'down', responseTime: Math.round(performance.now() - t0) }
       }
