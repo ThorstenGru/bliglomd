@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { COMPANIES_SORTED } from '../data/companies'
 import { CompanyCard } from '../components/CompanyCard'
@@ -27,6 +28,7 @@ export function Scan() {
   const [hasScanned, setHasScanned] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [companySearch, setCompanySearch] = useState('')
+  const [consentChecked, setConsentChecked] = useState(false)
 
   const q = companySearch.trim().toLowerCase()
   const matchesQuery = (name: string) => !q || name.toLowerCase().includes(q)
@@ -45,6 +47,10 @@ export function Scan() {
 
   async function handleScan(e: React.FormEvent) {
     e.preventDefault()
+    if (!consentChecked) {
+      setError(t.scan.consentRequired)
+      return
+    }
     setLoading(true)
     setError(null)
 
@@ -85,22 +91,39 @@ export function Scan() {
       <h1 className="text-3xl font-bold text-gray-900 mb-2">{t.scan.title}</h1>
       <p className="text-gray-600 mb-8">{t.scan.subtitle}</p>
 
-      <form onSubmit={handleScan} className="flex gap-3 mb-10">
-        <input
-          type="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder={t.scan.placeholder}
-          className="flex-1 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-brand-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-brand-700 transition-colors disabled:opacity-50 whitespace-nowrap"
-        >
-          {loading ? t.scan.btnLoading : t.scan.btn}
-        </button>
+      <form onSubmit={handleScan} className="mb-10">
+        <div className="flex gap-3">
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder={t.scan.placeholder}
+            className="flex-1 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+          />
+          <button
+            type="submit"
+            disabled={loading || !consentChecked}
+            className="bg-brand-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-brand-700 transition-colors disabled:opacity-50 whitespace-nowrap"
+          >
+            {loading ? t.scan.btnLoading : t.scan.btn}
+          </button>
+        </div>
+        <label className="flex items-start gap-2 mt-3 text-xs text-gray-500 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={consentChecked}
+            onChange={(e) => setConsentChecked(e.target.checked)}
+            className="mt-0.5"
+          />
+          <span>
+            {t.scan.consentLabel}
+            <Link to="/privacy" className="text-brand-600 underline" target="_blank" rel="noopener noreferrer">
+              {t.scan.consentLabelLink}
+            </Link>
+            .
+          </span>
+        </label>
       </form>
 
       {error && (

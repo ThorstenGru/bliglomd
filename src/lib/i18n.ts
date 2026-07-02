@@ -135,6 +135,10 @@ export const translations = {
       otherCompanies: 'Övriga företag',
       utgivningsbevisbadge:
         'Utgivningsbevis — kan åberopa journalistiskt syfte för viss data',
+      consentLabel:
+        'Jag samtycker till att min e-postadress skickas till XposedOrNot för att söka efter dataintrång. Enligt deras policy behandlas sökningen endast i minnet och lagras inte, men de uppger inget bolagsnamn eller jurisdiktion — se vår ',
+      consentLabelLink: 'Integritetspolicy',
+      consentRequired: 'Du måste samtycka till skanningen mot XposedOrNot innan du kan fortsätta.',
     },
     request: {
       notFound: 'Företaget hittades inte.',
@@ -394,6 +398,10 @@ export const translations = {
       otherCompanies: 'Other companies',
       utgivningsbevisbadge:
         'Publishing certificate — may invoke journalistic purpose for some data',
+      consentLabel:
+        'I consent to my email address being sent to XposedOrNot to search for data breaches. Per their policy, the query is processed in memory only and not stored, but they disclose no company name or jurisdiction — see our ',
+      consentLabelLink: 'Privacy Policy',
+      consentRequired: 'You must consent to the XposedOrNot scan before continuing.',
     },
     request: {
       notFound: 'Company not found.',

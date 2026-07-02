@@ -18,8 +18,8 @@ export function Privacy() {
           </h1>
           <p style={{ fontSize: 14, color: '#6B7A99', lineHeight: 1.6 }}>
             {isEn
-              ? `Version ${PRIVACY_VERSION}. Effective from 1 July 2026.`
-              : `Version ${PRIVACY_VERSION}. Gäller fr.o.m. 1 juli 2026.`
+              ? `Version ${PRIVACY_VERSION}. Effective from 2 July 2026.`
+              : `Version ${PRIVACY_VERSION}. Gäller fr.o.m. 2026-07-02.`
             }
           </p>
         </div>
@@ -34,20 +34,20 @@ export function Privacy() {
           {
             title: isEn ? '2. What data do we process?' : '2. Vilka uppgifter behandlar vi?',
             body: isEn
-              ? 'Account data: email address, full name. Service data: GDPR deletion requests sent (company, status, timestamp). Scan data: email addresses you scan, breach results. Payment data: handled entirely by Stripe — BliGlömd never sees card numbers. Consent records: timestamp and text of your agreement to our terms at signup and purchase. Traffic statistics: see section 7.'
-              : 'Kontodata: e-postadress, fullständigt namn. Tjänstedata: GDPR-raderingsförfrågningar (bolag, status, tidsstämpel). Skanningsdata: e-postadresser du skannar och intrångresultat. Betalningsdata: hanteras helt av Stripe — BliGlömd ser aldrig kortnummer. Samtyckeslogg: tidsstämpel och text för ditt avtalsaccepterande vid registrering och köp. Besöksstatistik: se avsnitt 7.',
+              ? 'Account data: email address, full name. Service data: GDPR deletion requests sent (company, status, timestamp). Scan data: email addresses you scan, breach results — see section 4 regarding XposedOrNot. Payment data: handled entirely by Stripe — BliGlömd never sees card numbers. Consent records: timestamp and text of your agreement to our terms at signup, purchase, and scanning. Traffic statistics: see section 7.'
+              : 'Kontodata: e-postadress, fullständigt namn. Tjänstedata: GDPR-raderingsförfrågningar (bolag, status, tidsstämpel). Skanningsdata: e-postadresser du skannar och intrångresultat — se avsnitt 4 om XposedOrNot. Betalningsdata: hanteras helt av Stripe — BliGlömd ser aldrig kortnummer. Samtyckeslogg: tidsstämpel och text för ditt avtalsaccepterande vid registrering, köp och skanning. Besöksstatistik: se avsnitt 7.',
           },
           {
             title: isEn ? '3. Why do we process your data?' : '3. Varför behandlar vi dina uppgifter?',
             body: isEn
-              ? 'To provide the service (legal basis: contract performance, GDPR Art. 6(1)(b)). To send GDPR deletion requests on your behalf (contract performance). To maintain accounting records as required by Swedish law (legal obligation, Art. 6(1)(c)). To record consent (legal obligation + legitimate interest, Art. 6(1)(c) and (f)). To understand how the service is used and identify which companies are missing from our directory (legitimate interest, Art. 6(1)(f)).'
-              : 'För att tillhandahålla tjänsten (rättslig grund: avtalsprestanda, GDPR Art. 6(1)(b)). För att skicka GDPR-raderingsförfrågningar å dina vägnar (avtalsprestanda). För att föra räkenskaper enligt Bokföringslagen (rättslig förpliktelse, Art. 6(1)(c)). För att registrera samtycke (rättslig förpliktelse + berättigat intresse, Art. 6(1)(c) och (f)). För att förstå hur tjänsten används och identifiera vilka företag som saknas i vår katalog (berättigat intresse, Art. 6(1)(f)).',
+              ? 'To provide the service (legal basis: contract performance, GDPR Art. 6(1)(b)). To send GDPR deletion requests on your behalf (contract performance). To search XposedOrNot\'s breach database (explicit consent, Art. 6(1)(a), obtained separately before each scan). To maintain accounting records as required by Swedish law (legal obligation, Art. 6(1)(c)). To record consent (legal obligation + legitimate interest, Art. 6(1)(c) and (f)). To understand how the service is used and identify which companies are missing from our directory (legitimate interest, Art. 6(1)(f)).'
+              : 'För att tillhandahålla tjänsten (rättslig grund: avtalsprestanda, GDPR Art. 6(1)(b)). För att skicka GDPR-raderingsförfrågningar å dina vägnar (avtalsprestanda). För att söka i XposedOrNots dataintrångsdatabas (uttryckligt samtycke, Art. 6(1)(a), inhämtat separat inför varje skanning). För att föra räkenskaper enligt Bokföringslagen (rättslig förpliktelse, Art. 6(1)(c)). För att registrera samtycke (rättslig förpliktelse + berättigat intresse, Art. 6(1)(c) och (f)). För att förstå hur tjänsten används och identifiera vilka företag som saknas i vår katalog (berättigat intresse, Art. 6(1)(f)).',
           },
           {
             title: isEn ? '4. Data processors (sub-processors)' : '4. Personuppgiftsbiträden',
             body: isEn
-              ? 'Supabase Inc. (database and authentication, servers in Frankfurt, EU). Stripe Inc. (payment processing, EU data handling). Brevo SAS (transactional email, headquartered and hosted in France, EU). All processors are bound by data processing agreements.'
-              : 'Supabase Inc. (databas och autentisering, servrar i Frankfurt, EU). Stripe Inc. (betalningshantering, EU-datahantering). Brevo SAS (transaktionell e-post, huvudkontor och datahantering i Frankrike, EU). Alla biträden är bundna av personuppgiftsbiträdesavtal.',
+              ? 'Supabase Inc. (database and authentication, servers in Frankfurt, EU). Stripe Inc. (payment processing, EU data handling). Brevo SAS (transactional email, headquartered and hosted in France, EU). XposedOrNot (breach-database lookup during email scans) — its own policy states queries are processed in memory only and not stored, but it discloses no company name or jurisdiction, so we obtain your explicit consent separately before each scan rather than treating it as a standard processor. All other processors are bound by data processing agreements.'
+              : 'Supabase Inc. (databas och autentisering, servrar i Frankfurt, EU). Stripe Inc. (betalningshantering, EU-datahantering). Brevo SAS (transaktionell e-post, huvudkontor och datahantering i Frankrike, EU). XposedOrNot (sökning mot databas för läckta uppgifter vid e-postskanning) — leverantören anger i sin egen policy att sökningar behandlas endast i minnet och inte lagras, men offentliggör inget bolagsnamn eller jurisdiktion, varför vi inhämtar ditt uttryckliga samtycke separat inför varje skanning istället för att behandla dem som ett vanligt personuppgiftsbiträde. Alla övriga biträden är bundna av personuppgiftsbiträdesavtal.',
           },
           {
             title: isEn ? '5. How long do we keep your data?' : '5. Hur länge sparar vi dina uppgifter?',
