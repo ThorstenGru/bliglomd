@@ -460,13 +460,10 @@ export function Admin() {
     loadConsents()
     loadTraffic()
     // Admin actions are audited, but admin logins never were — close that gap.
-    supabase.from('audit_logs').insert({
-      user_id: data.user.id,
-      user_email: data.user.email,
-      action: 'admin_login',
-      resource: null,
-      metadata: { user_agent: navigator.userAgent },
-    })
+    // Routed through an edge function (service role) because a direct client
+    // insert here was silently rejected by RLS despite a correct-looking policy —
+    // matches the pattern already used by admin_delete/export/level_change.
+    supabase.functions.invoke('admin-log-login', { body: { user_agent: navigator.userAgent } })
   }
 
   useEffect(() => {
