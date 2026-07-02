@@ -93,8 +93,11 @@ export function AuthModal({ onClose }: AuthModalProps) {
               <p className="text-sm text-gray-500 mb-3">
                 {t.auth.signupDoneMsg} <strong>{email}</strong>. {t.auth.signupDoneAction}
               </p>
-              <p className="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2 text-left">
+              <p className="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2 text-left mb-2">
                 {t.auth.signupDoneExpiry}
+              </p>
+              <p className="text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2 text-left">
+                {t.auth.signupDoneSpam}
               </p>
             </div>
           ) : (

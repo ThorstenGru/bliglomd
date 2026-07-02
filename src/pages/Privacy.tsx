@@ -46,8 +46,8 @@ export function Privacy() {
           {
             title: isEn ? '4. Data processors (sub-processors)' : '4. Personuppgiftsbiträden',
             body: isEn
-              ? 'Supabase Inc. (database and authentication, servers in Frankfurt, EU). Stripe Inc. (payment processing, EU data handling). Resend Inc. (transactional email, EU data handling). All processors are bound by data processing agreements.'
-              : 'Supabase Inc. (databas och autentisering, servrar i Frankfurt, EU). Stripe Inc. (betalningshantering, EU-datahantering). Resend Inc. (transaktionell e-post, EU-datahantering). Alla biträden är bundna av personuppgiftsbiträdesavtal.',
+              ? 'Supabase Inc. (database and authentication, servers in Frankfurt, EU). Stripe Inc. (payment processing, EU data handling). Brevo SAS (transactional email, headquartered and hosted in France, EU). All processors are bound by data processing agreements.'
+              : 'Supabase Inc. (databas och autentisering, servrar i Frankfurt, EU). Stripe Inc. (betalningshantering, EU-datahantering). Brevo SAS (transaktionell e-post, huvudkontor och datahantering i Frankrike, EU). Alla biträden är bundna av personuppgiftsbiträdesavtal.',
           },
           {
             title: isEn ? '5. How long do we keep your data?' : '5. Hur länge sparar vi dina uppgifter?',

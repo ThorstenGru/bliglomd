@@ -19,9 +19,9 @@ const REMINDER_COMPANIES: Record<string, { reminderMonths: number; nameSv: strin
 Deno.serve(async (_req) => {
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const serviceKey  = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-  const resendKey   = Deno.env.get('RESEND_API_KEY')
+  const brevoKey    = Deno.env.get('BREVO_API_KEY')
 
-  if (!supabaseUrl || !serviceKey || !resendKey) {
+  if (!supabaseUrl || !serviceKey || !brevoKey) {
     return new Response(JSON.stringify({ error: 'Missing environment variables' }), { status: 500 })
   }
 
@@ -47,17 +47,17 @@ Deno.serve(async (_req) => {
     }
 
     for (const req of (requests ?? [])) {
-      const res = await fetch('https://api.resend.com/emails', {
+      const res = await fetch('https://api.brevo.com/v3/smtp/email', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${resendKey}`,
+          'api-key': brevoKey,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'BliGlömd <noreply@xn--bliglmd-e1a.se>',
-          to: req.user_email,
+          sender: { name: 'BliGlömd', email: 'noreply@xn--bliglmd-e1a.se' },
+          to: [{ email: req.user_email }],
           subject: `Påminnelse: Ditt ${nameSv}-skydd löper snart ut`,
-          text: [
+          textContent: [
             `Hej ${req.user_name},`,
             '',
             `Ditt dataskydd på ${nameSv} löper ut om ungefär en månad.`,
@@ -79,7 +79,7 @@ Deno.serve(async (_req) => {
         totalSent++
       } else {
         const body = await res.text()
-        errors.push(`resend ${req.id}: ${res.status} ${body}`)
+        errors.push(`brevo ${req.id}: ${res.status} ${body}`)
       }
     }
   }

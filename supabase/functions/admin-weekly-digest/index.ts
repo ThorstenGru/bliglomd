@@ -126,9 +126,9 @@ Deno.serve(async (req) => {
       }
     }
 
-    const resendKey = Deno.env.get('RESEND_API_KEY')
-    if (!resendKey) {
-      return new Response(JSON.stringify({ error: 'RESEND_API_KEY not set' }), { status: 500 })
+    const brevoKey = Deno.env.get('BREVO_API_KEY')
+    if (!brevoKey) {
+      return new Response(JSON.stringify({ error: 'BREVO_API_KEY not set' }), { status: 500 })
     }
 
     const client = createClient(
@@ -202,19 +202,19 @@ Deno.serve(async (req) => {
 
     const weekLabel = new Date().toLocaleDateString('sv-SE', { year: 'numeric', month: 'short', day: 'numeric' })
 
-    const emailRes = await fetch('https://api.resend.com/emails', {
+    const emailRes = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
+      headers: { 'api-key': brevoKey, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: 'BliGlömd System <noreply@xn--bliglmd-e1a.se>',
-        to: [ADMIN_EMAIL],
+        sender: { name: 'BliGlömd System', email: 'noreply@xn--bliglmd-e1a.se' },
+        to: [{ email: ADMIN_EMAIL }],
         subject: `[BliGlömd] Veckorapport — ${weekLabel}`,
-        html: buildDigestHtml({ snapshot, top_companies: topCompanies ?? [] }, weekLabel),
+        htmlContent: buildDigestHtml({ snapshot, top_companies: topCompanies ?? [] }, weekLabel),
       }),
     })
 
     if (!emailRes.ok) {
-      console.error('Resend failed:', emailRes.status, await emailRes.text())
+      console.error('Brevo failed:', emailRes.status, await emailRes.text())
     }
 
     return new Response(JSON.stringify({ ok: true, sent_to: ADMIN_EMAIL, week: weekLabel }), {

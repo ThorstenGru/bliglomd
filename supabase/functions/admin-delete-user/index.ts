@@ -157,24 +157,24 @@ Deno.serve(async (req) => {
     const { error: deleteErr } = await client.auth.admin.deleteUser(userId)
     if (deleteErr) throw deleteErr
 
-    // 5. Email report via Resend (sent after confirmed deletion to avoid false reports)
-    const resendKey = Deno.env.get('RESEND_API_KEY')
-    if (resendKey) {
-      const emailRes = await fetch('https://api.resend.com/emails', {
+    // 5. Email report via Brevo (sent after confirmed deletion to avoid false reports)
+    const brevoKey = Deno.env.get('BREVO_API_KEY')
+    if (brevoKey) {
+      const emailRes = await fetch('https://api.brevo.com/v3/smtp/email', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${resendKey}`,
+          'api-key': brevoKey,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'BliGlömd System <noreply@xn--bliglmd-e1a.se>',
-          to: [ADMIN_EMAIL],
+          sender: { name: 'BliGlömd System', email: 'noreply@xn--bliglmd-e1a.se' },
+          to: [{ email: ADMIN_EMAIL }],
           subject: `[Admin] Raderingsrapport — ${authUser.email}`,
-          html: buildEmailHtml(snapshot as unknown as Record<string, unknown>),
+          htmlContent: buildEmailHtml(snapshot as unknown as Record<string, unknown>),
         }),
       })
       if (!emailRes.ok) {
-        console.error('Resend email failed:', emailRes.status, await emailRes.text())
+        console.error('Brevo email failed:', emailRes.status, await emailRes.text())
       }
     }
 

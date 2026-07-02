@@ -65,23 +65,23 @@ Deno.serve(async (req) => {
       ? `Personal data deletion request – GDPR Article 17 (${companyName})`
       : `Begäran om radering av personuppgifter – GDPR Artikel 17 (${companyName})`
 
-    const apiKey = Deno.env.get('RESEND_API_KEY')
+    const apiKey = Deno.env.get('BREVO_API_KEY')
     if (!apiKey) {
-      throw new Error('RESEND_API_KEY is not configured')
+      throw new Error('BREVO_API_KEY is not configured')
     }
 
-    const res = await fetch('https://api.resend.com/emails', {
+    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
+        'api-key': apiKey,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'BliGlömd <noreply@xn--bliglmd-e1a.se>',
-        to: gdprEmail,
-        reply_to: userEmail,
+        sender: { name: 'BliGlömd', email: 'noreply@xn--bliglmd-e1a.se' },
+        to: [{ email: gdprEmail }],
+        replyTo: { email: userEmail },
         subject,
-        text: mailBody,
+        textContent: mailBody,
       }),
       signal: AbortSignal.timeout(15_000),
     })
@@ -89,11 +89,11 @@ Deno.serve(async (req) => {
     const data = await res.json()
 
     if (!res.ok) {
-      throw new Error(`Resend API error ${res.status}: ${JSON.stringify(data)}`)
+      throw new Error(`Brevo API error ${res.status}: ${JSON.stringify(data)}`)
     }
 
     return new Response(
-      JSON.stringify({ success: true, id: data.id }),
+      JSON.stringify({ success: true, id: data.messageId }),
       { headers: { ...headers, 'Content-Type': 'application/json' } }
     )
   } catch (err) {

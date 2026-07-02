@@ -8,8 +8,8 @@ Browser
         ├─ Supabase Auth (JWT sessions)
         ├─ Supabase DB (PostgreSQL + RLS)
         ├─ Edge Function: scan-email        ──► XposedOrNot API
-        ├─ Edge Function: send-request      ──► Resend API ──► company GDPR email
-        ├─ Edge Function: send-reminders    ──► Resend API ──► user renewal reminder
+        ├─ Edge Function: send-request      ──► Brevo API ──► company GDPR email
+        ├─ Edge Function: send-reminders    ──► Brevo API ──► user renewal reminder
         ├─ Edge Function: delete-account    ──► deletes own account
         ├─ Edge Function: admin-list-users  ──► user list + counts
         ├─ Edge Function: admin-update-user ──► change level + audit
@@ -96,7 +96,7 @@ Companies with `utgivningsbevis: true` have legal protection for editorially pub
 |------|--------|---------|
 | **Trace** (free) | User reads instructions, visits company's GDPR portal | No |
 | **Cipher** (paid) | User copies the generated email template and sends it manually | No |
-| **Ghost** (paid) | BliGlömd sends the email via Resend + inserts a `requests` row | Yes |
+| **Ghost** (paid) | BliGlömd sends the email via Brevo + inserts a `requests` row | Yes |
 
 ---
 
@@ -181,7 +181,7 @@ Calls XposedOrNot API (free). Returns empty array on 404. 10 s timeout. Validate
 **Input:** `{ companyName, gdprEmail, userName, userEmail, lang }`
 **Output:** `{ "success": true, "id": "resend-message-id" }`
 
-Generates bilingual GDPR Article 17 email. Requires `RESEND_API_KEY` secret. Input-validated. 15 s timeout.
+Generates bilingual GDPR Article 17 email. Requires `BREVO_API_KEY` secret. Input-validated. 15 s timeout.
 
 ### `send-reminders`
 Runs daily 09:00 UTC via pg_cron. For each company in `REMINDER_COMPANIES`, finds `status=sent` requests created 11+ months ago and emails the user a renewal reminder, then marks the request `expired`.
@@ -200,7 +200,7 @@ Updates `profiles.level` for a given user. Writes an `admin_level_change` event 
 2. Fetches user data for the audit record
 3. Deletes the auth user (cascades to all rows)
 4. Inserts into `admin_deletions`
-5. Sends HTML deletion report to admin via Resend
+5. Sends HTML deletion report to admin via Brevo
 6. Logs `admin_delete` to `audit_logs`
 
 User data is HTML-escaped before insertion into the email template.
@@ -227,7 +227,7 @@ DAU/WAU/MAU and signup trends computed client-side from `listUsers` result. Retu
 
 ### `admin-weekly-digest`
 Checks `Authorization: Bearer <DIGEST_SECRET>` (soft — skipped if secret not set in env).
-Queries 6 parallel RPCs + listUsers. Builds and sends an HTML email report to `admin@bliglömd.se` via Resend. Called by pg_cron every Monday 07:00 UTC; the cron job retrieves the secret from Supabase Vault at runtime.
+Queries 6 parallel RPCs + listUsers. Builds and sends an HTML email report to `admin@bliglömd.se` via Brevo. Called by pg_cron every Monday 07:00 UTC; the cron job retrieves the secret from Supabase Vault at runtime.
 
 ---
 
@@ -316,7 +316,7 @@ CNAME www  thorstengru.github.io
 |---------|-----------|
 | Anon key exposure | Acceptable — RLS policies prevent cross-user access |
 | Service role key | Only used server-side in edge functions; never in frontend code or GitHub Secrets |
-| RESEND_API_KEY | Supabase Edge Function Secret only; never in git |
+| BREVO_API_KEY | Supabase Edge Function Secret only; never in git |
 | DIGEST_SECRET | Supabase Edge Function Secret + Vault; never in git |
 | Admin access | JWT role claim (`user_metadata.role === 'admin'`) verified in every admin edge function |
 | Audit log DoS | `audit_logs` INSERT policy requires `auth.uid() = user_id AND uid IS NOT NULL` |

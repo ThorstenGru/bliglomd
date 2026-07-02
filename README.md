@@ -37,8 +37,8 @@ Browser (React SPA — GitHub Pages / bliglömd.se)
   │     ├── audit_logs       Admin action log
   │     └── admin_deletions  User deletion records
   ├── Edge Function: scan-email       → XposedOrNot API (breach data)
-  ├── Edge Function: send-request     → Resend API (GDPR email to company)
-  ├── Edge Function: send-reminders   → Resend API (user renewal reminders)
+  ├── Edge Function: send-request     → Brevo API (GDPR email to company)
+  ├── Edge Function: send-reminders   → Brevo API (user renewal reminders)
   ├── Edge Function: delete-account   → Deletes user on their own request
   ├── Edge Function: admin-list-users → Admin: paginated user list + stats
   ├── Edge Function: admin-update-user→ Admin: change subscription level
@@ -62,7 +62,7 @@ Supabase Cron (pg_cron + pg_net):
 | Routing | React Router v6 |
 | Auth & DB | Supabase (PostgreSQL 15 + RLS) |
 | Edge Functions | Supabase Edge Functions (Deno runtime) |
-| Email | Resend.com |
+| Email | Brevo.com |
 | Hosting | GitHub Pages + custom domain |
 | CI/CD | GitHub Actions (`.github/workflows/deploy.yml`) |
 | Secrets | Supabase Edge Function Secrets + Supabase Vault |
@@ -181,7 +181,7 @@ Checks an email address for known data breaches.
 Sends a GDPR Article 17 deletion request email to a company.
 - **Input:** `{ companyName, gdprEmail, userName, userEmail, lang }`
 - **Output:** `{ "success": true, "id": "resend-id" }`
-- Uses Resend. Input-validated. CORS restricted to `bliglömd.se` + localhost.
+- Uses Brevo. Input-validated. CORS restricted to `bliglömd.se` + localhost.
 
 ### `send-reminders`
 Daily cron (09:00 UTC). Finds opt-out requests with annual protection that are nearing expiry and sends renewal reminder emails to the user.
@@ -256,7 +256,7 @@ The service is designed to run with zero manual intervention:
 - **RLS everywhere** — users can only access their own rows; service-role key never exposed to browser
 - **CORS restricted** — edge functions only accept requests from `bliglömd.se` and `localhost`
 - **Admin role-check** — both client-side (`user_metadata.role`) and server-side (edge function verifies JWT claims)
-- **No secrets in git** — `RESEND_API_KEY` and `DIGEST_SECRET` are Supabase Edge Function Secrets; `DIGEST_SECRET` is also in Supabase Vault for pg_cron access
+- **No secrets in git** — `BREVO_API_KEY` and `DIGEST_SECRET` are Supabase Edge Function Secrets; `DIGEST_SECRET` is also in Supabase Vault for pg_cron access
 - **HTML-escaped email content** — admin deletion report escapes all user-supplied data before inserting into HTML
 - **Audit log** — every admin action is recorded with actor, target, and metadata
 
@@ -281,7 +281,7 @@ npm run dev
 # → http://localhost:5173
 ```
 
-Edge function secrets (`RESEND_API_KEY`, `DIGEST_SECRET`) are only needed for functions that use them — local dev with mock data works without them.
+Edge function secrets (`BREVO_API_KEY`, `DIGEST_SECRET`) are only needed for functions that use them — local dev with mock data works without them.
 
 ---
 
@@ -339,7 +339,7 @@ SPA routing on GitHub Pages is handled by `public/404.html` (saves path to `sess
 |----------|-------|-------|
 | `VITE_SUPABASE_URL` | GitHub Secrets + `.env.local` | Safe to expose — public URL |
 | `VITE_SUPABASE_ANON_KEY` | GitHub Secrets + `.env.local` | Safe to expose — RLS protects data |
-| `RESEND_API_KEY` | Supabase Edge Function Secrets | **Never in git or GitHub Secrets** |
+| `BREVO_API_KEY` | Supabase Edge Function Secrets | **Never in git or GitHub Secrets** |
 | `DIGEST_SECRET` | Supabase Edge Function Secrets + Vault | **Never in git** — Vault allows pg_cron access |
 
 ---
@@ -393,7 +393,7 @@ supabase/
 │   ├── delete-account/         User: self-deletion
 │   ├── scan-email/             Breach check via XposedOrNot
 │   ├── send-reminders/         Cron: renewal reminder emails
-│   └── send-request/           GDPR deletion email via Resend
+│   └── send-request/           GDPR deletion email via Brevo
 └── migrations/
     ├── 001_initial_schema.sql
     ├── 002_add_scan_columns.sql
