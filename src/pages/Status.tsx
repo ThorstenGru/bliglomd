@@ -159,13 +159,13 @@ const COMPONENTS: ComponentDef[] = [
     },
   },
   {
-    id: 'resend',
+    id: 'brevo',
     category: 'external',
-    docsUrl: 'https://resend.com',
+    docsUrl: 'https://www.brevo.com',
     check: async () => {
       const t0 = performance.now()
       try {
-        await fetchWithTimeout('https://api.resend.com/', { mode: 'no-cors' }, 8000)
+        await fetchWithTimeout('https://api.brevo.com/', { mode: 'no-cors' }, 8000)
         return { status: 'operational', responseTime: Math.round(performance.now() - t0) }
       } catch {
         return { status: 'down', responseTime: Math.round(performance.now() - t0) }
@@ -180,6 +180,20 @@ const COMPONENTS: ComponentDef[] = [
       const t0 = performance.now()
       try {
         await fetchWithTimeout('https://api.xposedornot.com/', { mode: 'no-cors' }, 8000)
+        return { status: 'operational', responseTime: Math.round(performance.now() - t0) }
+      } catch {
+        return { status: 'down', responseTime: Math.round(performance.now() - t0) }
+      }
+    },
+  },
+  {
+    id: 'stripe',
+    category: 'external',
+    docsUrl: 'https://status.stripe.com',
+    check: async () => {
+      const t0 = performance.now()
+      try {
+        await fetchWithTimeout('https://api.stripe.com/', { mode: 'no-cors' }, 8000)
         return { status: 'operational', responseTime: Math.round(performance.now() - t0) }
       } catch {
         return { status: 'down', responseTime: Math.round(performance.now() - t0) }
@@ -240,19 +254,23 @@ const T = {
       },
       edge_send: {
         name: 'Edge Function: send-request',
-        desc: 'Serverlös funktion som skickar GDPR-raderingsmail via Resend API',
+        desc: 'Serverlös funktion som skickar GDPR-raderingsmail via Brevo API',
       },
       edge_scan: {
         name: 'Edge Function: scan-email',
         desc: 'Serverlös funktion som söker dataintrång via HaveIBeenPwned API',
       },
-      resend: {
-        name: 'Resend Mail API',
-        desc: 'Extern e-posttjänst — levererar GDPR-raderingsmail till företagen',
+      brevo: {
+        name: 'Brevo Mail API',
+        desc: 'Extern e-posttjänst — levererar GDPR-raderingsmail till företagen och kontobekräftelser',
       },
       hibp: {
         name: 'XposedOrNot API',
         desc: 'Gratis extern tjänst — kontrollerar om e-postadressen förekommer i dataintrång',
+      },
+      stripe: {
+        name: 'Stripe API',
+        desc: 'Extern betaltjänst — hanterar alla kort- och abonnemangsbetalningar',
       },
     },
     backHome: '← Hem',
@@ -306,19 +324,23 @@ const T = {
       },
       edge_send: {
         name: 'Edge Function: send-request',
-        desc: 'Serverless function that sends GDPR deletion emails via Resend API',
+        desc: 'Serverless function that sends GDPR deletion emails via Brevo API',
       },
       edge_scan: {
         name: 'Edge Function: scan-email',
         desc: 'Serverless function that checks data breaches via HaveIBeenPwned API',
       },
-      resend: {
-        name: 'Resend Mail API',
-        desc: 'External email service — delivers GDPR deletion emails to companies',
+      brevo: {
+        name: 'Brevo Mail API',
+        desc: 'External email service — delivers GDPR deletion emails to companies and account confirmations',
       },
       hibp: {
         name: 'XposedOrNot API',
         desc: 'Free external service — checks if an email address appears in known data breaches',
+      },
+      stripe: {
+        name: 'Stripe API',
+        desc: 'External payment service — handles all card and subscription payments',
       },
     },
     backHome: '← Home',
