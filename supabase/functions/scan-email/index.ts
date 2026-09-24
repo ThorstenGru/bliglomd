@@ -35,13 +35,22 @@ Deno.serve(async (req) => {
       )
     }
 
-    const xonRes = await fetch(
-      `https://api.xposedornot.com/v1/breach-analytics?email=${encodeURIComponent(email)}`,
-      {
-        headers: { 'User-Agent': 'BliGlomd-GDPR-Tool/1.0' },
-        signal: AbortSignal.timeout(10_000),
-      }
-    )
+    let xonRes: Response
+    try {
+      xonRes = await fetch(
+        `https://api.xposedornot.com/v1/breach-analytics?email=${encodeURIComponent(email)}`,
+        {
+          headers: { 'User-Agent': 'BliGlomd-GDPR-Tool/1.0' },
+          signal: AbortSignal.timeout(10_000),
+        }
+      )
+    } catch (fetchErr) {
+      console.error('XposedOrNot fetch failed:', fetchErr)
+      return new Response(
+        JSON.stringify({ breaches: [], unavailable: true }),
+        { headers: { ...headers, 'Content-Type': 'application/json' } }
+      )
+    }
 
     if (xonRes.status === 404) {
       // XposedOrNot returns 404 when no breaches found
@@ -52,7 +61,15 @@ Deno.serve(async (req) => {
     }
 
     if (!xonRes.ok) {
-      throw new Error(`XposedOrNot API error: ${xonRes.status}`)
+      // XposedOrNot occasionally rejects requests from our server's IP range (seen: 403).
+      // Don't fail the whole scan for it — the company directory below is still useful,
+      // and the frontend shows an honest "couldn't check breaches right now" note instead
+      // of silently claiming "no breaches found".
+      console.error(`XposedOrNot API error: ${xonRes.status}`)
+      return new Response(
+        JSON.stringify({ breaches: [], unavailable: true }),
+        { headers: { ...headers, 'Content-Type': 'application/json' } }
+      )
     }
 
     const data = await xonRes.json()

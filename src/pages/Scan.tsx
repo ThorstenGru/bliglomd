@@ -25,6 +25,7 @@ export function Scan() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [breaches, setBreaches] = useState<XonBreach[]>([])
+  const [breachCheckUnavailable, setBreachCheckUnavailable] = useState(false)
   const [hasScanned, setHasScanned] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [companySearch, setCompanySearch] = useState('')
@@ -63,6 +64,7 @@ export function Scan() {
 
       const foundBreaches: XonBreach[] = data?.breaches ?? []
       setBreaches(foundBreaches)
+      setBreachCheckUnavailable(Boolean(data?.unavailable))
       setHasScanned(true)
       trackFunnel('scan_completed', { breach_count: foundBreaches.length })
 
@@ -136,11 +138,17 @@ export function Scan() {
           <div className="mb-10">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
               {t.scan.breachTitle}{' '}
-              <span className={`text-base font-normal ${breaches.length > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                ({breaches.length} {t.scan.found})
-              </span>
+              {!breachCheckUnavailable && (
+                <span className={`text-base font-normal ${breaches.length > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                  ({breaches.length} {t.scan.found})
+                </span>
+              )}
             </h2>
-            {breaches.length === 0 ? (
+            {breachCheckUnavailable ? (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-amber-800 text-sm">
+                {t.scan.breachCheckUnavailable}
+              </div>
+            ) : breaches.length === 0 ? (
               <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-green-800 text-sm">
                 {t.scan.noBreaches}
               </div>

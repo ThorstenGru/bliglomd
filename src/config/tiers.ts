@@ -41,7 +41,7 @@ export const TIERS: Record<1 | 2 | 3, Tier> = {
       en: 'Your digital trace is still out there — we show you where.',
     },
     description: {
-      sv: 'Identifiera var dina uppgifter finns och få guidade instruktioner för varje företag. Skärma din e-post mot kända dataintrång.',
+      sv: 'Identifiera var dina uppgifter finns och få guidade instruktioner för varje företag. Skanna din e-post mot kända dataintrång.',
       en: 'Identify where your data exists and get guided instructions for each company. Scan your email against known data breaches.',
     },
     features: {

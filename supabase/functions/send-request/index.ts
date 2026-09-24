@@ -1,3 +1,5 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
 const ALLOWED_ORIGINS = new Set([
   'https://xn--bliglmd-e1a.se',
   'https://bliglömd.se',
@@ -6,6 +8,7 @@ const ALLOWED_ORIGINS = new Set([
 ])
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const GHOST_LEVEL = 3
 
 function corsHeaders(origin: string | null) {
   const allowed = origin && ALLOWED_ORIGINS.has(origin) ? origin : 'https://xn--bliglmd-e1a.se'
@@ -26,6 +29,39 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Ghost-tier only: require a logged-in user whose profile is actually on level 3.
+    // (The UI already hides this behind an upgrade prompt for lower tiers — this is the
+    // server-side check that makes that enforceable rather than just a UI suggestion, and
+    // stops this endpoint from being an open, unauthenticated way to send arbitrary email.)
+    const auth = req.headers.get('authorization')
+    if (!auth) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized' }),
+        { status: 401, headers: { ...headers, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const sb = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: auth } } }
+    )
+    const { data: { user }, error: authErr } = await sb.auth.getUser()
+    if (authErr || !user) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized' }),
+        { status: 401, headers: { ...headers, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const { data: profile } = await sb.from('profiles').select('level').eq('id', user.id).single()
+    if (!profile || profile.level < GHOST_LEVEL) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Ghost subscription required' }),
+        { status: 403, headers: { ...headers, 'Content-Type': 'application/json' } }
+      )
+    }
+
     const body = await req.json().catch(() => ({}))
     const { companyName, gdprEmail, userName, userEmail, lang } = body
 
@@ -77,9 +113,13 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        sender: { name: 'BliGlömd', email: 'noreply@xn--bliglmd-e1a.se' },
+        // Sent as the user, not as BliGlömd acting on their behalf: display name leads with
+        // their own name (Brevo requires an authenticated sending domain for deliverability,
+        // so the address itself stays ours — but replyTo below routes any response straight
+        // to the user, and the message body is signed by them, never by BliGlömd).
+        sender: { name: `${userName} via BliGlömd`, email: 'noreply@xn--bliglmd-e1a.se' },
         to: [{ email: gdprEmail }],
-        replyTo: { email: userEmail },
+        replyTo: { email: userEmail, name: userName },
         subject,
         textContent: mailBody,
       }),

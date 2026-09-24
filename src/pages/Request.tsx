@@ -1,17 +1,30 @@
-import { useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { COMPANIES } from '../data/companies'
 import { LevelBadge } from '../components/LevelBadge'
 import { RequestTypeBadge } from '../components/RequestTypeBadge'
 import { supabase } from '../lib/supabase'
 import { trackFunnel } from '../lib/analytics'
 import { useLang } from '../contexts/LanguageContext'
+import { tierByKey } from '../config/tiers'
 
 export function Request() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { t, lang } = useLang()
   const company = COMPANIES.find((c) => c.id === id)
+
+  // null = not logged in, 0 = logged in but profile not loaded yet, 1-3 = actual tier
+  const [userLevel, setUserLevel] = useState<number | null>(0)
+  useEffect(() => {
+    let cancelled = false
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) { if (!cancelled) setUserLevel(null); return }
+      const { data } = await supabase.from('profiles').select('level').eq('id', user.id).single()
+      if (!cancelled) setUserLevel(data?.level ?? 1)
+    })
+    return () => { cancelled = true }
+  }, [])
 
   const defaultLevel: 1 | 2 | 3 = company
     ? ([3, 2, 1] as const).find((l) =>
@@ -51,6 +64,40 @@ export function Request() {
   const emailPlaceholder = t.request.templateEmailPlaceholder
 
   const templateBody = isOptOut ? t.request.optOutBody : t.request.templateBody
+
+  function renderGate(requiredLevel: 2 | 3) {
+    const tierName = tierByKey(requiredLevel === 2 ? 'cipher' : 'ghost').name
+    const price = tierByKey(requiredLevel === 2 ? 'cipher' : 'ghost').monthlyPriceSEK
+    return (
+      <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6 text-center">
+        <p className="text-3xl mb-3">🔒</p>
+        {userLevel === null ? (
+          <>
+            <p className="text-gray-700 font-medium mb-4">{t.request.gateLoginTitle}</p>
+            <button
+              onClick={() => document.dispatchEvent(new CustomEvent('bliglomd:open-auth'))}
+              className="inline-flex items-center gap-2 bg-brand-600 text-white px-5 py-3 rounded-xl text-sm font-medium hover:bg-brand-700 transition-colors"
+            >
+              {t.request.gateLoginBtn}
+            </button>
+          </>
+        ) : (
+          <>
+            <p className="text-gray-700 font-medium mb-1">
+              {t.request.gateUpgradeTitle} {tierName}
+            </p>
+            <p className="text-gray-500 text-sm mb-4">{price} kr{t.home.perMonth}</p>
+            <Link
+              to="/profile"
+              className="inline-flex items-center gap-2 bg-brand-600 text-white px-5 py-3 rounded-xl text-sm font-medium hover:bg-brand-700 transition-colors"
+            >
+              {t.request.gateUpgradeBtn} {tierName}
+            </Link>
+          </>
+        )}
+      </div>
+    )
+  }
 
   const mailTemplate = [
     t.request.templateGreeting,
@@ -239,19 +286,23 @@ export function Request() {
 
             return available.length > 1 ? (
               <div className="flex gap-3 mb-6">
-                {available.map((level) => (
-                  <button
-                    key={level}
-                    onClick={() => setSelectedLevel(level)}
-                    className={`flex-1 py-3 rounded-xl border-2 font-medium text-sm transition-colors ${
-                      selectedLevel === level
-                        ? 'border-brand-500 bg-brand-50 text-brand-700'
-                        : 'border-gray-200 text-gray-600 hover:border-gray-300'
-                    }`}
-                  >
-                    <LevelBadge level={level} className="pointer-events-none" />
-                  </button>
-                ))}
+                {available.map((level) => {
+                  const locked = level > 1 && userLevel !== 0 && (userLevel === null || userLevel < level)
+                  return (
+                    <button
+                      key={level}
+                      onClick={() => setSelectedLevel(level)}
+                      className={`flex-1 py-3 rounded-xl border-2 font-medium text-sm transition-colors flex items-center justify-center gap-1.5 ${
+                        selectedLevel === level
+                          ? 'border-brand-500 bg-brand-50 text-brand-700'
+                          : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                      }`}
+                    >
+                      <LevelBadge level={level} className="pointer-events-none" />
+                      {locked && <span aria-hidden="true">🔒</span>}
+                    </button>
+                  )
+                })}
               </div>
             ) : null
           })()}
@@ -274,6 +325,7 @@ export function Request() {
 
           {/* L2 — Template */}
           {selectedLevel === 2 && company.level2_available && (
+            userLevel !== 0 && (userLevel === null || userLevel < 2) ? renderGate(2) :
             <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6">
               <h2 className="font-semibold text-gray-900 mb-3">{t.request.mailTemplate}</h2>
               {company.gdpr_email ? (
@@ -313,6 +365,7 @@ export function Request() {
 
           {/* L3 — Auto send */}
           {selectedLevel === 3 && company.level3_available && (
+            userLevel !== 0 && (userLevel === null || userLevel < 3) ? renderGate(3) :
             <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6">
               <h2 className="font-semibold text-gray-900 mb-3">{t.request.autoSend}</h2>
               {company.gdpr_email ? (
