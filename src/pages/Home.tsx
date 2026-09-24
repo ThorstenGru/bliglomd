@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useLang } from '../contexts/LanguageContext'
 import { BrandLogo } from '../components/BrandLogo'
-import { TIERS, ENGANGSSTADNING } from '../config/tiers'
+import { TIERS } from '../config/tiers'
 import { ConsentModal } from '../components/ConsentModal'
 import { supabase } from '../lib/supabase'
 import type { Session } from '@supabase/supabase-js'
@@ -501,44 +501,6 @@ export function Home({ session }: HomeProps) {
           </p>
         </div>
       </section>
-
-      {/* ── ENGÅNGSSTÄDNING ───────────────────────────────────────── */}
-      <div style={{ padding: '0 clamp(16px, 5vw, 24px) clamp(40px, 10vw, 64px)' }}>
-        <div style={{ maxWidth: 1000, margin: '0 auto' }}>
-
-          {/* Divider */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28 }}>
-            <div style={{ flex: 1, height: 1, background: '#E2E8F0' }} />
-            <span style={{ fontSize: 13, color: '#94A3B8', whiteSpace: 'nowrap' }}>{t.home.oneTimeOption}</span>
-            <div style={{ flex: 1, height: 1, background: '#E2E8F0' }} />
-          </div>
-
-          <div style={{ background: 'white', borderRadius: 14, border: '1px solid #E2E8F0', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 20 }} className="px-5 sm:px-6 md:px-8 py-5 sm:py-6 md:py-7">
-            <div className="flex-1 min-w-[180px] sm:min-w-[240px]">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                <p style={{ fontSize: 17, fontWeight: 700, color: '#1E293B' }}>{t.home.onceTitle}</p>
-                <span style={{ background: '#FEF3C7', color: '#92400E', fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 100 }}>{t.home.onceBadge}</span>
-              </div>
-              <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.6, maxWidth: 480 }}>
-                {t.home.onceDesc}
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 flex-shrink-0">
-              <div className="text-center sm:text-right">
-                <p style={{ fontSize: 28, fontWeight: 800, color: '#1E293B', letterSpacing: '-0.03em' }}>{ENGANGSSTADNING.priceSEK} kr</p>
-                <p style={{ fontSize: 11, color: '#94A3B8' }}>{t.home.oncePerPayment}</p>
-              </div>
-              <button
-                onClick={() => handleTierCTA(ENGANGSSTADNING.stripePriceId, `${t.home.onceTitle} ${ENGANGSSTADNING.priceSEK} kr`)}
-                disabled={upgrading !== null}
-                style={{ background: '#1E293B', color: 'white', border: 'none', fontSize: 14, fontWeight: 600, padding: '15px 24px', borderRadius: 10, cursor: upgrading ? 'not-allowed' : 'pointer', opacity: upgrading ? 0.7 : 1, whiteSpace: 'nowrap', transition: 'opacity 0.15s' }}
-              >
-                {upgrading === ENGANGSSTADNING.stripePriceId ? t.common.loading : t.home.onceBuyNow}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* ── FOOTER ───────────────────────────────────────────────── */}
       <footer style={{ background: '#F1F5F9', borderTop: '1px solid #E2E8F0', padding: 'clamp(20px, 6vw, 32px) clamp(16px, 7vw, 40px)' }}>

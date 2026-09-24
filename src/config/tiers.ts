@@ -98,8 +98,10 @@ export const TIERS: Record<1 | 2 | 3, Tier> = {
     },
     color: 'blue',
     monthlyPriceSEK: 99,
-    // SANDBOX — 2026 repricing (+62% vs 61kr). Live equivalent not yet created — create under
-    // prod matching price_1TnxQbAT2u1nHxljUfTlrTTT's product before going live.
+    // SANDBOX — 2026 repricing (+62% vs 61kr). Live equivalent ready at price_1UJFbwAT2u1nHxljLEWgqzmV
+    // (same product, prod_UnXwn8yj2nHxWH) — switch to it, and swap STRIPE_SECRET_KEY /
+    // STRIPE_CIPHER_PRICE_ID / STRIPE_GHOST_PRICE_ID / STRIPE_WEBHOOK_SECRET to their live
+    // values in Supabase, when explicitly instructed to go live.
     stripeMonthlyPriceId: 'price_1UJF2CAR7wxHkiWgazzRxQYe',
   },
 
@@ -138,8 +140,8 @@ export const TIERS: Record<1 | 2 | 3, Tier> = {
     },
     color: 'purple',
     monthlyPriceSEK: 199,
-    // SANDBOX — 2026 repricing (+60% vs 124kr). Live equivalent not yet created — create under
-    // prod matching price_1TnxQcAT2u1nHxljSb3UDBSq's product before going live.
+    // SANDBOX — 2026 repricing (+60% vs 124kr). Live equivalent ready at price_1UJFbxAT2u1nHxljAZBl09In
+    // (same product, prod_UnXyNFtLNAiulF) — see the same go-live note as Cipher above.
     stripeMonthlyPriceId: 'price_1UJF2DAR7wxHkiWgOIfZS2jj',
   },
 }
@@ -148,10 +150,3 @@ export const TIERS: Record<1 | 2 | 3, Tier> = {
 export function tierByKey(key: Tier['key']): Tier {
   return Object.values(TIERS).find(t => t.key === key)!
 }
-
-/** One-time Engångsstädning product (no recurring subscription) */
-export const ENGANGSSTADNING = {
-  // SANDBOX — switch to price_1To2AvAT2u1nHxljFzYjF0Q0 for live when explicitly instructed
-  stripePriceId: 'price_1To2AtAR7wxHkiWg9gHAQ4o9',
-  priceSEK: 199,
-} as const
