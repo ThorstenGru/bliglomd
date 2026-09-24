@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabase'
 import { trackFunnel } from '../lib/analytics'
 import { useLang } from '../contexts/LanguageContext'
 import { tierByKey } from '../config/tiers'
+import { extractFunctionErrorMessage } from '../lib/functionError'
 
 export function Request() {
   const { id } = useParams<{ id: string }>()
@@ -14,8 +15,9 @@ export function Request() {
   const { t, lang } = useLang()
   const company = COMPANIES.find((c) => c.id === id)
 
-  // null = not logged in, 0 = logged in but profile not loaded yet, 1-3 = actual tier
-  const [userLevel, setUserLevel] = useState<number | null>(0)
+  // undefined = still loading (fail closed — treated as gated, same as level 0),
+  // null = not logged in, 1-3 = actual tier
+  const [userLevel, setUserLevel] = useState<number | null | undefined>(undefined)
   useEffect(() => {
     let cancelled = false
     supabase.auth.getUser().then(async ({ data: { user } }) => {
@@ -25,6 +27,8 @@ export function Request() {
     })
     return () => { cancelled = true }
   }, [])
+  const levelLoading = userLevel === undefined
+  const hasLevel = (required: 2 | 3) => userLevel !== undefined && userLevel !== null && userLevel >= required
 
   const defaultLevel: 1 | 2 | 3 = company
     ? ([3, 2, 1] as const).find((l) =>
@@ -64,6 +68,14 @@ export function Request() {
   const emailPlaceholder = t.request.templateEmailPlaceholder
 
   const templateBody = isOptOut ? t.request.optOutBody : t.request.templateBody
+
+  function renderLoadingGate() {
+    return (
+      <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6 text-center text-gray-400 text-sm">
+        {t.common.loading}
+      </div>
+    )
+  }
 
   function renderGate(requiredLevel: 2 | 3) {
     const tierName = tierByKey(requiredLevel === 2 ? 'cipher' : 'ghost').name
@@ -140,7 +152,7 @@ export function Request() {
         },
       })
 
-      if (fnError) throw new Error(fnError.message)
+      if (fnError) throw new Error(await extractFunctionErrorMessage(fnError))
 
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
@@ -162,7 +174,11 @@ export function Request() {
       setSuccess(true)
       trackFunnel('request_sent', { company_id: company.id })
     } catch (err) {
-      setError(err instanceof Error ? err.message : t.common.error)
+      const raw = err instanceof Error ? err.message : t.common.error
+      const friendly = raw === 'Unauthorized' ? t.request.gateLoginTitle
+        : raw === 'Ghost subscription required' ? `${t.request.gateUpgradeTitle} ${tierByKey('ghost').name}`
+        : raw
+      setError(friendly)
     } finally {
       setLoading(false)
     }
@@ -287,7 +303,7 @@ export function Request() {
             return available.length > 1 ? (
               <div className="flex gap-3 mb-6">
                 {available.map((level) => {
-                  const locked = level > 1 && userLevel !== 0 && (userLevel === null || userLevel < level)
+                  const locked = (level === 2 || level === 3) && (levelLoading || !hasLevel(level))
                   return (
                     <button
                       key={level}
@@ -325,7 +341,8 @@ export function Request() {
 
           {/* L2 — Template */}
           {selectedLevel === 2 && company.level2_available && (
-            userLevel !== 0 && (userLevel === null || userLevel < 2) ? renderGate(2) :
+            levelLoading ? renderLoadingGate() :
+            !hasLevel(2) ? renderGate(2) :
             <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6">
               <h2 className="font-semibold text-gray-900 mb-3">{t.request.mailTemplate}</h2>
               {company.gdpr_email ? (
@@ -365,7 +382,8 @@ export function Request() {
 
           {/* L3 — Auto send */}
           {selectedLevel === 3 && company.level3_available && (
-            userLevel !== 0 && (userLevel === null || userLevel < 3) ? renderGate(3) :
+            levelLoading ? renderLoadingGate() :
+            !hasLevel(3) ? renderGate(3) :
             <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6">
               <h2 className="font-semibold text-gray-900 mb-3">{t.request.autoSend}</h2>
               {company.gdpr_email ? (

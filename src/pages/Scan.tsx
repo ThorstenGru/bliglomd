@@ -5,6 +5,7 @@ import { COMPANIES_SORTED } from '../data/companies'
 import { CompanyCard } from '../components/CompanyCard'
 import { trackFunnel, trackSearchNoMatch } from '../lib/analytics'
 import { useLang } from '../contexts/LanguageContext'
+import { extractFunctionErrorMessage } from '../lib/functionError'
 
 const mediaCompanies   = COMPANIES_SORTED.filter((c) => c.request_type === 'gdpr_art17' && c.utgivningsbevis)
 const gdprCompanies    = COMPANIES_SORTED.filter((c) => c.request_type === 'gdpr_art17' && !c.utgivningsbevis)
@@ -60,7 +61,7 @@ export function Scan() {
         body: { email },
       })
 
-      if (fnError) throw new Error(fnError.message)
+      if (fnError) throw new Error(await extractFunctionErrorMessage(fnError))
 
       const foundBreaches: XonBreach[] = data?.breaches ?? []
       setBreaches(foundBreaches)
