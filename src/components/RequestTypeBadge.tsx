@@ -16,7 +16,7 @@ export function RequestTypeBadge({ type, className = '' }: RequestTypeBadgeProps
   const { t } = useLang()
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${typeStyle[type]} ${className}`}
+      className={`inline-flex items-center whitespace-nowrap px-2 py-0.5 rounded text-xs font-medium ${typeStyle[type]} ${className}`}
       title={t.common.requestType[type].tooltip}
     >
       {t.common.requestType[type].label}

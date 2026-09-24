@@ -69,15 +69,15 @@ export function AuthModal({ onClose }: AuthModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
-        <div className="p-6">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="p-5 sm:p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-900">
               {tab === 'login' ? t.auth.login : t.auth.signup}
             </h2>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
+              className="text-gray-400 hover:text-gray-600 text-2xl leading-none p-2 -m-2 min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-lg"
               aria-label={t.common.close}
             >
               &times;
@@ -105,7 +105,7 @@ export function AuthModal({ onClose }: AuthModalProps) {
               <div className="flex rounded-lg bg-gray-100 p-1 mb-6">
                 <button
                   onClick={() => setTab('login')}
-                  className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
+                  className={`flex-1 py-3 sm:py-2 min-h-[44px] sm:min-h-0 text-sm font-medium rounded-md transition-colors ${
                     tab === 'login' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
@@ -113,7 +113,7 @@ export function AuthModal({ onClose }: AuthModalProps) {
                 </button>
                 <button
                   onClick={() => setTab('signup')}
-                  className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
+                  className={`flex-1 py-3 sm:py-2 min-h-[44px] sm:min-h-0 text-sm font-medium rounded-md transition-colors ${
                     tab === 'signup' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >

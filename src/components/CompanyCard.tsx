@@ -13,7 +13,7 @@ export function CompanyCard({ company }: CompanyCardProps) {
   const { t } = useLang()
 
   return (
-    <div className={`bg-white rounded-lg border p-4 flex items-start gap-4 hover:border-brand-400 transition-colors ${
+    <div className={`bg-white rounded-lg border p-4 flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4 hover:border-brand-400 transition-colors ${
       company.sensitive ? 'border-red-200' : 'border-gray-200'
     }`}>
       <div className="flex-1 min-w-0">
@@ -62,7 +62,7 @@ export function CompanyCard({ company }: CompanyCardProps) {
       </div>
       <button
         onClick={() => navigate(`/request/${company.id}`)}
-        className="shrink-0 bg-brand-600 text-white text-sm px-3 py-1.5 rounded-lg hover:bg-brand-700 transition-colors mt-0.5"
+        className="shrink-0 w-full sm:w-auto bg-brand-600 text-white text-sm px-3 py-1.5 rounded-lg hover:bg-brand-700 transition-colors mt-0.5 sm:mt-0.5 min-h-[44px] sm:min-h-0 flex items-center justify-center"
       >
         {t.common.send}
       </button>

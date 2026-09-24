@@ -19,10 +19,8 @@ export interface Tier {
   timelineHint: Record<Lang, string>
   /** Tailwind color ramp used by LevelBadge */
   color: 'green' | 'blue' | 'purple'
-  /** Display price in SEK (0 = free). Change freely — backend is unaffected. */
+  /** Display price in SEK (0 = free). Change freely — backend is unaffected. Monthly-only, no annual billing. */
   monthlyPriceSEK: number
-  /** Annual price in SEK (0 = free). 20% off monthly × 12. */
-  annualPriceSEK: number
   /**
    * Stripe recurring monthly price ID.
    * null  = free tier, no Stripe product.
@@ -30,11 +28,6 @@ export interface Tier {
    * { bliglomd_level: "2" } — never by this name.
    */
   stripeMonthlyPriceId: string | null
-  /**
-   * Stripe recurring annual price ID.
-   * null  = free tier, no Stripe product.
-   */
-  stripeAnnualPriceId: string | null
 }
 
 export const TIERS: Record<1 | 2 | 3, Tier> = {
@@ -69,9 +62,7 @@ export const TIERS: Record<1 | 2 | 3, Tier> = {
     },
     color: 'green',
     monthlyPriceSEK: 0,
-    annualPriceSEK: 0,
     stripeMonthlyPriceId: null,
-    stripeAnnualPriceId: null,
   },
 
   2: {
@@ -107,11 +98,9 @@ export const TIERS: Record<1 | 2 | 3, Tier> = {
     },
     color: 'blue',
     monthlyPriceSEK: 99,
-    annualPriceSEK: 0,
     // SANDBOX — 2026 repricing (+62% vs 61kr). Live equivalent not yet created — create under
     // prod matching price_1TnxQbAT2u1nHxljUfTlrTTT's product before going live.
     stripeMonthlyPriceId: 'price_1UJF2CAR7wxHkiWgazzRxQYe',
-    stripeAnnualPriceId: null,
   },
 
   3: {
@@ -149,11 +138,9 @@ export const TIERS: Record<1 | 2 | 3, Tier> = {
     },
     color: 'purple',
     monthlyPriceSEK: 199,
-    annualPriceSEK: 0,
     // SANDBOX — 2026 repricing (+60% vs 124kr). Live equivalent not yet created — create under
     // prod matching price_1TnxQcAT2u1nHxljSb3UDBSq's product before going live.
     stripeMonthlyPriceId: 'price_1UJF2DAR7wxHkiWgOIfZS2jj',
-    stripeAnnualPriceId: null,
   },
 }
 

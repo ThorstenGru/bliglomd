@@ -131,13 +131,19 @@ function TestimonialCarousel() {
           <button
             key={i}
             onClick={() => jumpTo(i)}
-            style={{
-              width: i === idx ? 18 : 6, height: 6, borderRadius: 3, border: 'none', padding: 0,
-              background: i === idx ? '#2563EB' : '#CBD5E1',
-              cursor: 'pointer', transition: 'all 0.3s ease',
-            }}
+            className="p-2.5 -m-1"
+            style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}
             aria-label={`Omdöme ${i + 1}`}
-          />
+          >
+            <span
+              style={{
+                display: 'block',
+                width: i === idx ? 18 : 6, height: 6, borderRadius: 3,
+                background: i === idx ? '#2563EB' : '#CBD5E1',
+                transition: 'all 0.3s ease',
+              }}
+            />
+          </button>
         ))}
       </div>
     </div>
@@ -194,7 +200,7 @@ export function Home({ session }: HomeProps) {
       )}
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
-      <section style={{ padding: '72px 24px 64px', textAlign: 'center' }}>
+      <section style={{ padding: 'clamp(40px, 10vw, 72px) clamp(16px, 5vw, 24px) clamp(36px, 9vw, 64px)', textAlign: 'center' }}>
         <h1 className="sr-only">{t.home.title}</h1>
 
         <BrandLogo variant="large" className="mx-auto" />
@@ -231,7 +237,7 @@ export function Home({ session }: HomeProps) {
         </div>
 
         {/* Social proof — animated count-up */}
-        <div className="flex items-center justify-center flex-wrap gap-8 mb-10">
+        <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-6 md:gap-8 mb-10">
           <div style={{ textAlign: 'center' }}>
             <p style={{ fontSize: 26, fontWeight: 800, color: '#1E3A8A', letterSpacing: '-0.03em', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
               {reqCount.toLocaleString('sv-SE')}
@@ -293,7 +299,7 @@ export function Home({ session }: HomeProps) {
 
       {/* ── TRUST STRIP + TESTIMONIAL CAROUSEL ───────────────────── */}
       <div style={{ padding: '20px 24px 28px', textAlign: 'center' }}>
-        <div className="flex items-center justify-center flex-wrap gap-6 mb-7">
+        <div className="flex items-center justify-center flex-wrap gap-3 sm:gap-4 md:gap-6 mb-7">
           <span style={{ fontSize: 12, color: '#64748B' }}>✓ {t.home.trustNeverSell}</span>
           <span style={{ color: '#CBD5E1' }}>|</span>
           <span style={{ fontSize: 12, color: '#64748B' }}>✓ {t.home.trustCancelAnytime}</span>
@@ -318,7 +324,7 @@ export function Home({ session }: HomeProps) {
       </div>
 
       {/* ── PRICING ──────────────────────────────────────────────── */}
-      <section style={{ padding: '20px 24px 60px' }}>
+      <section style={{ padding: 'clamp(16px, 4vw, 20px) clamp(16px, 5vw, 24px) clamp(36px, 9vw, 60px)' }}>
         <div style={{ maxWidth: 1000, margin: '0 auto' }}>
           <h2 style={{ textAlign: 'center', fontWeight: 700, color: '#1E293B', marginBottom: 24, letterSpacing: '-0.02em', fontSize: 'clamp(22px, 3vw, 30px)' }}>
             {t.home.levelsTitle}
@@ -328,7 +334,7 @@ export function Home({ session }: HomeProps) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
 
             {/* L1 — Trace */}
-            <div style={{ background: 'white', borderRadius: 14, border: '1px solid #E2E8F0', padding: '32px 28px', display: 'flex', flexDirection: 'column', gap: 0 }}>
+            <div style={{ background: 'white', borderRadius: 14, border: '1px solid #E2E8F0', display: 'flex', flexDirection: 'column', gap: 0 }} className="px-5 sm:px-6 md:px-7 py-6 sm:py-7 md:py-8">
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
                 <div style={{ width: 36, height: 36, borderRadius: 10, background: '#DCFCE7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <span style={{ fontSize: 15, fontWeight: 700, color: '#16A34A' }}>1</span>
@@ -360,14 +366,14 @@ export function Home({ session }: HomeProps) {
                 {session ? (
                   <Link
                     to="/scan"
-                    style={{ display: 'block', textAlign: 'center', background: '#F0FDF4', color: '#16A34A', border: '1.5px solid #BBF7D0', fontSize: 14, fontWeight: 600, padding: '12px 0', borderRadius: 10, textDecoration: 'none', transition: 'background 0.15s' }}
+                    style={{ display: 'block', textAlign: 'center', background: '#F0FDF4', color: '#16A34A', border: '1.5px solid #BBF7D0', fontSize: 14, fontWeight: 600, padding: '15px 0', borderRadius: 10, textDecoration: 'none', transition: 'background 0.15s' }}
                   >
                     {t.home.goToScan}
                   </Link>
                 ) : (
                   <button
                     onClick={() => document.dispatchEvent(new CustomEvent('bliglomd:open-auth'))}
-                    style={{ width: '100%', background: '#F0FDF4', color: '#16A34A', border: '1.5px solid #BBF7D0', fontSize: 14, fontWeight: 600, padding: '12px 0', borderRadius: 10, cursor: 'pointer', transition: 'background 0.15s' }}
+                    style={{ width: '100%', background: '#F0FDF4', color: '#16A34A', border: '1.5px solid #BBF7D0', fontSize: 14, fontWeight: 600, padding: '15px 0', borderRadius: 10, cursor: 'pointer', transition: 'background 0.15s' }}
                   >
                     {t.home.cta}
                   </button>
@@ -376,7 +382,7 @@ export function Home({ session }: HomeProps) {
             </div>
 
             {/* L2 — Cipher (highlighted) */}
-            <div style={{ background: 'white', borderRadius: 14, border: '2px solid #3B82F6', padding: '32px 28px', display: 'flex', flexDirection: 'column', gap: 0, boxShadow: '0 4px 24px rgba(59,130,246,0.15)', position: 'relative' }}>
+            <div style={{ background: 'white', borderRadius: 14, border: '2px solid #3B82F6', display: 'flex', flexDirection: 'column', gap: 0, boxShadow: '0 4px 24px rgba(59,130,246,0.15)', position: 'relative' }} className="px-5 sm:px-6 md:px-7 py-6 sm:py-7 md:py-8">
               {/* Most popular badge */}
               <div style={{ position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)', background: '#2563EB', color: 'white', fontSize: 11, fontWeight: 700, padding: '4px 14px', borderRadius: 100, whiteSpace: 'nowrap', letterSpacing: '0.04em' }}>
                 {t.home.mostPopular}
@@ -414,7 +420,7 @@ export function Home({ session }: HomeProps) {
                 <button
                   onClick={() => handleTierCTA(TIERS[2].stripeMonthlyPriceId!, `Cipher ${TIERS[2].monthlyPriceSEK} kr`)}
                   disabled={upgrading !== null}
-                  style={{ width: '100%', background: '#2563EB', color: 'white', border: 'none', fontSize: 14, fontWeight: 600, padding: '13px 0', borderRadius: 10, cursor: upgrading ? 'not-allowed' : 'pointer', opacity: upgrading ? 0.7 : 1, transition: 'opacity 0.15s' }}
+                  style={{ width: '100%', background: '#2563EB', color: 'white', border: 'none', fontSize: 14, fontWeight: 600, padding: '15px 0', borderRadius: 10, cursor: upgrading ? 'not-allowed' : 'pointer', opacity: upgrading ? 0.7 : 1, transition: 'opacity 0.15s' }}
                 >
                   {upgrading === TIERS[2].stripeMonthlyPriceId ? t.common.loading : t.home.chooseCipher}
                 </button>
@@ -422,7 +428,7 @@ export function Home({ session }: HomeProps) {
             </div>
 
             {/* L3 — Ghost */}
-            <div style={{ background: 'white', borderRadius: 14, border: '1px solid #E2E8F0', padding: '32px 28px', display: 'flex', flexDirection: 'column', gap: 0 }}>
+            <div style={{ background: 'white', borderRadius: 14, border: '1px solid #E2E8F0', display: 'flex', flexDirection: 'column', gap: 0 }} className="px-5 sm:px-6 md:px-7 py-6 sm:py-7 md:py-8">
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
                 <div style={{ width: 36, height: 36, borderRadius: 10, background: '#F3E8FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <span style={{ fontSize: 15, fontWeight: 700, color: '#9333EA' }}>3</span>
@@ -455,7 +461,7 @@ export function Home({ session }: HomeProps) {
                 <button
                   onClick={() => handleTierCTA(TIERS[3].stripeMonthlyPriceId!, `Ghost ${TIERS[3].monthlyPriceSEK} kr`)}
                   disabled={upgrading !== null}
-                  style={{ width: '100%', background: '#7C3AED', color: 'white', border: 'none', fontSize: 14, fontWeight: 600, padding: '13px 0', borderRadius: 10, cursor: upgrading ? 'not-allowed' : 'pointer', opacity: upgrading ? 0.7 : 1, transition: 'opacity 0.15s' }}
+                  style={{ width: '100%', background: '#7C3AED', color: 'white', border: 'none', fontSize: 14, fontWeight: 600, padding: '15px 0', borderRadius: 10, cursor: upgrading ? 'not-allowed' : 'pointer', opacity: upgrading ? 0.7 : 1, transition: 'opacity 0.15s' }}
                 >
                   {upgrading === TIERS[3].stripeMonthlyPriceId ? t.common.loading : t.home.chooseGhost}
                 </button>
@@ -497,7 +503,7 @@ export function Home({ session }: HomeProps) {
       </section>
 
       {/* ── ENGÅNGSSTÄDNING ───────────────────────────────────────── */}
-      <div style={{ padding: '0 24px 64px' }}>
+      <div style={{ padding: '0 clamp(16px, 5vw, 24px) clamp(40px, 10vw, 64px)' }}>
         <div style={{ maxWidth: 1000, margin: '0 auto' }}>
 
           {/* Divider */}
@@ -507,8 +513,8 @@ export function Home({ session }: HomeProps) {
             <div style={{ flex: 1, height: 1, background: '#E2E8F0' }} />
           </div>
 
-          <div style={{ background: 'white', borderRadius: 14, border: '1px solid #E2E8F0', padding: '28px 32px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 20 }}>
-            <div style={{ flex: 1, minWidth: 240 }}>
+          <div style={{ background: 'white', borderRadius: 14, border: '1px solid #E2E8F0', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 20 }} className="px-5 sm:px-6 md:px-8 py-5 sm:py-6 md:py-7">
+            <div className="flex-1 min-w-[180px] sm:min-w-[240px]">
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                 <p style={{ fontSize: 17, fontWeight: 700, color: '#1E293B' }}>{t.home.onceTitle}</p>
                 <span style={{ background: '#FEF3C7', color: '#92400E', fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 100 }}>{t.home.onceBadge}</span>
@@ -517,15 +523,15 @@ export function Home({ session }: HomeProps) {
                 {t.home.onceDesc}
               </p>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexShrink: 0 }}>
-              <div style={{ textAlign: 'right' }}>
+            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 flex-shrink-0">
+              <div className="text-center sm:text-right">
                 <p style={{ fontSize: 28, fontWeight: 800, color: '#1E293B', letterSpacing: '-0.03em' }}>{ENGANGSSTADNING.priceSEK} kr</p>
                 <p style={{ fontSize: 11, color: '#94A3B8' }}>{t.home.oncePerPayment}</p>
               </div>
               <button
                 onClick={() => handleTierCTA(ENGANGSSTADNING.stripePriceId, `${t.home.onceTitle} ${ENGANGSSTADNING.priceSEK} kr`)}
                 disabled={upgrading !== null}
-                style={{ background: '#1E293B', color: 'white', border: 'none', fontSize: 14, fontWeight: 600, padding: '12px 24px', borderRadius: 10, cursor: upgrading ? 'not-allowed' : 'pointer', opacity: upgrading ? 0.7 : 1, whiteSpace: 'nowrap', transition: 'opacity 0.15s' }}
+                style={{ background: '#1E293B', color: 'white', border: 'none', fontSize: 14, fontWeight: 600, padding: '15px 24px', borderRadius: 10, cursor: upgrading ? 'not-allowed' : 'pointer', opacity: upgrading ? 0.7 : 1, whiteSpace: 'nowrap', transition: 'opacity 0.15s' }}
               >
                 {upgrading === ENGANGSSTADNING.stripePriceId ? t.common.loading : t.home.onceBuyNow}
               </button>
@@ -535,10 +541,10 @@ export function Home({ session }: HomeProps) {
       </div>
 
       {/* ── FOOTER ───────────────────────────────────────────────── */}
-      <footer style={{ background: '#F1F5F9', borderTop: '1px solid #E2E8F0', padding: '32px 40px' }}>
-        <div className="flex items-center justify-between flex-wrap gap-4" style={{ maxWidth: 1000, margin: '0 auto' }}>
+      <footer style={{ background: '#F1F5F9', borderTop: '1px solid #E2E8F0', padding: 'clamp(20px, 6vw, 32px) clamp(16px, 7vw, 40px)' }}>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left" style={{ maxWidth: 1000, margin: '0 auto' }}>
           {/* Left */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
             <svg width="20" height="22" viewBox="0 0 100 110" fill="none" aria-hidden="true">
               <path d="M50 8L22 18V44c0 18 12 34 28 40 16-6 28-22 28-40V18L50 8z" fill="#2563EB" />
             </svg>
@@ -557,10 +563,10 @@ export function Home({ session }: HomeProps) {
           </p>
 
           {/* Right */}
-          <div style={{ display: 'flex', gap: 24 }}>
-            <Link to="/privacy" style={{ fontSize: 12, color: '#94A3B8', textDecoration: 'none' }}>{t.home.footerPrivacy}</Link>
-            <Link to="/terms" style={{ fontSize: 12, color: '#94A3B8', textDecoration: 'none' }}>{t.home.footerTerms}</Link>
-            <Link to="/status" style={{ fontSize: 12, color: '#94A3B8', textDecoration: 'none' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 'clamp(12px, 4vw, 24px)' }}>
+            <Link to="/privacy" className="py-3 sm:py-0" style={{ fontSize: 12, color: '#94A3B8', textDecoration: 'none' }}>{t.home.footerPrivacy}</Link>
+            <Link to="/terms" className="py-3 sm:py-0" style={{ fontSize: 12, color: '#94A3B8', textDecoration: 'none' }}>{t.home.footerTerms}</Link>
+            <Link to="/status" className="py-3 sm:py-0" style={{ fontSize: 12, color: '#94A3B8', textDecoration: 'none' }}>
               {t.home.footerStatus}
             </Link>
           </div>

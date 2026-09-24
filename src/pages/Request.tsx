@@ -124,7 +124,7 @@ export function Request() {
   if (success) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="bg-white rounded-2xl p-8 text-center shadow-sm border border-gray-200 max-w-md w-full mx-4">
+        <div className="bg-white rounded-2xl p-6 sm:p-8 text-center shadow-sm border border-gray-200 max-w-md w-full mx-4">
           <div className="flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mx-auto mb-4">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
@@ -137,7 +137,7 @@ export function Request() {
           </p>
           <button
             onClick={() => navigate('/dashboard')}
-            className="bg-brand-600 text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-brand-700 transition-colors"
+            className="bg-brand-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-brand-700 transition-colors"
           >
             {t.request.toDashboard}
           </button>
@@ -147,15 +147,15 @@ export function Request() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-12">
-      <button onClick={() => navigate(-1)} className="text-gray-500 hover:text-gray-700 text-sm mb-6 flex items-center gap-1">
+    <div className="max-w-2xl mx-auto px-4 py-8 sm:py-12">
+      <button onClick={() => navigate(-1)} className="text-gray-500 hover:text-gray-700 text-sm mb-3 flex items-center gap-1 py-3 px-1 -mx-1">
         {t.common.back}
       </button>
 
       {/* Company header */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-4">
+      <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6 mb-4">
         <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-          <h1 className="text-2xl font-bold text-gray-900">{company.name}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 break-words">{company.name}</h1>
           <div className="flex items-center gap-2 flex-wrap">
             <RequestTypeBadge type={company.request_type} />
             {company.utgivningsbevis && (
@@ -213,14 +213,14 @@ export function Request() {
 
       {/* For authority entries: just show L1 guide directly, no level selector */}
       {isAuthority ? (
-        <div className="bg-white rounded-2xl border border-gray-200 p-6">
+        <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6">
           <h2 className="font-semibold text-gray-900 mb-3">{t.request.instructions}</h2>
           <p className="text-gray-700 text-sm leading-relaxed mb-4">{instructions}</p>
           <a
             href={company.gdpr_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-brand-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-brand-700 transition-colors"
+            className="inline-flex items-center gap-2 bg-brand-600 text-white px-4 py-3 rounded-xl text-sm font-medium hover:bg-brand-700 transition-colors"
           >
             {t.request.openGdpr} {company.name} ↗
           </a>
@@ -258,14 +258,14 @@ export function Request() {
 
           {/* L1 — Instructions */}
           {selectedLevel === 1 && (
-            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+            <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6">
               <h2 className="font-semibold text-gray-900 mb-3">{t.request.instructions}</h2>
               <p className="text-gray-700 text-sm leading-relaxed mb-4">{instructions}</p>
               <a
                 href={company.gdpr_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-brand-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-brand-700 transition-colors"
+                className="inline-flex items-center gap-2 bg-brand-600 text-white px-4 py-3 rounded-xl text-sm font-medium hover:bg-brand-700 transition-colors"
               >
                 {t.request.openGdpr} {company.name} ↗
               </a>
@@ -274,19 +274,19 @@ export function Request() {
 
           {/* L2 — Template */}
           {selectedLevel === 2 && company.level2_available && (
-            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+            <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6">
               <h2 className="font-semibold text-gray-900 mb-3">{t.request.mailTemplate}</h2>
               {company.gdpr_email ? (
                 <>
                   <p className="text-sm text-gray-500 mb-1">
-                    {t.request.sendTo}: <span className="font-mono text-gray-800">{company.gdpr_email}</span>
+                    {t.request.sendTo}: <span className="font-mono text-gray-800 break-all">{company.gdpr_email}</span>
                   </p>
-                  <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-4 font-mono text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">
+                  <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-4 font-mono text-sm text-gray-800 whitespace-pre-wrap break-words leading-relaxed">
                     {mailTemplate}
                   </div>
                   <button
                     onClick={handleCopy}
-                    className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                    className={`px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                       copied
                         ? 'bg-green-600 text-white'
                         : 'bg-brand-600 text-white hover:bg-brand-700'
@@ -302,7 +302,7 @@ export function Request() {
                     href={company.gdpr_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 bg-brand-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-brand-700 transition-colors"
+                    className="inline-flex items-center gap-2 bg-brand-600 text-white px-4 py-3 rounded-xl text-sm font-medium hover:bg-brand-700 transition-colors"
                   >
                     {t.request.openForm} ↗
                   </a>
@@ -313,7 +313,7 @@ export function Request() {
 
           {/* L3 — Auto send */}
           {selectedLevel === 3 && company.level3_available && (
-            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+            <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6">
               <h2 className="font-semibold text-gray-900 mb-3">{t.request.autoSend}</h2>
               {company.gdpr_email ? (
                 <form onSubmit={handleSendL3} className="space-y-4">
@@ -325,7 +325,7 @@ export function Request() {
                       value={userName}
                       onChange={(e) => setUserName(e.target.value)}
                       placeholder={t.auth.fullNamePlaceholder}
-                      className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                      className="w-full border border-gray-300 rounded-xl px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                     />
                   </div>
                   <div>
@@ -336,7 +336,7 @@ export function Request() {
                       value={userEmail}
                       onChange={(e) => setUserEmail(e.target.value)}
                       placeholder={t.scan.placeholder}
-                      className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                      className="w-full border border-gray-300 rounded-xl px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                     />
                   </div>
 
@@ -359,7 +359,7 @@ export function Request() {
                     href={company.gdpr_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 bg-brand-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-brand-700 transition-colors"
+                    className="inline-flex items-center gap-2 bg-brand-600 text-white px-4 py-3 rounded-xl text-sm font-medium hover:bg-brand-700 transition-colors"
                   >
                     {t.request.openGdprForm} ↗
                   </a>

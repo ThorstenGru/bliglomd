@@ -335,6 +335,7 @@ export function Admin() {
   const [ready, setReady]           = useState(false)
   const [adminEmail, setAdminEmail] = useState('')
   const [tab, setTab]               = useState<Tab>('overview')
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [users, setUsers]           = useState<AdminUser[]>([])
   const [audit, setAudit]           = useState<AuditEvent[]>([])
   const [deletions, setDeletions]   = useState<DeletionRecord[]>([])
@@ -640,8 +641,20 @@ export function Admin() {
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', fontFamily: '"Inter", -apple-system, system-ui, sans-serif', fontSize: 14, background: '#EEF2F8' }}>
 
+      {/* ── MOBILE NAV BACKDROP (hamburger overlay, closes drawer) ─────────── */}
+      {mobileNavOpen && (
+        <div
+          className="md:hidden"
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 45 }}
+          onClick={() => setMobileNavOpen(false)}
+        />
+      )}
+
       {/* ── SIDEBAR ──────────────────────────────────────────────────────── */}
-      <nav style={{ width: 220, flexShrink: 0, background: '#0F172A', display: 'flex', flexDirection: 'column', padding: '0 0 16px' }}>
+      <nav
+        className={`fixed md:static inset-y-0 left-0 z-50 transform transition-transform duration-200 ease-in-out ${mobileNavOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
+        style={{ width: 220, flexShrink: 0, background: '#0F172A', display: 'flex', flexDirection: 'column', padding: '0 0 16px', height: '100vh', overflowY: 'auto' }}
+      >
         {/* Logo */}
         <div style={{ padding: '20px 18px 12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
@@ -662,7 +675,8 @@ export function Admin() {
           {(['overview', 'users', 'audit', 'analytics', 'consents', 'trafik'] as Tab[]).map(t => (
             <button
               key={t}
-              onClick={() => setTab(t)}
+              onClick={() => { setTab(t); setMobileNavOpen(false) }}
+              className="min-h-[44px] md:min-h-0"
               style={{
                 width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 9,
                 padding: '9px 12px', borderRadius: 8, border: 'none', cursor: 'pointer', marginBottom: 2,
@@ -708,16 +722,29 @@ export function Admin() {
       </nav>
 
       {/* ── MAIN ─────────────────────────────────────────────────────────── */}
-      <main style={{ flex: 1, overflow: 'auto', padding: '24px 28px' }}>
+      <main className="px-4 py-4 sm:px-6 sm:py-5 md:px-7 md:py-6" style={{ flex: 1, overflow: 'auto' }}>
 
         {/* Top bar */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 22 }}>
-          <h1 style={{ fontSize: 20, fontWeight: 700, color: '#0F172A', margin: 0, letterSpacing: '-0.025em' }}>
-            {TAB_LABELS[tab]}
-          </h1>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 22, gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+            <button
+              onClick={() => setMobileNavOpen(true)}
+              aria-label="Öppna meny"
+              className="md:hidden"
+              style={{ width: 44, height: 44, borderRadius: 8, border: '1px solid #E2E8F0', background: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M3 6h18M3 12h18M3 18h18" />
+              </svg>
+            </button>
+            <h1 style={{ fontSize: 20, fontWeight: 700, color: '#0F172A', margin: 0, letterSpacing: '-0.025em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {TAB_LABELS[tab]}
+            </h1>
+          </div>
           <button
             onClick={() => { loadAll(); if (tab === 'analytics') loadStats(); if (tab === 'consents') loadConsents(); if (tab === 'trafik') loadTraffic() }}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 8, border: '1px solid #E2E8F0', background: 'white', cursor: 'pointer', fontSize: 13, color: '#475569', fontWeight: 500 }}
+            className="min-h-[44px] md:min-h-0"
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 8, border: '1px solid #E2E8F0', background: 'white', cursor: 'pointer', fontSize: 13, color: '#475569', fontWeight: 500, flexShrink: 0 }}
           >
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
@@ -747,7 +774,7 @@ export function Admin() {
             {tab === 'overview' && (
               <div>
                 {/* Stat cards */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 20 }}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" style={{ gap: 14, marginBottom: 20 }}>
                   {[
                     { label: 'Totalt användare',     value: users.length,    icon: 'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8z', color: '#2563EB' },
                     { label: 'Förfrågningar totalt', value: totalReqs,       icon: 'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6',         color: '#7C3AED' },
@@ -776,7 +803,7 @@ export function Admin() {
                     <h2 style={{ fontSize: 13, fontWeight: 700, color: '#64748B', margin: '0 0 14px', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
                       Intäkter (MRR, uppskattat)
                     </h2>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 8 }}>
+                    <div className="grid grid-cols-1 sm:grid-cols-3" style={{ gap: 12, marginBottom: 8 }}>
                       <div style={{ borderRadius: 10, border: '1.5px solid #DCFCE7', padding: '14px 16px', background: '#F0FDF4' }}>
                         <p style={{ fontSize: 11, color: '#15803D', fontWeight: 700, margin: '0 0 6px', textTransform: 'uppercase' }}>Totalt MRR</p>
                         <p style={{ fontSize: 28, fontWeight: 800, color: '#0F172A', margin: 0, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>
@@ -809,7 +836,7 @@ export function Admin() {
                   <h2 style={{ fontSize: 13, fontWeight: 700, color: '#64748B', margin: '0 0 14px', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
                     Fördelning per nivå
                   </h2>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+                  <div className="grid grid-cols-1 sm:grid-cols-3" style={{ gap: 12 }}>
                     {([1, 2, 3] as const).map(lvl => (
                       <div key={lvl} style={{ borderRadius: 10, border: `1.5px solid ${LVL_BG[lvl]}`, padding: '14px 16px', background: LVL_BG[lvl] + '55' }}>
                         <span style={{ display: 'inline-block', fontSize: 11, fontWeight: 700, color: LVL_FG[lvl], background: LVL_BG[lvl], borderRadius: 20, padding: '2px 10px', marginBottom: 8 }}>
@@ -832,6 +859,7 @@ export function Admin() {
                     <h2 style={{ fontSize: 13, fontWeight: 700, color: '#64748B', margin: '0 0 14px', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
                       Senaste raderingar
                     </h2>
+                    <div className="overflow-x-auto">
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                       <thead>
                         <tr style={{ borderBottom: '1px solid #F1F5F9' }}>
@@ -858,6 +886,7 @@ export function Admin() {
                         ))}
                       </tbody>
                     </table>
+                    </div>
                   </div>
                 )}
               </div>
@@ -867,7 +896,7 @@ export function Admin() {
             {tab === 'users' && (
               <div>
                 {/* Filters */}
-                <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
+                <div className="flex flex-col sm:flex-row" style={{ gap: 10, marginBottom: 14 }}>
                   <div style={{ position: 'relative', flex: 1 }}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)' }}>
                       <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
@@ -877,12 +906,14 @@ export function Admin() {
                       placeholder="Sök e-post eller namn…"
                       value={search}
                       onChange={e => setSearch(e.target.value)}
+                      className="min-h-[44px] md:min-h-0"
                       style={{ width: '100%', padding: '9px 12px 9px 34px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13, color: '#374151', outline: 'none', background: 'white', boxSizing: 'border-box' }}
                     />
                   </div>
                   <select
                     value={lvlFilter}
                     onChange={e => setLvlFilter(e.target.value as '' | '1' | '2' | '3')}
+                    className="min-h-[44px] md:min-h-0"
                     style={{ padding: '9px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13, color: '#374151', background: 'white', outline: 'none', cursor: 'pointer' }}
                   >
                     <option value="">Alla nivåer</option>
@@ -893,6 +924,7 @@ export function Admin() {
                   <select
                     value={subFilter}
                     onChange={e => setSubFilter(e.target.value as typeof subFilter)}
+                    className="min-h-[44px] md:min-h-0"
                     style={{ padding: '9px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13, color: '#374151', background: 'white', outline: 'none', cursor: 'pointer' }}
                   >
                     <option value="">Alla betalstatus</option>
@@ -903,6 +935,7 @@ export function Admin() {
                   </select>
                   <button
                     onClick={() => downloadCsv('bliglomd-anvandare.csv', filtered as unknown as Record<string, unknown>[])}
+                    className="min-h-[44px] md:min-h-0"
                     style={{ padding: '9px 14px', borderRadius: 8, border: '1px solid #E2E8F0', background: 'white', cursor: 'pointer', fontSize: 13, color: '#475569', fontWeight: 500, whiteSpace: 'nowrap' }}
                   >
                     Exportera CSV
@@ -911,7 +944,7 @@ export function Admin() {
 
                 {/* Table */}
                 <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E2E8F0', overflow: 'hidden' }}>
-                  <div style={{ overflowX: 'auto' }}>
+                  <div className="overflow-x-auto">
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                       <thead style={{ background: '#F8FAFC' }}>
                         <tr>
@@ -979,10 +1012,11 @@ export function Admin() {
                   <>
                     {stats.snapshot.stale_reqs > 0 && (
                       <div style={{ background: '#FEF9C3', border: '1px solid #FDE68A', borderRadius: 10, padding: '11px 16px', marginBottom: 16, fontSize: 13, color: '#92400E' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div className="flex-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
                           <span><span style={{ fontWeight: 700 }}>⚠️ {stats.snapshot.stale_reqs} ärenden</span> har inte fått svar på 30+ dagar</span>
                           <button
                             onClick={() => setShowStale(s => !s)}
+                            className="min-h-[44px] md:min-h-0"
                             style={{ padding: '4px 12px', background: 'white', border: '1px solid #FDE68A', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600, color: '#92400E' }}
                           >
                             {showStale ? 'Dölj lista' : 'Visa lista'}
@@ -1015,7 +1049,7 @@ export function Admin() {
                     )}
 
                     <p style={{ fontSize: 11, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px' }}>Användare</p>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 16 }}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" style={{ gap: 12, marginBottom: 16 }}>
                       <KpiCard label="Totalt registrerade" value={stats.snapshot.total_users} />
                       <KpiCard label="Aktiva 30 dagar (MAU)" value={stats.snapshot.mau} sub={`WAU ${stats.snapshot.wau} · DAU ${stats.snapshot.dau}`} />
                       <KpiCard label="Retention WAU/MAU" value={`${stats.snapshot.retention_pct}%`} />
@@ -1023,19 +1057,19 @@ export function Admin() {
                     </div>
 
                     <p style={{ fontSize: 11, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px' }}>Förfrågningar</p>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 20 }}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" style={{ gap: 12, marginBottom: 20 }}>
                       <KpiCard label="Skickade denna vecka" value={stats.snapshot.reqs_this_week} sub={`Förra veckan: ${stats.snapshot.reqs_last_week}`} />
                       <KpiCard label="Aktiva ärenden" value={stats.snapshot.active_reqs} />
                       <KpiCard label="Snitt per användare" value={stats.snapshot.avg_reqs_per_user} />
                       <KpiCard label="Intrångsfrekvens" value={`${stats.snapshot.breach_rate_pct}%`} sub={`${stats.snapshot.total_breaches} funna · snitt ${stats.snapshot.avg_breaches}/skanning`} />
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 14, marginBottom: 14 }}>
                       <BarChart data={stats.signups_per_day} color="#2563EB" label="Registreringar per dag (30 dgr)" />
                       <BarChart data={stats.reqs_per_day} color="#7C3AED" label="Förfrågningar per dag (30 dgr)" />
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 14, marginBottom: 14 }}>
                       <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E2E8F0', padding: '18px 20px' }}>
                         <p style={{ fontSize: 11, fontWeight: 700, color: '#64748B', margin: '0 0 14px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Topp tjänster (alla tider)</p>
                         <HorizBars items={stats.top_companies.slice(0, 8)} color="#2563EB" />
@@ -1049,6 +1083,7 @@ export function Admin() {
                     {stats.response_times.length > 0 && (
                       <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E2E8F0', padding: '18px 20px', marginBottom: 14 }}>
                         <p style={{ fontSize: 11, fontWeight: 700, color: '#64748B', margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Snabbast svarande tjänster (min 2 bekräftade)</p>
+                        <div className="overflow-x-auto">
                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                           <thead>
                             <tr style={{ borderBottom: '1px solid #F1F5F9' }}>
@@ -1067,20 +1102,23 @@ export function Admin() {
                             ))}
                           </tbody>
                         </table>
+                        </div>
                       </div>
                     )}
 
                     {stats.company_trends.length > 0 && (
                       <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E2E8F0', padding: '18px 20px', marginBottom: 14 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                        <div className="flex-wrap" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, gap: 8 }}>
                           <p style={{ fontSize: 11, fontWeight: 700, color: '#64748B', margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Trend per tjänst (topp 10)</p>
                           <button
                             onClick={() => downloadCsv('bliglomd-tjanstetrender.csv', stats.company_trends as unknown as Record<string, unknown>[])}
+                            className="min-h-[44px] md:min-h-0"
                             style={{ padding: '5px 12px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 6, cursor: 'pointer', fontSize: 11, color: '#475569', fontWeight: 600 }}
                           >
                             Exportera CSV
                           </button>
                         </div>
+                        <div className="overflow-x-auto">
                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                           <thead>
                             <tr style={{ borderBottom: '1px solid #F1F5F9' }}>
@@ -1109,6 +1147,7 @@ export function Admin() {
                             })}
                           </tbody>
                         </table>
+                        </div>
                       </div>
                     )}
 
@@ -1124,17 +1163,19 @@ export function Admin() {
             {tab === 'audit' && (
               <div>
                 {/* Filters */}
-                <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
+                <div className="flex flex-col sm:flex-row" style={{ gap: 10, marginBottom: 14 }}>
                   <input
                     type="search"
                     placeholder="Sök användare…"
                     value={auditSearch}
                     onChange={e => setAuditSearch(e.target.value)}
+                    className="min-h-[44px] md:min-h-0"
                     style={{ flex: 1, padding: '9px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13, color: '#374151', outline: 'none', background: 'white', boxSizing: 'border-box' }}
                   />
                   <select
                     value={auditActionFilter}
                     onChange={e => setAuditActionFilter(e.target.value)}
+                    className="min-h-[44px] md:min-h-0"
                     style={{ padding: '9px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13, color: '#374151', background: 'white', outline: 'none', cursor: 'pointer' }}
                   >
                     <option value="">Alla händelser</option>
@@ -1144,6 +1185,7 @@ export function Admin() {
                   </select>
                   <button
                     onClick={() => downloadCsv('bliglomd-granskningslogg.csv', filteredAudit as unknown as Record<string, unknown>[])}
+                    className="min-h-[44px] md:min-h-0"
                     style={{ padding: '9px 14px', borderRadius: 8, border: '1px solid #E2E8F0', background: 'white', cursor: 'pointer', fontSize: 13, color: '#475569', fontWeight: 500, whiteSpace: 'nowrap' }}
                   >
                     Exportera CSV
@@ -1157,7 +1199,7 @@ export function Admin() {
                   </div>
                 ) : (
                   <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E2E8F0', overflow: 'hidden' }}>
-                    <div style={{ overflowX: 'auto' }}>
+                    <div className="overflow-x-auto">
                       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                         <thead style={{ background: '#F8FAFC' }}>
                           <tr>
@@ -1215,16 +1257,17 @@ export function Admin() {
                 ) : (
                   <>
                     <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E2E8F0', overflow: 'hidden', marginBottom: 20 }}>
-                      <div style={{ padding: '14px 20px', borderBottom: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div className="flex-wrap" style={{ padding: '14px 20px', borderBottom: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
                         <p style={{ fontSize: 13, fontWeight: 700, color: '#0F172A', margin: 0 }}>Registreringssamtycke ({signupConsents.length})</p>
                         <button
                           onClick={() => downloadCsv('bliglomd-registreringssamtycke.csv', signupConsents as unknown as Record<string, unknown>[])}
+                          className="min-h-[44px] md:min-h-0"
                           style={{ padding: '5px 12px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 6, cursor: 'pointer', fontSize: 11, color: '#475569', fontWeight: 600 }}
                         >
                           Exportera CSV
                         </button>
                       </div>
-                      <div style={{ overflowX: 'auto' }}>
+                      <div className="overflow-x-auto">
                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                           <thead style={{ background: '#F8FAFC' }}>
                             <tr>
@@ -1259,16 +1302,17 @@ export function Admin() {
                     </div>
 
                     <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E2E8F0', overflow: 'hidden' }}>
-                      <div style={{ padding: '14px 20px', borderBottom: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div className="flex-wrap" style={{ padding: '14px 20px', borderBottom: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
                         <p style={{ fontSize: 13, fontWeight: 700, color: '#0F172A', margin: 0 }}>Köpsamtycke ({checkoutConsents.length})</p>
                         <button
                           onClick={() => downloadCsv('bliglomd-kopsamtycke.csv', checkoutConsents as unknown as Record<string, unknown>[])}
+                          className="min-h-[44px] md:min-h-0"
                           style={{ padding: '5px 12px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 6, cursor: 'pointer', fontSize: 11, color: '#475569', fontWeight: 600 }}
                         >
                           Exportera CSV
                         </button>
                       </div>
-                      <div style={{ overflowX: 'auto' }}>
+                      <div className="overflow-x-auto">
                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                           <thead style={{ background: '#F8FAFC' }}>
                             <tr>
@@ -1347,7 +1391,7 @@ export function Admin() {
                       </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 14, marginBottom: 14 }}>
                       {/* Referrers */}
                       <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E2E8F0', padding: '18px 20px' }}>
                         <p style={{ fontSize: 11, fontWeight: 700, color: '#64748B', margin: '0 0 14px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
@@ -1364,7 +1408,7 @@ export function Admin() {
                       </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 14, marginBottom: 14 }}>
                       {/* Landing pages */}
                       <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E2E8F0', padding: '18px 20px' }}>
                         <p style={{ fontSize: 11, fontWeight: 700, color: '#64748B', margin: '0 0 14px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
@@ -1383,13 +1427,14 @@ export function Admin() {
 
                     {/* Unmatched searches */}
                     <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E2E8F0', padding: '18px 20px', marginBottom: 14 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                      <div className="flex-wrap" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4, gap: 8 }}>
                         <p style={{ fontSize: 11, fontWeight: 700, color: '#64748B', margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                           Sökningar utan träff (90 dgr) — vad kunder saknar
                         </p>
                         {traffic.unmatched_searches.length > 0 && (
                           <button
                             onClick={() => downloadCsv('bliglomd-osokta-foretag.csv', traffic.unmatched_searches as unknown as Record<string, unknown>[])}
+                            className="min-h-[44px] md:min-h-0"
                             style={{ padding: '5px 12px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 6, cursor: 'pointer', fontSize: 11, color: '#475569', fontWeight: 600 }}
                           >
                             Exportera CSV
@@ -1402,6 +1447,7 @@ export function Admin() {
                       {traffic.unmatched_searches.length === 0 ? (
                         <p style={{ fontSize: 12, color: '#CBD5E1' }}>Inga osökta träffar registrerade ännu</p>
                       ) : (
+                        <div className="overflow-x-auto">
                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                           <thead>
                             <tr style={{ borderBottom: '1px solid #F1F5F9' }}>
@@ -1420,6 +1466,7 @@ export function Admin() {
                             ))}
                           </tbody>
                         </table>
+                        </div>
                       )}
                     </div>
 
@@ -1441,13 +1488,14 @@ export function Admin() {
             style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.25)', zIndex: 40 }}
             onClick={() => setSelected(null)}
           />
-          <aside style={{ position: 'fixed', right: 0, top: 0, bottom: 0, width: 380, background: 'white', borderLeft: '1px solid #E2E8F0', zIndex: 50, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
+          <aside className="w-full sm:w-[380px]" style={{ position: 'fixed', right: 0, top: 0, bottom: 0, background: 'white', borderLeft: '1px solid #E2E8F0', zIndex: 50, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
             {/* Header */}
             <div style={{ padding: '20px 24px 16px', borderBottom: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
               <h2 style={{ fontSize: 16, fontWeight: 700, color: '#0F172A', margin: 0 }}>Användardetaljer</h2>
               <button
                 onClick={() => setSelected(null)}
-                style={{ width: 28, height: 28, borderRadius: '50%', border: 'none', background: '#F1F5F9', cursor: 'pointer', fontSize: 13, color: '#64748B', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                className="w-11 h-11 md:w-7 md:h-7"
+                style={{ borderRadius: '50%', border: 'none', background: '#F1F5F9', cursor: 'pointer', fontSize: 13, color: '#64748B', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
                 aria-label="Stäng"
               >
                 ✕
@@ -1467,7 +1515,7 @@ export function Admin() {
               </div>
 
               {/* Info grid */}
-              <div style={{ background: '#F8FAFC', borderRadius: 10, padding: '14px 16px', marginBottom: 20, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 16px' }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2" style={{ background: '#F8FAFC', borderRadius: 10, padding: '14px 16px', marginBottom: 20, gap: '10px 16px' }}>
                 {[
                   { label: 'Registrerad',   value: fmtDate(selected.created_at) },
                   { label: 'Senast aktiv',  value: selected.last_sign_in_at ? fmtDate(selected.last_sign_in_at) : 'Aldrig' },
@@ -1588,6 +1636,7 @@ export function Admin() {
                       key={lvl}
                       disabled={busyUser === selected.id}
                       onClick={() => handleLevelChange(selected.id, lvl)}
+                      className="min-h-[44px] md:min-h-0"
                       style={{
                         flex: 1, padding: '9px 4px', borderRadius: 8, cursor: 'pointer', fontWeight: 700, fontSize: 12, transition: 'all 0.15s',
                         border: `2px solid ${selected.level === lvl ? LVL_FG[lvl] : '#E2E8F0'}`,
@@ -1607,6 +1656,7 @@ export function Admin() {
                 <button
                   onClick={() => handleExport(selected.id)}
                   disabled={exporting}
+                  className="min-h-[44px]"
                   style={{ width: '100%', padding: '11px', borderRadius: 8, border: '1px solid #E2E8F0', background: 'white', color: '#374151', fontWeight: 600, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: exporting ? 0.6 : 1 }}
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -1617,6 +1667,7 @@ export function Admin() {
 
                 <button
                   onClick={() => { setShowDelete(true); setDeleteInput('') }}
+                  className="min-h-[44px]"
                   style={{ width: '100%', padding: '11px', borderRadius: 8, border: '1.5px solid #FEE2E2', background: '#FFF5F5', color: '#DC2626', fontWeight: 600, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -1632,9 +1683,9 @@ export function Admin() {
 
       {/* ── DELETE CONFIRM MODAL ──────────────────────────────────────────── */}
       {showDelete && selected && (
-        <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60, padding: 24 }}>
+        <div className="p-4 sm:p-6" style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60 }}>
           <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)' }} onClick={() => { setShowDelete(false); setDeleteInput('') }} />
-          <div style={{ position: 'relative', background: 'white', borderRadius: 14, padding: '28px 28px 24px', width: '100%', maxWidth: 420, boxShadow: '0 24px 64px rgba(0,0,0,0.3)' }}>
+          <div style={{ position: 'relative', background: 'white', borderRadius: 14, padding: '28px 28px 24px', width: '100%', maxWidth: 420, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 24px 64px rgba(0,0,0,0.3)' }}>
             <div style={{ width: 44, height: 44, borderRadius: 12, background: '#FEE2E2', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M3 6h18M19 6l-1 14H6L5 6M9 6V4h6v2"/>
@@ -1652,11 +1703,13 @@ export function Admin() {
               value={deleteInput}
               onChange={e => setDeleteInput(e.target.value)}
               placeholder={selected.email}
+              className="min-h-[44px]"
               style={{ width: '100%', padding: '9px 12px', border: `1.5px solid ${deleteInput === selected.email ? '#FCA5A5' : '#E2E8F0'}`, borderRadius: 8, fontSize: 13, color: '#1E293B', outline: 'none', boxSizing: 'border-box', marginBottom: 16 }}
             />
             <div style={{ display: 'flex', gap: 8 }}>
               <button
                 onClick={() => { setShowDelete(false); setDeleteInput('') }}
+                className="min-h-[44px]"
                 style={{ flex: 1, padding: '10px', borderRadius: 8, border: '1px solid #E2E8F0', background: 'white', color: '#475569', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}
               >
                 Avbryt
@@ -1664,6 +1717,7 @@ export function Admin() {
               <button
                 onClick={handleDelete}
                 disabled={deleteInput !== selected.email || deleting}
+                className="min-h-[44px]"
                 style={{
                   flex: 1, padding: '10px', borderRadius: 8, border: 'none', fontWeight: 700, fontSize: 13, transition: 'all 0.15s',
                   background: deleteInput === selected.email ? '#DC2626' : '#F1F5F9',
@@ -1680,14 +1734,15 @@ export function Admin() {
 
       {/* ── DELETION SNAPSHOT VIEWER ─────────────────────────────────────── */}
       {snapshotView && (
-        <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60, padding: 24 }}>
+        <div className="p-4 sm:p-6" style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60 }}>
           <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)' }} onClick={() => setSnapshotView(null)} />
           <div style={{ position: 'relative', background: 'white', borderRadius: 14, padding: '24px 24px 20px', width: '100%', maxWidth: 640, maxHeight: '80vh', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 64px rgba(0,0,0,0.3)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexShrink: 0 }}>
-              <h3 style={{ fontSize: 15, fontWeight: 700, color: '#0F172A', margin: 0 }}>Raderingssnapshot — {snapshotView.deleted_user_email}</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexShrink: 0, gap: 8 }}>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: '#0F172A', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Raderingssnapshot — {snapshotView.deleted_user_email}</h3>
               <button
                 onClick={() => setSnapshotView(null)}
-                style={{ width: 26, height: 26, borderRadius: '50%', border: 'none', background: '#F1F5F9', cursor: 'pointer', fontSize: 12, color: '#64748B' }}
+                className="w-11 h-11 md:w-[26px] md:h-[26px]"
+                style={{ borderRadius: '50%', border: 'none', background: '#F1F5F9', cursor: 'pointer', fontSize: 12, color: '#64748B', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 aria-label="Stäng"
               >
                 ✕
@@ -1702,14 +1757,15 @@ export function Admin() {
 
       {/* ── CONSENT TEXT VIEWER ──────────────────────────────────────────── */}
       {consentTextView && (
-        <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60, padding: 24 }}>
+        <div className="p-4 sm:p-6" style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60 }}>
           <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)' }} onClick={() => setConsentTextView(null)} />
           <div style={{ position: 'relative', background: 'white', borderRadius: 14, padding: '24px 24px 20px', width: '100%', maxWidth: 680, maxHeight: '82vh', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 64px rgba(0,0,0,0.3)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4, flexShrink: 0 }}>
-              <h3 style={{ fontSize: 15, fontWeight: 700, color: '#0F172A', margin: 0 }}>Samtycke — {consentTextView.user_email}</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4, flexShrink: 0, gap: 8 }}>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: '#0F172A', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Samtycke — {consentTextView.user_email}</h3>
               <button
                 onClick={() => setConsentTextView(null)}
-                style={{ width: 26, height: 26, borderRadius: '50%', border: 'none', background: '#F1F5F9', cursor: 'pointer', fontSize: 12, color: '#64748B' }}
+                className="w-11 h-11 md:w-[26px] md:h-[26px]"
+                style={{ borderRadius: '50%', border: 'none', background: '#F1F5F9', cursor: 'pointer', fontSize: 12, color: '#64748B', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 aria-label="Stäng"
               >
                 ✕

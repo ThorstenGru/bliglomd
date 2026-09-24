@@ -439,21 +439,26 @@ export function Status() {
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <a href="/" className="text-white/80 hover:text-white text-sm mb-2 inline-block">
-                {t.backHome}
-              </a>
-              <h1 className="text-3xl font-bold">{t.title}</h1>
+              <div className="mb-2">
+                <a
+                  href="/"
+                  className="text-white/80 hover:text-white text-sm inline-block py-2 -my-2"
+                >
+                  {t.backHome}
+                </a>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-bold">{t.title}</h1>
               <p className="mt-1 text-white/90 text-sm">{t.subtitle}</p>
             </div>
           </div>
 
           {/* Overall status banner */}
-          <div className="mt-6 bg-white/15 rounded-xl p-4 flex items-center justify-between flex-wrap gap-3">
+          <div className="mt-6 bg-white/15 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between flex-wrap gap-3">
             <div className="flex items-center gap-3">
               <span className={`inline-block w-3 h-3 rounded-full ${overall === 'checking' ? 'bg-white/60 animate-pulse' : 'bg-white'}`} />
               <span className="font-semibold text-lg">{overallText}</span>
             </div>
-            <div className="flex items-center gap-4 text-sm text-white/80">
+            <div className="flex flex-col items-start sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-white/80">
               <span>
                 {t.lastChecked}: {lastChecked
                   ? lastChecked.toLocaleTimeString(lang === 'sv' ? 'sv-SE' : 'en-GB')
@@ -462,7 +467,7 @@ export function Status() {
               <button
                 onClick={runChecks}
                 disabled={running}
-                className="bg-white/20 hover:bg-white/30 text-white font-medium px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 text-sm"
+                className="bg-white/20 hover:bg-white/30 text-white font-medium px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 text-sm min-h-[44px] sm:min-h-0 flex items-center justify-center"
               >
                 {running ? t.refreshing : t.refresh}
               </button>
@@ -487,32 +492,34 @@ export function Status() {
                   return (
                     <div
                       key={comp.id}
-                      className={`rounded-xl border p-4 flex items-center gap-4 transition-colors ${statusBg(result.status)}`}
+                      className={`rounded-xl border p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 transition-colors ${statusBg(result.status)}`}
                     >
-                      {/* Status dot */}
-                      <span className={`shrink-0 w-3 h-3 rounded-full ${statusColor(result.status)}`} />
+                      <div className="flex items-center gap-4">
+                        {/* Status dot */}
+                        <span className={`shrink-0 w-3 h-3 rounded-full ${statusColor(result.status)}`} />
 
-                      {/* Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-semibold text-gray-900 text-sm">
-                            {compText?.name ?? comp.id}
-                          </span>
-                          {comp.docsUrl && (
-                            <a
-                              href={comp.docsUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-xs text-gray-400 hover:text-gray-600"
-                            >
-                              ↗
-                            </a>
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-semibold text-gray-900 text-sm">
+                              {compText?.name ?? comp.id}
+                            </span>
+                            {comp.docsUrl && (
+                              <a
+                                href={comp.docsUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-gray-400 hover:text-gray-600 inline-flex items-center justify-center p-2 -m-2"
+                              >
+                                ↗
+                              </a>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-500 mt-0.5">{compText?.desc}</p>
+                          {result.detail && (
+                            <p className="text-xs text-gray-400 mt-0.5 italic">{result.detail}</p>
                           )}
                         </div>
-                        <p className="text-xs text-gray-500 mt-0.5">{compText?.desc}</p>
-                        {result.detail && (
-                          <p className="text-xs text-gray-400 mt-0.5 italic">{result.detail}</p>
-                        )}
                       </div>
 
                       {/* Right side: status + response time */}

@@ -170,27 +170,27 @@ export function Dashboard() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12">
+    <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
       {upgraded && (
-        <div className="mb-6 bg-green-50 border border-green-200 rounded-2xl px-5 py-4 flex items-center gap-3">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <div className="mb-6 bg-green-50 border border-green-200 rounded-2xl px-4 sm:px-5 py-4 flex items-start gap-3">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="shrink-0 mt-0.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
           <p className="text-sm text-green-800 font-medium">
             {t.dashboard.upgradedBanner}
           </p>
         </div>
       )}
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">{t.dashboard.title}</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t.dashboard.title}</h1>
         <button
           onClick={() => navigate('/scan')}
-          className="bg-brand-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-brand-700 transition-colors"
+          className="bg-brand-600 text-white px-4 py-3 sm:py-2 rounded-xl text-sm font-medium hover:bg-brand-700 transition-colors"
         >
           {t.dashboard.newScan}
         </button>
       </div>
 
       {requests.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 sm:p-10 md:p-12 text-center">
           <p className="text-gray-500 text-lg mb-4">{t.dashboard.emptyTitle}</p>
           <p className="text-gray-400 text-sm mb-6">{t.dashboard.emptySub}</p>
           <button
@@ -221,14 +221,14 @@ export function Dashboard() {
                       setNoteText(req.notes ?? '')
                     }
                   }}
-                  className="w-full text-left px-5 py-4 flex items-center gap-4"
+                  className="w-full text-left px-4 sm:px-5 py-4 flex items-center gap-4 min-h-[44px]"
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 flex-wrap">
                       <span className="font-semibold text-gray-900">{req.company_name}</span>
                       <StatusBadge status={req.status} />
                     </div>
-                    <div className="flex items-center gap-4 mt-1 text-xs text-gray-400">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-xs text-gray-400">
                       {req.sent_at
                         ? <span>{t.dashboard.colSent}: {new Date(req.sent_at).toLocaleDateString(locale)}</span>
                         : <span className="italic">{t.dashboard.timeline.notSentYet}</span>
@@ -245,7 +245,7 @@ export function Dashboard() {
 
                 {/* Expanded detail panel */}
                 {isExpanded && (
-                  <div className="border-t border-gray-100 px-5 py-5 bg-gray-50">
+                  <div className="border-t border-gray-100 px-4 sm:px-5 py-5 bg-gray-50">
                     {/* Timeline */}
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4">
                       {t.dashboard.timeline.title}
@@ -282,7 +282,7 @@ export function Dashboard() {
                       <select
                         value={req.status}
                         onChange={(e) => updateStatus(req.id, e.target.value as Request['status'])}
-                        className="text-xs border border-gray-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-white"
+                        className="text-xs border border-gray-300 rounded-lg px-2.5 py-1.5 min-h-[44px] sm:min-h-0 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-white"
                       >
                         <option value="pending">{t.dashboard.pending}</option>
                         <option value="sent">{t.dashboard.sent}</option>
@@ -294,7 +294,7 @@ export function Dashboard() {
 
                       <button
                         onClick={() => navigate(`/request/${req.company_id}`)}
-                        className="text-xs text-brand-600 hover:underline"
+                        className="text-xs text-brand-600 hover:underline inline-block py-3.5 -my-3.5 sm:py-0 sm:my-0"
                       >
                         {t.dashboard.goToRequest} →
                       </button>
@@ -309,12 +309,12 @@ export function Dashboard() {
                           onChange={(e) => setNoteText(e.target.value)}
                           rows={2}
                           placeholder={t.dashboard.notePlaceholder}
-                          className="flex-1 border border-gray-300 rounded-lg px-2.5 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 resize-none"
+                          className="flex-1 min-w-0 border border-gray-300 rounded-lg px-2.5 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 resize-none"
                         />
                         <button
                           onClick={() => saveNote(req.id)}
                           disabled={noteSaving}
-                          className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors self-end ${
+                          className={`px-3 py-3 sm:py-2 rounded-lg text-xs font-medium transition-colors self-end min-h-[44px] sm:min-h-0 flex items-center justify-center shrink-0 ${
                             noteSavedId === req.id
                               ? 'bg-green-600 text-white'
                               : 'bg-brand-600 text-white hover:bg-brand-700'

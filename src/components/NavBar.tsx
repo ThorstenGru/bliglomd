@@ -34,8 +34,8 @@ export function NavBar({ session }: NavBarProps) {
     <>
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
       <nav className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-5xl mx-auto px-10 flex items-center justify-between gap-4" style={{ height: 60 }}>
-          <div className="flex items-center gap-6">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 md:px-10 flex items-center justify-between gap-2 sm:gap-4" style={{ height: 60 }}>
+          <div className="flex items-center gap-3 sm:gap-6 min-w-0">
             <Link to="/" className="shrink-0 leading-none" aria-label="BliGlömd — hem">
               <BrandLogo variant="compact" />
             </Link>
@@ -48,10 +48,10 @@ export function NavBar({ session }: NavBarProps) {
             )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               onClick={toggleLang}
-              className="text-xs font-medium text-gray-500 hover:text-gray-800 border border-gray-200 rounded-md px-2 py-1 transition-colors"
+              className="text-xs font-medium text-gray-500 hover:text-gray-800 border border-gray-200 rounded-md px-2 py-1 min-h-[44px] sm:min-h-0 inline-flex items-center transition-colors"
               aria-label="Switch language"
             >
               {t.nav.switchLang}
@@ -60,14 +60,14 @@ export function NavBar({ session }: NavBarProps) {
             {session ? (
               <button
                 onClick={handleLogout}
-                className="text-sm text-gray-600 hover:text-red-600 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-50"
+                className="text-sm text-gray-600 hover:text-red-600 transition-colors px-3 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg hover:bg-red-50 inline-flex items-center"
               >
                 {t.nav.logout}
               </button>
             ) : (
               <button
                 onClick={() => setShowAuth(true)}
-                className="bg-brand-600 text-white text-sm px-4 py-1.5 rounded-lg hover:bg-brand-700 transition-colors font-medium"
+                className="bg-brand-600 text-white text-sm px-4 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg hover:bg-brand-700 transition-colors font-medium inline-flex items-center"
               >
                 {t.nav.login}
               </button>
@@ -78,13 +78,13 @@ export function NavBar({ session }: NavBarProps) {
         {/* Mobile nav for logged-in users */}
         {session && (
           <div className="sm:hidden border-t border-gray-100 flex text-sm">
-            <Link to="/scan" className={`flex-1 text-center py-2 ${isActive('/scan')}`}>
+            <Link to="/scan" className={`flex-1 text-center py-3 min-h-[44px] flex items-center justify-center ${isActive('/scan')}`}>
               {t.nav.scan}
             </Link>
-            <Link to="/dashboard" className={`flex-1 text-center py-2 ${isActive('/dashboard')}`}>
+            <Link to="/dashboard" className={`flex-1 text-center py-3 min-h-[44px] flex items-center justify-center ${isActive('/dashboard')}`}>
               {t.nav.dashboard}
             </Link>
-            <Link to="/profile" className={`flex-1 text-center py-2 ${isActive('/profile')}`}>
+            <Link to="/profile" className={`flex-1 text-center py-3 min-h-[44px] flex items-center justify-center ${isActive('/profile')}`}>
               {t.nav.profile}
             </Link>
           </div>

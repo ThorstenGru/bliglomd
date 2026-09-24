@@ -113,13 +113,16 @@ export function BrandLogo({ variant = 'compact', className = '' }: BrandLogoProp
 
   // compact — navbar
   return (
-    <div className={`flex items-center gap-2.5 ${className}`}>
-      <ShieldNav gradId={gradId} />
-      <div>
-        <div style={{ fontSize: 16, fontWeight: 400, color: '#1E3A8A', lineHeight: 1.1 }}>
+    <div className={`flex items-center gap-2.5 min-w-0 ${className}`}>
+      <div className="flex-shrink-0">
+        <ShieldNav gradId={gradId} />
+      </div>
+      <div className="min-w-0">
+        <div className="truncate" style={{ fontSize: 16, fontWeight: 400, color: '#1E3A8A', lineHeight: 1.1 }}>
           Bli<strong style={{ fontWeight: 700 }}>Glömd</strong>
         </div>
         <div
+          className="truncate"
           style={{
             fontSize: 8,
             fontWeight: 500,

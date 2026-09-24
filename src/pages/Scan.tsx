@@ -88,23 +88,23 @@ export function Scan() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold text-gray-900 mb-2">{t.scan.title}</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{t.scan.title}</h1>
       <p className="text-gray-600 mb-8">{t.scan.subtitle}</p>
 
       <form onSubmit={handleScan} className="mb-10">
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <input
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder={t.scan.placeholder}
-            className="flex-1 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+            className="w-full sm:flex-1 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
           <button
             type="submit"
             disabled={loading || !consentChecked}
-            className="bg-brand-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-brand-700 transition-colors disabled:opacity-50 whitespace-nowrap"
+            className="w-full sm:w-auto bg-brand-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-brand-700 transition-colors disabled:opacity-50 whitespace-nowrap min-h-[44px]"
           >
             {loading ? t.scan.btnLoading : t.scan.btn}
           </button>

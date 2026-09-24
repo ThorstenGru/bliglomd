@@ -17,7 +17,7 @@ const statusColor: Record<RequestStatus, string> = {
 export function StatusBadge({ status }: StatusBadgeProps) {
   const { t } = useLang()
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor[status]}`}>
+    <span className={`inline-flex items-center whitespace-nowrap px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor[status]}`}>
       {t.requestStatus[status]}
     </span>
   )

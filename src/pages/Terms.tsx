@@ -11,7 +11,7 @@ const SV_SECTIONS: Section[] = [
   {
     num: '1', title: 'Parter',
     body: [
-      'Tjänsten BliGlömd tillhandahålls av Thorsten Grund, enskild firma (nedan "BliGlömd" eller "Tjänsteleverantören"). Kontakt: kontakt@bliglömd.se.',
+      'Tjänsten BliGlömd tillhandahålls av BliGlömd (nedan "BliGlömd" eller "Tjänsteleverantören"). Kontakt: kontakt@bliglömd.se.',
       'Den fysiska eller juridiska person som ingår detta avtal benämns "Kunden".',
     ],
   },
@@ -102,7 +102,7 @@ const EN_SECTIONS: Section[] = [
   {
     num: '1', title: 'Parties',
     body: [
-      'The service BliGlömd is provided by Thorsten Grund, sole trader (hereinafter "BliGlömd" or "Service Provider"). Contact: kontakt@bliglömd.se.',
+      'The service BliGlömd is provided by BliGlömd (hereinafter "BliGlömd" or "Service Provider"). Contact: kontakt@bliglömd.se.',
       'The natural or legal person entering into this agreement is referred to as the "Customer".',
     ],
   },
@@ -195,8 +195,8 @@ export function Terms() {
   const sections = isEn ? EN_SECTIONS : SV_SECTIONS
 
   return (
-    <div style={{ background: '#F5F7FF', minHeight: '100vh', padding: '48px 24px 80px' }}>
-      <div style={{ maxWidth: 740, margin: '0 auto' }}>
+    <div className="px-4 sm:px-6 pt-8 sm:pt-10 md:pt-12 pb-14 sm:pb-20" style={{ background: '#F5F7FF', minHeight: '100vh' }}>
+      <div style={{ maxWidth: 740, margin: '0 auto', width: '100%' }}>
 
         {/* Header */}
         <div style={{ marginBottom: 40 }}>

@@ -55,7 +55,8 @@ export function ConsentModal({ priceId, planLabel, onConfirmed, onClose }: Conse
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
       <div style={{
-        background: 'white', borderRadius: 16, padding: '32px 28px',
+        background: 'white', borderRadius: 16,
+        padding: 'clamp(20px, 6vw, 32px) clamp(18px, 5vw, 28px)',
         maxWidth: 520, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
         maxHeight: '90vh', overflowY: 'auto',
       }}>
@@ -64,7 +65,7 @@ export function ConsentModal({ priceId, planLabel, onConfirmed, onClose }: Conse
           <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', color: '#6B7A99', textTransform: 'uppercase', marginBottom: 6 }}>
             {isEn ? 'Before you pay' : 'Innan du betalar'}
           </p>
-          <h2 style={{ fontSize: 20, fontWeight: 700, color: '#1B2640', letterSpacing: '-0.01em', lineHeight: 1.2 }}>
+          <h2 style={{ fontSize: 'clamp(18px, 4.5vw, 20px)', fontWeight: 700, color: '#1B2640', letterSpacing: '-0.01em', lineHeight: 1.2 }}>
             {isEn ? `Purchase ${planLabel}` : `Köp ${planLabel}`}
           </h2>
         </div>
@@ -125,18 +126,20 @@ export function ConsentModal({ priceId, planLabel, onConfirmed, onClose }: Conse
         )}
 
         {/* Buttons */}
-        <div style={{ display: 'flex', gap: 10 }}>
+        <div className="flex flex-col sm:flex-row" style={{ gap: 10 }}>
           <button
             onClick={onClose}
-            style={{ flex: 1, padding: '11px 0', borderRadius: 10, border: '1.5px solid #E2E8F0', background: 'white', color: '#6B7A99', fontSize: 14, fontWeight: 500, cursor: 'pointer' }}
+            className="w-full sm:flex-1"
+            style={{ padding: '14px 0', borderRadius: 10, border: '1.5px solid #E2E8F0', background: 'white', color: '#6B7A99', fontSize: 14, fontWeight: 500, cursor: 'pointer' }}
           >
             {isEn ? 'Cancel' : 'Avbryt'}
           </button>
           <button
             onClick={handleConfirm}
             disabled={!checked || saving}
+            className="w-full sm:flex-[2]"
             style={{
-              flex: 2, padding: '11px 0', borderRadius: 10, border: 'none',
+              padding: '14px 0', borderRadius: 10, border: 'none',
               background: checked ? '#2852D9' : '#E2E8F0',
               color: checked ? 'white' : '#94A3B8',
               fontSize: 14, fontWeight: 600, cursor: checked ? 'pointer' : 'not-allowed',

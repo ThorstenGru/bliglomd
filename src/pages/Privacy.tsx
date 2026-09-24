@@ -6,8 +6,8 @@ export function Privacy() {
   const isEn = lang === 'en'
 
   return (
-    <div style={{ background: '#F5F7FF', minHeight: '100vh', padding: '48px 24px 80px' }}>
-      <div style={{ maxWidth: 740, margin: '0 auto' }}>
+    <div className="px-4 sm:px-6 pt-8 sm:pt-10 md:pt-12 pb-14 sm:pb-20" style={{ background: '#F5F7FF', minHeight: '100vh' }}>
+      <div style={{ maxWidth: 740, margin: '0 auto', width: '100%' }}>
 
         <div style={{ marginBottom: 40 }}>
           <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', color: '#6B7A99', textTransform: 'uppercase', marginBottom: 8 }}>
@@ -28,8 +28,8 @@ export function Privacy() {
           {
             title: isEn ? '1. Who is responsible for your data?' : '1. Vem ansvarar för dina uppgifter?',
             body: isEn
-              ? 'BliGlömd (Thorsten Grund, sole trader) is the data controller. Contact for data protection questions: kontakt@bliglömd.se.'
-              : 'BliGlömd (Thorsten Grund, enskild firma) är personuppgiftsansvarig. Kontakt för dataskyddsfrågor: kontakt@bliglömd.se.',
+              ? 'BliGlömd is the data controller. Contact for data protection questions: kontakt@bliglömd.se.'
+              : 'BliGlömd är personuppgiftsansvarig. Kontakt för dataskyddsfrågor: kontakt@bliglömd.se.',
           },
           {
             title: isEn ? '2. What data do we process?' : '2. Vilka uppgifter behandlar vi?',
