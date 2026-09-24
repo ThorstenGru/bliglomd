@@ -133,7 +133,7 @@ export const translations = {
     },
     request: {
       notFound: 'Företaget hittades inte.',
-      backToScan: 'Tillbaka till skärming',
+      backToScan: 'Tillbaka till skanning',
       instructions: 'Guidade instruktioner',
       mailTemplate: 'Färdig mailmall',
       gateLoginTitle: 'Logga in för att låsa upp den här nivån.',
@@ -174,9 +174,9 @@ export const translations = {
     },
     dashboard: {
       title: 'Mina förfrågningar',
-      newScan: '+ Ny skärming',
+      newScan: '+ Ny skanning',
       emptyTitle: 'Inga förfrågningar ännu.',
-      emptySub: 'Starta en skärming!',
+      emptySub: 'Starta en skanning!',
       emptyCta: 'Skanna min e-post',
       colCompany: 'Företag',
       colStatus: 'Status',
