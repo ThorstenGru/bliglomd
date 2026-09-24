@@ -26,7 +26,7 @@ const SV_SECTIONS: Section[] = [
   {
     num: '3', title: 'Priser och betalning',
     body: [
-      'Priser anges i SEK. Betalning sker via Stripe i förskott, månadsvis eller årsvis beroende på valt abonnemang.',
+      'Priser anges i SEK. Betalning sker via Stripe i förskott, månadsvis. Abonnemang kan sägas upp när som helst utan bindningstid.',
       'BliGlömd förbehåller sig rätten att justera priser med minst 14 dagars avisering till befintliga prenumeranter. Fortsatt användning efter prisjustering utgör godkännande av nytt pris.',
     ],
   },
@@ -117,7 +117,7 @@ const EN_SECTIONS: Section[] = [
   {
     num: '3', title: 'Prices and payment',
     body: [
-      'Prices are stated in SEK. Payment is made via Stripe in advance, monthly or annually depending on the chosen plan.',
+      'Prices are stated in SEK. Payment is made via Stripe in advance, monthly. Subscriptions can be cancelled at any time with no binding period.',
       'BliGlömd reserves the right to adjust prices with at least 14 days\' notice to existing subscribers. Continued use after a price change constitutes acceptance of the new price.',
     ],
   },

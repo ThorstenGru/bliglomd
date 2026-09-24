@@ -154,7 +154,6 @@ export function Home({ session }: HomeProps) {
   const { t, lang } = useLang()
   const reqCount  = useCountUp(3847)
   const userCount = useCountUp(1200)
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly')
   const [upgrading, setUpgrading] = useState<string | null>(null)
   const [stripeError, setStripeError] = useState<string | null>(null)
   const [consentPriceId, setConsentPriceId] = useState<string | null>(null)
@@ -325,40 +324,6 @@ export function Home({ session }: HomeProps) {
             {t.home.levelsTitle}
           </h2>
 
-          {/* Billing toggle */}
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 36 }}>
-            <div style={{ display: 'flex', background: '#E2E8F0', borderRadius: 100, padding: 4, gap: 2 }}>
-              <button
-                onClick={() => setBillingCycle('monthly')}
-                style={{
-                  padding: '8px 22px', borderRadius: 100, border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: billingCycle === 'monthly' ? 600 : 400,
-                  background: billingCycle === 'monthly' ? 'white' : 'transparent',
-                  color: billingCycle === 'monthly' ? '#1E293B' : '#64748B',
-                  boxShadow: billingCycle === 'monthly' ? '0 1px 3px rgba(0,0,0,0.12)' : 'none',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                {t.home.monthly}
-              </button>
-              <button
-                onClick={() => setBillingCycle('annual')}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  padding: '8px 22px', borderRadius: 100, border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: billingCycle === 'annual' ? 600 : 400,
-                  background: billingCycle === 'annual' ? 'white' : 'transparent',
-                  color: billingCycle === 'annual' ? '#1E293B' : '#64748B',
-                  boxShadow: billingCycle === 'annual' ? '0 1px 3px rgba(0,0,0,0.12)' : 'none',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                {t.home.annual}
-                <span style={{ background: '#DCFCE7', color: '#15803D', fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 100 }}>
-                  {t.home.save20}
-                </span>
-              </button>
-            </div>
-          </div>
-
           {/* Tier cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
 
@@ -427,18 +392,8 @@ export function Home({ session }: HomeProps) {
 
               {/* Price */}
               <div style={{ marginBottom: 20 }}>
-                {billingCycle === 'monthly' ? (
-                  <div>
-                    <span style={{ fontSize: 32, fontWeight: 800, color: '#2563EB', letterSpacing: '-0.03em' }}>{TIERS[2].monthlyPriceSEK} kr</span>
-                    <span style={{ fontSize: 14, color: '#94A3B8' }}>{t.home.perMonth}</span>
-                  </div>
-                ) : (
-                  <div>
-                    <span style={{ fontSize: 32, fontWeight: 800, color: '#2563EB', letterSpacing: '-0.03em' }}>{TIERS[2].annualPriceSEK} kr</span>
-                    <span style={{ fontSize: 14, color: '#94A3B8' }}>{t.home.perYear}</span>
-                    <p style={{ fontSize: 12, color: '#64748B', marginTop: 2 }}>≈ {Math.round(TIERS[2].annualPriceSEK / 12)} kr{t.home.perMonth}</p>
-                  </div>
-                )}
+                <span style={{ fontSize: 32, fontWeight: 800, color: '#2563EB', letterSpacing: '-0.03em' }}>{TIERS[2].monthlyPriceSEK} kr</span>
+                <span style={{ fontSize: 14, color: '#94A3B8' }}>{t.home.perMonth}</span>
               </div>
 
               {/* Features */}
@@ -457,18 +412,11 @@ export function Home({ session }: HomeProps) {
               {/* CTA */}
               <div style={{ marginTop: 'auto' }}>
                 <button
-                  onClick={() => {
-                    const priceId = billingCycle === 'annual'
-                      ? TIERS[2].stripeAnnualPriceId!
-                      : TIERS[2].stripeMonthlyPriceId!
-                    handleTierCTA(priceId, `Cipher ${billingCycle === 'annual' ? TIERS[2].annualPriceSEK : TIERS[2].monthlyPriceSEK} kr`)
-                  }}
+                  onClick={() => handleTierCTA(TIERS[2].stripeMonthlyPriceId!, `Cipher ${TIERS[2].monthlyPriceSEK} kr`)}
                   disabled={upgrading !== null}
                   style={{ width: '100%', background: '#2563EB', color: 'white', border: 'none', fontSize: 14, fontWeight: 600, padding: '13px 0', borderRadius: 10, cursor: upgrading ? 'not-allowed' : 'pointer', opacity: upgrading ? 0.7 : 1, transition: 'opacity 0.15s' }}
                 >
-                  {upgrading === (billingCycle === 'annual' ? TIERS[2].stripeAnnualPriceId : TIERS[2].stripeMonthlyPriceId)
-                    ? t.common.loading
-                    : t.home.chooseCipher}
+                  {upgrading === TIERS[2].stripeMonthlyPriceId ? t.common.loading : t.home.chooseCipher}
                 </button>
               </div>
             </div>
@@ -485,18 +433,8 @@ export function Home({ session }: HomeProps) {
 
               {/* Price */}
               <div style={{ marginBottom: 20 }}>
-                {billingCycle === 'monthly' ? (
-                  <div>
-                    <span style={{ fontSize: 32, fontWeight: 800, color: '#7C3AED', letterSpacing: '-0.03em' }}>{TIERS[3].monthlyPriceSEK} kr</span>
-                    <span style={{ fontSize: 14, color: '#94A3B8' }}>{t.home.perMonth}</span>
-                  </div>
-                ) : (
-                  <div>
-                    <span style={{ fontSize: 32, fontWeight: 800, color: '#7C3AED', letterSpacing: '-0.03em' }}>{TIERS[3].annualPriceSEK.toLocaleString('sv-SE')} kr</span>
-                    <span style={{ fontSize: 14, color: '#94A3B8' }}>{t.home.perYear}</span>
-                    <p style={{ fontSize: 12, color: '#64748B', marginTop: 2 }}>≈ {Math.round(TIERS[3].annualPriceSEK / 12)} kr{t.home.perMonth}</p>
-                  </div>
-                )}
+                <span style={{ fontSize: 32, fontWeight: 800, color: '#7C3AED', letterSpacing: '-0.03em' }}>{TIERS[3].monthlyPriceSEK} kr</span>
+                <span style={{ fontSize: 14, color: '#94A3B8' }}>{t.home.perMonth}</span>
               </div>
 
               {/* Features */}
@@ -515,18 +453,11 @@ export function Home({ session }: HomeProps) {
               {/* CTA */}
               <div style={{ marginTop: 'auto' }}>
                 <button
-                  onClick={() => {
-                    const priceId = billingCycle === 'annual'
-                      ? TIERS[3].stripeAnnualPriceId!
-                      : TIERS[3].stripeMonthlyPriceId!
-                    handleTierCTA(priceId, `Ghost ${billingCycle === 'annual' ? TIERS[3].annualPriceSEK : TIERS[3].monthlyPriceSEK} kr`)
-                  }}
+                  onClick={() => handleTierCTA(TIERS[3].stripeMonthlyPriceId!, `Ghost ${TIERS[3].monthlyPriceSEK} kr`)}
                   disabled={upgrading !== null}
                   style={{ width: '100%', background: '#7C3AED', color: 'white', border: 'none', fontSize: 14, fontWeight: 600, padding: '13px 0', borderRadius: 10, cursor: upgrading ? 'not-allowed' : 'pointer', opacity: upgrading ? 0.7 : 1, transition: 'opacity 0.15s' }}
                 >
-                  {upgrading === (billingCycle === 'annual' ? TIERS[3].stripeAnnualPriceId : TIERS[3].stripeMonthlyPriceId)
-                    ? t.common.loading
-                    : t.home.chooseGhost}
+                  {upgrading === TIERS[3].stripeMonthlyPriceId ? t.common.loading : t.home.chooseGhost}
                 </button>
               </div>
             </div>

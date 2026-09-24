@@ -106,12 +106,12 @@ export const TIERS: Record<1 | 2 | 3, Tier> = {
       en: 'Upgrade to Ghost to let BliGlömd send and monitor automatically.',
     },
     color: 'blue',
-    monthlyPriceSEK: 61,
-    annualPriceSEK: 586,
-    // SANDBOX — switch to price_1TnxQbAT2u1nHxljUfTlrTTT for live when explicitly instructed
-    stripeMonthlyPriceId: 'price_1TnxQdAR7wxHkiWgJINpQ3EZ',
-    // SANDBOX — switch to price_1To2AuAT2u1nHxljRxAA6KV9 for live when explicitly instructed
-    stripeAnnualPriceId: 'price_1To2AsAR7wxHkiWgfrIUhoEQ',
+    monthlyPriceSEK: 99,
+    annualPriceSEK: 0,
+    // SANDBOX — 2026 repricing (+62% vs 61kr). Live equivalent not yet created — create under
+    // prod matching price_1TnxQbAT2u1nHxljUfTlrTTT's product before going live.
+    stripeMonthlyPriceId: 'price_1UJF2CAR7wxHkiWgazzRxQYe',
+    stripeAnnualPriceId: null,
   },
 
   3: {
@@ -148,12 +148,12 @@ export const TIERS: Record<1 | 2 | 3, Tier> = {
       en: '',
     },
     color: 'purple',
-    monthlyPriceSEK: 124,
-    annualPriceSEK: 1190,
-    // SANDBOX — switch to price_1TnxQcAT2u1nHxljSb3UDBSq for live when explicitly instructed
-    stripeMonthlyPriceId: 'price_1TnxQeAR7wxHkiWgMk6H20JZ',
-    // SANDBOX — switch to price_1To2AuAT2u1nHxljKE1sN1U3 for live when explicitly instructed
-    stripeAnnualPriceId: 'price_1To2AsAR7wxHkiWgONTMlkE5',
+    monthlyPriceSEK: 199,
+    annualPriceSEK: 0,
+    // SANDBOX — 2026 repricing (+60% vs 124kr). Live equivalent not yet created — create under
+    // prod matching price_1TnxQcAT2u1nHxljSb3UDBSq's product before going live.
+    stripeMonthlyPriceId: 'price_1UJF2DAR7wxHkiWgOIfZS2jj',
+    stripeAnnualPriceId: null,
   },
 }
 
