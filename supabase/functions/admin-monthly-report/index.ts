@@ -16,15 +16,37 @@ interface PurchaseRow {
   status: string
 }
 
-function levelFromProduct(product: unknown): number | null {
-  if (product && typeof product === 'object' && 'metadata' in product) {
-    const raw = (product as { metadata?: { bliglomd_level?: string } }).metadata?.bliglomd_level
-    return raw ? parseInt(raw, 10) : null
+// Stripe caps `expand` chains at 4 levels, so the invoice list request can reach
+// data.lines.data.price (4) but not .product (5). Instead, resolve price -> level
+// once via a separate, shallow-expanded /v1/prices call and look up by price id.
+async function fetchPriceLevelMap(stripeAuth: string): Promise<Record<string, number>> {
+  const map: Record<string, number> = {}
+  let startingAfter: string | undefined
+
+  for (;;) {
+    const params = new URLSearchParams({ limit: '100', 'expand[0]': 'data.product' })
+    if (startingAfter) params.set('starting_after', startingAfter)
+
+    const res = await fetch(`${STRIPE_BASE}/prices?${params.toString()}`, {
+      headers: { Authorization: stripeAuth },
+    })
+    const page = await res.json()
+    if (!res.ok) throw new Error(page.error?.message ?? 'Failed to list Stripe prices')
+
+    for (const price of page.data ?? []) {
+      const raw = price.product?.metadata?.bliglomd_level
+      if (raw) map[price.id] = parseInt(raw, 10)
+    }
+
+    if (!page.has_more || !page.data?.length) break
+    startingAfter = page.data[page.data.length - 1].id
   }
-  return null
+
+  return map
 }
 
 async function fetchPaidInvoices(stripeAuth: string, gte: number, lt: number): Promise<PurchaseRow[]> {
+  const priceLevelMap = await fetchPriceLevelMap(stripeAuth)
   const rows: PurchaseRow[] = []
   let startingAfter: string | undefined
 
@@ -35,7 +57,7 @@ async function fetchPaidInvoices(stripeAuth: string, gte: number, lt: number): P
       'created[lt]': String(lt),
       limit: '100',
       'expand[0]': 'data.customer',
-      'expand[1]': 'data.lines.data.price.product',
+      'expand[1]': 'data.lines.data.price',
     })
     if (startingAfter) params.set('starting_after', startingAfter)
 
@@ -47,7 +69,7 @@ async function fetchPaidInvoices(stripeAuth: string, gte: number, lt: number): P
 
     for (const inv of page.data ?? []) {
       const line = inv.lines?.data?.[0]
-      const level = levelFromProduct(line?.price?.product)
+      const level = line?.price?.id ? priceLevelMap[line.price.id] : undefined
       rows.push({
         date: new Date(inv.created * 1000).toISOString().slice(0, 10),
         customerEmail: inv.customer?.email ?? inv.customer_email ?? '',
