@@ -2,11 +2,15 @@ project_id = "ydkahdqvuykpmjkpunck"
 
 # Each edge function's gateway-level JWT requirement, made explicit so a plain
 # `supabase functions deploy <name>` can never silently reset it to the CLI
-# default (verify_jwt = true) again. Two functions must stay false because
-# their caller can never present a Supabase session JWT:
+# default (verify_jwt = true) again. These must stay false because their
+# caller can never present a Supabase session JWT:
 #   - stripe-webhook: called by Stripe's servers, authenticated via the
 #     stripe-signature header (verified inside the function) instead.
 #   - scan-email: called from the Trace scan flow.
+#   - cleanup-unconfirmed, admin-weekly-digest, admin-monthly-report,
+#     admin-weekly-db-dump, send-reminders: called only by pg_cron via
+#     net.http_post, authenticated via a per-function bearer secret stored
+#     in Supabase Vault (verified inside each function) instead.
 # Everything else is invoked by a logged-in user via supabase.functions.invoke()
 # and must keep gateway JWT enforcement on.
 
@@ -14,6 +18,21 @@ project_id = "ydkahdqvuykpmjkpunck"
 verify_jwt = false
 
 [functions.scan-email]
+verify_jwt = false
+
+[functions.cleanup-unconfirmed]
+verify_jwt = false
+
+[functions.admin-weekly-digest]
+verify_jwt = false
+
+[functions.admin-monthly-report]
+verify_jwt = false
+
+[functions.admin-weekly-db-dump]
+verify_jwt = false
+
+[functions.send-reminders]
 verify_jwt = false
 
 [functions.stripe-checkout]

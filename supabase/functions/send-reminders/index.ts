@@ -16,7 +16,15 @@ const REMINDER_COMPANIES: Record<string, { reminderMonths: number; nameSv: strin
   mrkoll:      { reminderMonths: 11, nameSv: 'MrKoll' },
 }
 
-Deno.serve(async (_req) => {
+Deno.serve(async (req) => {
+  const remindersSecret = Deno.env.get('REMINDERS_SECRET')
+  if (remindersSecret) {
+    const auth = req.headers.get('Authorization')?.replace('Bearer ', '')
+    if (auth !== remindersSecret) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403 })
+    }
+  }
+
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const serviceKey  = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   const brevoKey    = Deno.env.get('BREVO_API_KEY')
