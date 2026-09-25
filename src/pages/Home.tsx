@@ -5,6 +5,7 @@ import { BrandLogo } from '../components/BrandLogo'
 import { TIERS } from '../config/tiers'
 import { ConsentModal } from '../components/ConsentModal'
 import { supabase } from '../lib/supabase'
+import { extractFunctionErrorMessage } from '../lib/functionError'
 import type { Session } from '@supabase/supabase-js'
 
 function TreKronor({ size = 22 }: { size?: number }) {
@@ -170,7 +171,12 @@ export function Home({ session }: HomeProps) {
     setStripeError(null)
     try {
       const { data, error } = await supabase.functions.invoke('stripe-checkout', { body: { priceId } })
-      if (error || !data?.url) throw new Error(error?.message ?? 'No URL returned')
+      if (error) throw new Error(await extractFunctionErrorMessage(error))
+      if (data?.updatedInPlace) {
+        window.location.href = '/dashboard?upgraded=1'
+        return
+      }
+      if (!data?.url) throw new Error('No URL returned')
       window.location.href = data.url
     } catch (err) {
       setStripeError(String(err))

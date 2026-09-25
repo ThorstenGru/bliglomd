@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
 
     const { data: profile } = await sbAdmin
       .from('profiles')
-      .select('stripe_customer_id, full_name')
+      .select('stripe_customer_id, stripe_subscription_id, subscription_status, full_name')
       .eq('id', user.id)
       .single()
 
@@ -70,6 +70,40 @@ Deno.serve(async (req) => {
       if (!customer.id) throw new Error(customer.error?.message ?? 'Failed to create customer')
       customerId = customer.id
       await sbAdmin.from('profiles').update({ stripe_customer_id: customerId }).eq('id', user.id)
+    }
+
+    // Already on an active subscription (e.g. Cipher -> Ghost): swap the price on the
+    // existing subscription instead of opening a new Checkout Session, which would create
+    // a second subscription billing in parallel with the first rather than replacing it.
+    if (profile?.stripe_subscription_id && profile.subscription_status === 'active') {
+      const currentSubRes = await fetch(`${STRIPE_BASE}/subscriptions/${profile.stripe_subscription_id}`, {
+        headers: { Authorization: stripeAuth },
+      })
+      const currentSub = await currentSubRes.json()
+      const itemId = currentSub.items?.data?.[0]?.id
+
+      if (currentSubRes.ok && itemId && currentSub.status !== 'canceled') {
+        const updateRes = await fetch(`${STRIPE_BASE}/subscriptions/${profile.stripe_subscription_id}`, {
+          method: 'POST',
+          headers: { Authorization: stripeAuth, 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            'items[0][id]': itemId,
+            'items[0][price]': priceId,
+            proration_behavior: 'always_invoice',
+          }),
+        })
+        const updated = await updateRes.json()
+        if (!updateRes.ok) throw new Error(updated.error?.message ?? 'Failed to update subscription')
+
+        // Write the new level ourselves rather than waiting on the customer.subscription.updated
+        // webhook round-trip -- keeps the UI correct immediately even if webhook delivery lags.
+        const level = await levelFromPrice(priceId, stripeAuth)
+        if (level) {
+          await sbAdmin.from('profiles').update({ level, subscription_status: 'active' }).eq('id', user.id)
+        }
+
+        return json({ url: null, updatedInPlace: true }, 200, cors)
+      }
     }
 
     const sessionParams = new URLSearchParams({
@@ -104,4 +138,13 @@ function json(body: unknown, status: number, cors: Record<string, string>) {
     status,
     headers: { ...cors, 'Content-Type': 'application/json' },
   })
+}
+
+async function levelFromPrice(priceId: string, stripeAuth: string): Promise<number | null> {
+  const res = await fetch(`${STRIPE_BASE}/prices/${priceId}?expand[]=product`, {
+    headers: { Authorization: stripeAuth },
+  })
+  const price = await res.json()
+  const raw = price.product?.metadata?.bliglomd_level
+  return raw ? parseInt(raw, 10) : null
 }

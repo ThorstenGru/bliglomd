@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useLang } from '../contexts/LanguageContext'
 import { LevelBadge } from '../components/LevelBadge'
 import { TIERS } from '../config/tiers'
+import { extractFunctionErrorMessage } from '../lib/functionError'
 
 const tierColor = {
   green:  { ring: 'border-green-300',  bg: 'bg-green-50',  btn: 'bg-green-600 hover:bg-green-700',  text: 'text-green-700'  },
@@ -91,7 +92,12 @@ export function Profile() {
     setStripeError(null)
     try {
       const { data, error } = await supabase.functions.invoke('stripe-checkout', { body: { priceId } })
-      if (error || !data?.url) throw new Error(error?.message ?? 'No URL returned')
+      if (error) throw new Error(await extractFunctionErrorMessage(error))
+      if (data?.updatedInPlace) {
+        window.location.href = '/dashboard?upgraded=1'
+        return
+      }
+      if (!data?.url) throw new Error('No URL returned')
       window.location.href = data.url
     } catch (err) {
       setStripeError(String(err))
