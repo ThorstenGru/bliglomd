@@ -11,7 +11,7 @@ const SV_SECTIONS: Section[] = [
   {
     num: '1', title: 'Parter',
     body: [
-      'Tjänsten BliGlömd tillhandahålls av BliGlömd (nedan "BliGlömd" eller "Tjänsteleverantören"). Kontakt: kontakt@bliglömd.se.',
+      'Tjänsten BliGlömd tillhandahålls av Lykkebo Fastigheter Kommanditbolag (nedan "BliGlömd" eller "Tjänsteleverantören"). Kontakt: kontakt@bliglömd.se.',
       'Den fysiska eller juridiska person som ingår detta avtal benämns "Kunden".',
     ],
   },
@@ -39,11 +39,11 @@ const SV_SECTIONS: Section[] = [
     ],
   },
   {
-    num: '5', title: 'Ingen återbetalning',
+    num: '5', title: 'Återbetalning',
     body: [
-      'Samtliga betalningar är slutgiltiga och återbetalas inte, oavsett omständighet.',
-      'Detta gäller uttryckligen: (a) om Kunden väljer att avsluta abonnemanget innan perioden löpt ut, (b) om Kunden inte utnyttjar tjänsten eller delar av den, (c) om tjänsten är otillgänglig, förändras, begränsas eller läggs ned av BliGlömd, (d) om Kundens konto stängs till följd av brott mot dessa villkor, (e) om Kunden är missnöjd med tjänstens resultat.',
-      'Kunden har inte rätt till proraterat återbetalning för outnyttjad del av abonnemangsperioden.',
+      'Betalningar är i regel slutgiltiga och återbetalas inte.',
+      'Detta gäller uttryckligen: (a) om Kunden väljer att avsluta abonnemanget innan perioden löpt ut, (b) om Kunden inte utnyttjar tjänsten eller delar av den, (c) om Kunden är missnöjd med tjänstens resultat, förutsatt att tjänsten levererats i enlighet med avsnitt 2, (d) om Kundens konto stängs till följd av brott mot dessa villkor. Kunden har inte rätt till proraterat återbetalning för outnyttjad del av abonnemangsperioden i dessa fall.',
+      'Undantag — utebliven leverans: Om BliGlömd på grund av ett tekniskt fel eller annat förhållande som helt beror på BliGlömd inte har levererat den betalda tjänstens kärnfunktion alls (till exempel att ett betalt abonnemang aldrig aktiverades), har Kunden rätt att inom skälig tid begära återbetalning för den period felet avsåg. Undantaget gäller inte fel som beror på omständigheter utanför BliGlömds kontroll (t.ex. tredje parts system) eller när tjänsten i övrigt fungerat enligt avsnitt 2 (bästa ansträngning, inga garanterade resultat).',
     ],
   },
   {
@@ -102,7 +102,7 @@ const EN_SECTIONS: Section[] = [
   {
     num: '1', title: 'Parties',
     body: [
-      'The service BliGlömd is provided by BliGlömd (hereinafter "BliGlömd" or "Service Provider"). Contact: kontakt@bliglömd.se.',
+      'The service BliGlömd is provided by Lykkebo Fastigheter Kommanditbolag (hereinafter "BliGlömd" or "Service Provider"). Contact: kontakt@bliglömd.se.',
       'The natural or legal person entering into this agreement is referred to as the "Customer".',
     ],
   },
@@ -130,11 +130,11 @@ const EN_SECTIONS: Section[] = [
     ],
   },
   {
-    num: '5', title: 'No refunds',
+    num: '5', title: 'Refunds',
     body: [
-      'All payments are final and non-refundable under any circumstances.',
-      'This applies explicitly to: (a) the Customer choosing to cancel the subscription before the period expires, (b) the Customer not using the service or parts of it, (c) the service being unavailable, changed, restricted or discontinued by BliGlömd, (d) the Customer\'s account being closed due to breach of these terms, (e) the Customer being dissatisfied with the service\'s results.',
-      'The Customer is not entitled to a prorated refund for the unused portion of a subscription period.',
+      'Payments are generally final and non-refundable.',
+      'This applies explicitly to: (a) the Customer choosing to cancel the subscription before the period expires, (b) the Customer not using the service or parts of it, (c) the Customer being dissatisfied with the service\'s results, provided the service was delivered in accordance with section 2, (d) the Customer\'s account being closed due to breach of these terms. The Customer is not entitled to a prorated refund for the unused portion of a subscription period in these cases.',
+      'Exception — failure to deliver: If, due to a technical fault or other circumstance entirely attributable to BliGlömd, BliGlömd has not delivered the core function of the paid service at all (for example, a paid subscription that never activated), the Customer is entitled to request a refund for the affected period within a reasonable time. This exception does not apply to faults caused by circumstances outside BliGlömd\'s control (e.g. third-party systems) or where the service otherwise functioned in accordance with section 2 (best effort, no guaranteed results).',
     ],
   },
   {
@@ -208,8 +208,8 @@ export function Terms() {
           </h1>
           <p style={{ fontSize: 14, color: '#6B7A99', lineHeight: 1.6 }}>
             {isEn
-              ? `Version ${TERMS_VERSION}. Effective from 30 June 2026. The Swedish version is the legally binding version.`
-              : `Version ${TERMS_VERSION}. Gäller fr.o.m. 30 juni 2026. Den svenska versionen är juridiskt bindande.`
+              ? `Version ${TERMS_VERSION}. The Swedish version is the legally binding version.`
+              : `Version ${TERMS_VERSION}. Den svenska versionen är juridiskt bindande.`
             }
           </p>
         </div>

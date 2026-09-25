@@ -78,16 +78,16 @@ export function ConsentModal({ priceId, planLabel, onConfirmed, onClose }: Conse
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
             {(isEn ? [
               'Service is provided "best effort" — no guaranteed outcomes.',
-              'No refunds under any circumstances once payment is made.',
+              'No refunds for change of mind once payment is made.',
               'Right of withdrawal is waived upon immediate digital delivery.',
-              'If the service shuts down, no refund or compensation is owed.',
+              'Refund available if BliGlömd fails to deliver the paid service due to a fault on our side.',
               'Liability is capped at the lower of 3 months\' fees or SEK 500.',
               'Disputes resolved in Helsingborg, Swedish law governs.',
             ] : [
               'Tjänsten levereras som "bästa ansträngning" — inga garanterade utfall.',
-              'Inga återbetalningar ges efter genomförd betalning.',
+              'Ingen återbetalning vid ångrat köp efter genomförd betalning.',
               'Ångerrätten upphör vid omedelbar aktivering av digital tjänst.',
-              'Vid nedläggning av tjänsten ges ingen återbetalning eller ersättning.',
+              'Återbetalning kan begäras om BliGlömd inte levererar den betalda tjänsten på grund av eget fel.',
               'Ansvar begränsat till lägst 3 månaders avgifter eller 500 kr.',
               'Tvister avgörs i Helsingborgs tingsrätt under svensk lag.',
             ]).map((point) => (

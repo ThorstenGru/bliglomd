@@ -18,8 +18,8 @@ export function Privacy() {
           </h1>
           <p style={{ fontSize: 14, color: '#6B7A99', lineHeight: 1.6 }}>
             {isEn
-              ? `Version ${PRIVACY_VERSION}. Effective from 2 July 2026.`
-              : `Version ${PRIVACY_VERSION}. Gäller fr.o.m. 2026-07-02.`
+              ? `Version ${PRIVACY_VERSION}. The Swedish version is the legally binding version.`
+              : `Version ${PRIVACY_VERSION}. Den svenska versionen är juridiskt bindande.`
             }
           </p>
         </div>
@@ -28,8 +28,8 @@ export function Privacy() {
           {
             title: isEn ? '1. Who is responsible for your data?' : '1. Vem ansvarar för dina uppgifter?',
             body: isEn
-              ? 'BliGlömd is the data controller. Contact for data protection questions: kontakt@bliglömd.se.'
-              : 'BliGlömd är personuppgiftsansvarig. Kontakt för dataskyddsfrågor: kontakt@bliglömd.se.',
+              ? 'BliGlömd, operated by Lykkebo Fastigheter Kommanditbolag, is the data controller. Contact for data protection questions: kontakt@bliglömd.se.'
+              : 'BliGlömd, som drivs av Lykkebo Fastigheter Kommanditbolag, är personuppgiftsansvarig. Kontakt för dataskyddsfrågor: kontakt@bliglömd.se.',
           },
           {
             title: isEn ? '2. What data do we process?' : '2. Vilka uppgifter behandlar vi?',
