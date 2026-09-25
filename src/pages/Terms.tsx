@@ -11,6 +11,7 @@ const SV_SECTIONS: Section[] = [
   {
     num: '1', title: 'Parter',
     body: [
+      'BliGlömd.se är en del av Lykkebo Fastigheter Kommanditbolag, Org.nr 969797-1647.',
       'Tjänsten BliGlömd tillhandahålls av Lykkebo Fastigheter Kommanditbolag (nedan "BliGlömd" eller "Tjänsteleverantören"). Kontakt: kontakt@bliglömd.se.',
       'Den fysiska eller juridiska person som ingår detta avtal benämns "Kunden".',
     ],
@@ -102,6 +103,7 @@ const EN_SECTIONS: Section[] = [
   {
     num: '1', title: 'Parties',
     body: [
+      'BliGlömd.se is part of Lykkebo Fastigheter Kommanditbolag, Swedish company registration no. 969797-1647.',
       'The service BliGlömd is provided by Lykkebo Fastigheter Kommanditbolag (hereinafter "BliGlömd" or "Service Provider"). Contact: kontakt@bliglömd.se.',
       'The natural or legal person entering into this agreement is referred to as the "Customer".',
     ],

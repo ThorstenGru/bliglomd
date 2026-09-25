@@ -28,8 +28,8 @@ export function Privacy() {
           {
             title: isEn ? '1. Who is responsible for your data?' : '1. Vem ansvarar för dina uppgifter?',
             body: isEn
-              ? 'BliGlömd, operated by Lykkebo Fastigheter Kommanditbolag, is the data controller. Contact for data protection questions: kontakt@bliglömd.se.'
-              : 'BliGlömd, som drivs av Lykkebo Fastigheter Kommanditbolag, är personuppgiftsansvarig. Kontakt för dataskyddsfrågor: kontakt@bliglömd.se.',
+              ? 'BliGlömd.se is part of Lykkebo Fastigheter Kommanditbolag, Swedish company registration no. 969797-1647. BliGlömd, operated by Lykkebo Fastigheter Kommanditbolag, is the data controller. Contact for data protection questions: kontakt@bliglömd.se.'
+              : 'BliGlömd.se är en del av Lykkebo Fastigheter Kommanditbolag, Org.nr 969797-1647. BliGlömd, som drivs av Lykkebo Fastigheter Kommanditbolag, är personuppgiftsansvarig. Kontakt för dataskyddsfrågor: kontakt@bliglömd.se.',
           },
           {
             title: isEn ? '2. What data do we process?' : '2. Vilka uppgifter behandlar vi?',

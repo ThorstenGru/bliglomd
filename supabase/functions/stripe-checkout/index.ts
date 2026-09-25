@@ -31,16 +31,24 @@ Deno.serve(async (req) => {
 
     const { priceId } = await req.json()
 
+    // STRIPE_MODE is the single switch for going live: set to 'live' and both the
+    // API key and the accepted price IDs move to their live-mode counterparts in
+    // one atomic change, without overwriting (and losing) the sandbox values --
+    // flipping back for testing stays possible. tiers.ts in the frontend must be
+    // updated to send the matching mode's price IDs in the same deploy, or every
+    // checkout attempt fails closed with "Invalid price" (safe, but broken).
+    const live = Deno.env.get('STRIPE_MODE') === 'live'
+
     const subscriptionPrices = new Set([
-      Deno.env.get('STRIPE_CIPHER_PRICE_ID'),
-      Deno.env.get('STRIPE_GHOST_PRICE_ID'),
+      Deno.env.get(live ? 'STRIPE_CIPHER_PRICE_ID_LIVE' : 'STRIPE_CIPHER_PRICE_ID'),
+      Deno.env.get(live ? 'STRIPE_GHOST_PRICE_ID_LIVE' : 'STRIPE_GHOST_PRICE_ID'),
     ])
 
     if (!priceId || !subscriptionPrices.has(priceId)) {
       return json({ error: 'Invalid price' }, 400, cors)
     }
 
-    const STRIPE_KEY = Deno.env.get('STRIPE_SECRET_KEY')!
+    const STRIPE_KEY = Deno.env.get(live ? 'STRIPE_SECRET_KEY_LIVE' : 'STRIPE_SECRET_KEY')!
     const stripeAuth = `Basic ${btoa(STRIPE_KEY + ':')}`
 
     const sbAdmin = createClient(

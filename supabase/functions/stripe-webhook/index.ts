@@ -29,14 +29,28 @@ async function levelFromPrice(priceId: string, stripeAuth: string): Promise<numb
 Deno.serve(async (req) => {
   const payload = await req.text()
   const sigHeader = req.headers.get('stripe-signature') ?? ''
-  const secret = Deno.env.get('STRIPE_WEBHOOK_SECRET') ?? ''
 
-  if (!(await verifySignature(payload, sigHeader, secret))) {
+  // Stripe signs sandbox and live events with different secrets but delivers both
+  // to this same endpoint (one webhook registered per mode). Try sandbox first
+  // (the common case today), then live, before rejecting.
+  const sandboxSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET') ?? ''
+  const liveSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET_LIVE') ?? ''
+
+  const verifiedSandbox = sandboxSecret ? await verifySignature(payload, sigHeader, sandboxSecret) : false
+  const verifiedLive = !verifiedSandbox && liveSecret ? await verifySignature(payload, sigHeader, liveSecret) : false
+
+  if (!verifiedSandbox && !verifiedLive) {
     return new Response('Invalid signature', { status: 400 })
   }
 
   const event = JSON.parse(payload)
-  const STRIPE_KEY = Deno.env.get('STRIPE_SECRET_KEY')!
+
+  // Use the matching-mode Stripe key for follow-up API calls -- a sandbox key can
+  // never read live-mode objects (and vice versa), so this must track verification,
+  // not just event.livemode, in case the two ever disagree.
+  const STRIPE_KEY = verifiedLive
+    ? Deno.env.get('STRIPE_SECRET_KEY_LIVE')!
+    : Deno.env.get('STRIPE_SECRET_KEY')!
   const stripeAuth = `Basic ${btoa(STRIPE_KEY + ':')}`
 
   const sb = createClient(

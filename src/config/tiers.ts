@@ -99,9 +99,13 @@ export const TIERS: Record<1 | 2 | 3, Tier> = {
     color: 'blue',
     monthlyPriceSEK: 99,
     // SANDBOX — 2026 repricing (+62% vs 61kr). Live equivalent ready at price_1UJFbwAT2u1nHxljLEWgqzmV
-    // (same product, prod_UnXwn8yj2nHxWH) — switch to it, and swap STRIPE_SECRET_KEY /
-    // STRIPE_CIPHER_PRICE_ID / STRIPE_GHOST_PRICE_ID / STRIPE_WEBHOOK_SECRET to their live
-    // values in Supabase, when explicitly instructed to go live.
+    // (same product, prod_UnXwn8yj2nHxWH). Going live is a two-part, same-deploy change:
+    // (1) set the Supabase secret STRIPE_MODE=live (stripe-checkout and stripe-webhook then
+    //     switch to STRIPE_SECRET_KEY_LIVE / STRIPE_CIPHER_PRICE_ID_LIVE / STRIPE_GHOST_PRICE_ID_LIVE
+    //     automatically -- the sandbox secrets are untouched, so flipping STRIPE_MODE back to
+    //     'sandbox' safely restores test-mode checkout), and
+    // (2) change stripeMonthlyPriceId below (and Ghost's) to the live price ID and deploy.
+    // Doing only one half breaks checkout with "Invalid price" (fails closed, not silently).
     stripeMonthlyPriceId: 'price_1UJF2CAR7wxHkiWgazzRxQYe',
   },
 
@@ -141,7 +145,7 @@ export const TIERS: Record<1 | 2 | 3, Tier> = {
     color: 'purple',
     monthlyPriceSEK: 199,
     // SANDBOX — 2026 repricing (+60% vs 124kr). Live equivalent ready at price_1UJFbxAT2u1nHxljAZBl09In
-    // (same product, prod_UnXyNFtLNAiulF) — see the same go-live note as Cipher above.
+    // (same product, prod_UnXyNFtLNAiulF) — see the go-live note on Cipher above.
     stripeMonthlyPriceId: 'price_1UJF2DAR7wxHkiWgOIfZS2jj',
   },
 }
