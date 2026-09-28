@@ -585,6 +585,354 @@ export const COMPANIES: Company[] = [
     request_type: 'gdpr_art17',
   },
 
+  // ── Group 1d: Swedish banks ─────────────────────────────────────────────
+  {
+    id: 'swedbank',
+    name: 'Swedbank',
+    category: 'Bank',
+    country: 'SE',
+    gdpr_email: 'dpo@swedbank.se',
+    gdpr_url: 'https://www.swedbank.se/bedrageri-och-sakerhet/banksekretess-och-integritet/behandling-av-personuppgifter.html',
+    instructions_sv:
+      'Radering begärs genom att kontakta Swedbanks dataskyddsombud (dpo@swedbank.se) eller via inloggad internetbank/kundservice med blanketten "Begäran om registerutdrag eller annan personuppgiftsrättighet". Fullständig radering är sällan möjlig — Swedbank måste enligt bokföringslagen spara transaktions- och kontouppgifter i minst 7 år, och enligt penningtvättslagen kundkännedomsuppgifter ytterligare en period efter avslutad kundrelation.',
+    instructions_en:
+      'Deletion is requested by contacting Swedbank\'s Data Protection Officer (dpo@swedbank.se) or via logged-in online banking/customer service. Full deletion is rarely possible — Swedbank must retain transaction and account data for at least 7 years under Swedish accounting law, and customer due-diligence data for a further period under anti-money-laundering law.',
+    level1_available: true,
+    level2_available: true,
+    level3_available: true,
+    utgivningsbevis: false,
+    request_type: 'gdpr_art17',
+  },
+  {
+    id: 'seb',
+    name: 'SEB (Skandinaviska Enskilda Banken)',
+    category: 'Bank',
+    country: 'SE',
+    gdpr_email: 'dataskyddsombud@seb.se',
+    gdpr_url: 'https://seb.se/juridik-och-sakerhet/sebs-integritetspolicyer/integritetspolicy-for-privatpersoner',
+    instructions_sv:
+      'Registerutdrag och andra rättigheter (inklusive radering) hanteras via inloggad internetbank eller genom att mejla SEBs dataskyddsombud på dataskyddsombud@seb.se. Fullständig radering sker sällan direkt: enligt bokföringslagen sparas räkenskapsuppgifter till och med sjunde året efter räkenskapsårets slut, och enligt penningtvättslagen bevaras kundkännedomsuppgifter i 5–10 år efter avslutad affärsförbindelse.',
+    instructions_en:
+      'Rights requests including deletion are handled via logged-in online banking or by emailing SEB\'s Data Protection Officer at dataskyddsombud@seb.se. Full deletion rarely happens immediately: accounting records are kept through the seventh year after the financial year ends, and customer due-diligence data for 5–10 years after the relationship ends.',
+    level1_available: true,
+    level2_available: true,
+    level3_available: true,
+    utgivningsbevis: false,
+    request_type: 'gdpr_art17',
+  },
+  {
+    id: 'handelsbanken',
+    name: 'Handelsbanken',
+    category: 'Bank',
+    country: 'SE',
+    gdpr_email: 'dpo@handelsbanken.se',
+    gdpr_url: 'https://www.handelsbanken.se/sv/om-oss/juridiska-dokument/personuppgifter',
+    instructions_sv:
+      'Radering begärs via formuläret "Registerutdrag för personuppgifter", inloggad internetbank, lokalt kontor eller telefon (0771-77 88 99); frågor kan även riktas till dataskyddsombudet på dpo@handelsbanken.se. Handelsbanken svarar normalt inom en månad, men kan sällan radera allt omedelbart eftersom bokföringslagen kräver ca 7 års sparande och penningtvättslagen upp till 10 år för kundkännedomsuppgifter.',
+    instructions_en:
+      'Deletion is requested via the "Registerutdrag för personuppgifter" form, logged-in online banking, a local branch, or phone; questions can also go to the DPO at dpo@handelsbanken.se. The bank typically responds within a month, but can rarely delete everything immediately due to ~7-year accounting retention and up to 10 years for customer due-diligence data.',
+    level1_available: true,
+    level2_available: true,
+    level3_available: true,
+    utgivningsbevis: false,
+    request_type: 'gdpr_art17',
+  },
+  {
+    id: 'nordea',
+    name: 'Nordea',
+    category: 'Bank',
+    country: 'SE',
+    gdpr_email: 'dataprotectionoffice@nordea.com',
+    gdpr_url: 'https://www.nordea.se/behandling-av-personuppgifter',
+    instructions_sv:
+      'Begäran om radering skickas via meddelandefunktionen i inloggad nätbank eller till koncernens dataskyddsombud på dataprotectionoffice@nordea.com. Nordea kan neka fullständig radering när uppgifter måste sparas för rättsliga skyldigheter, t.ex. bokföringslagens ca 7-åriga sparkrav och penningtvättslagens krav på kundkännedomsuppgifter.',
+    instructions_en:
+      'Deletion requests go via the message function in logged-in online banking or to the group Data Protection Office at dataprotectionoffice@nordea.com. Nordea may decline full deletion where retention is legally required, e.g. ~7-year accounting retention and anti-money-laundering customer due-diligence rules.',
+    level1_available: true,
+    level2_available: true,
+    level3_available: true,
+    utgivningsbevis: false,
+    request_type: 'gdpr_art17',
+  },
+  {
+    id: 'lansforsakringar-bank',
+    name: 'Länsförsäkringar Bank',
+    category: 'Bank',
+    country: 'SE',
+    gdpr_email: 'dataskyddsombud@lansforsakringar.se',
+    gdpr_url: 'https://www.lansforsakringar.se/stockholm/privat/kundservice/personuppgifter/',
+    instructions_sv:
+      'Radering begärs genom att kontakta Länsförsäkringars dataskyddsombud (dataskyddsombud@lansforsakringar.se) eller kundservice hos ditt lokala länsförsäkringsbolag. Radering är inte möjlig när bokföringslagen (ca 7 år) eller penningtvättslagen kräver fortsatt sparande. Observera: Länsförsäkringar är en allians av 23 regionala bolag — adressen kan variera per region.',
+    instructions_en:
+      'Deletion is requested by contacting Länsförsäkringar\'s Data Protection Officer or customer service at your local regional company. Deletion is not possible where accounting law (~7 years) or anti-money-laundering law requires continued retention. Note: Länsförsäkringar is an alliance of 23 regional companies — the exact contact may vary by region.',
+    level1_available: true,
+    level2_available: true,
+    level3_available: true,
+    utgivningsbevis: false,
+    request_type: 'gdpr_art17',
+  },
+
+  // ── Group 1e: Swedish telecom operators ────────────────────────────────
+  {
+    id: 'telia',
+    name: 'Telia',
+    category: 'Telekom',
+    country: 'SE',
+    gdpr_email: 'dpo-se@teliacompany.com',
+    gdpr_url: 'https://www.telia.se/om/integritetspolicy',
+    instructions_sv:
+      'Skicka en begäran till Telias dataskyddsombud på dpo-se@teliacompany.com, logga in på Mitt Telia, eller ring kundservice (90 200). Som teleoperatör kan Telia enligt lagen om elektronisk kommunikation vara skyldig att spara viss trafik- och faktureringsdata en period efter att kontot avslutats.',
+    instructions_en:
+      'Send a request to Telia\'s Data Protection Officer at dpo-se@teliacompany.com, log in to "Mitt Telia", or call customer service. As a telecom operator, Telia may be required under Swedish electronic communications law to retain certain traffic and billing data for a period after account closure.',
+    level1_available: true,
+    level2_available: true,
+    level3_available: true,
+    utgivningsbevis: false,
+    request_type: 'gdpr_art17',
+  },
+  {
+    id: 'tele2',
+    name: 'Tele2',
+    category: 'Telekom',
+    country: 'SE',
+    gdpr_email: 'dposweden@tele2.com',
+    gdpr_url: 'https://www.tele2.se/integritetspolicy',
+    instructions_sv:
+      'Kontakta Tele2:s dataskyddsombud via dposweden@tele2.com, eller vänd dig till kundtjänst för radering, rättelse eller tillgång till dina uppgifter. Tele2 måste spara viss trafik- och kunduppgift en period efter avtalets slut enligt lagen om elektronisk kommunikation samt bokföringslagen för fakturauppgifter.',
+    instructions_en:
+      "Contact Tele2's Data Protection Officer at dposweden@tele2.com, or reach customer service to request deletion, correction, or access. Tele2 must retain certain traffic and customer data for a period after contract end under electronic communications and accounting law.",
+    level1_available: true,
+    level2_available: true,
+    level3_available: true,
+    utgivningsbevis: false,
+    request_type: 'gdpr_art17',
+  },
+  {
+    id: 'telenor',
+    name: 'Telenor Sverige',
+    category: 'Telekom',
+    country: 'SE',
+    gdpr_email: 'personuppgifter@telenor.se',
+    gdpr_url: 'https://www.telenor.se/support/integritet/integritetspolicy/',
+    instructions_sv:
+      'Kontakta Telenors dataskyddsombud på personuppgifter@telenor.se, per telefon (020-222 222) eller via Mitt Telenor. Telenor kan enligt lagen om elektronisk kommunikation vara skyldig att behålla viss trafik- och abonnemangsdata en period efter avslutad kundrelation.',
+    instructions_en:
+      'Contact Telenor\'s Data Protection Officer at personuppgifter@telenor.se, by phone, or via "Mitt Telenor". Telenor may be required to retain certain traffic and subscription data for a period after the relationship ends under electronic communications law.',
+    level1_available: true,
+    level2_available: true,
+    level3_available: true,
+    utgivningsbevis: false,
+    request_type: 'gdpr_art17',
+  },
+  {
+    id: 'tre',
+    name: 'Tre (3 Sverige)',
+    category: 'Telekom',
+    country: 'SE',
+    gdpr_email: 'dataskyddsombud@tre.se',
+    gdpr_url: 'https://tre.se/om-tre/sakerhet/gdpr',
+    instructions_sv:
+      'Skicka en begäran om radering till Tres dataskyddsombud på dataskyddsombud@tre.se eller kontakta kundservice. Tre (Hi3G Access AB) kan enligt lagen om elektronisk kommunikation vara skyldig att spara viss trafik- och faktureringsdata en period efter att abonnemanget avslutats.',
+    instructions_en:
+      "Send a deletion request to Tre's Data Protection Officer at dataskyddsombud@tre.se or contact customer service. Tre (Hi3G Access AB) may be required to retain certain traffic and billing data for a period after subscription end under electronic communications law.",
+    level1_available: true,
+    level2_available: true,
+    level3_available: true,
+    utgivningsbevis: false,
+    request_type: 'gdpr_art17',
+  },
+
+  // ── Group 1f: Investment platforms & insurance ─────────────────────────
+  {
+    id: 'avanza',
+    name: 'Avanza',
+    category: 'Finans',
+    country: 'SE',
+    gdpr_email: 'dataskyddsombud@avanza.se',
+    gdpr_url: 'https://www.avanza.se/sakerhet-villkor/behandling-av-personuppgifter/hur-avanza-behandlar-personuppgifter.html',
+    instructions_sv:
+      'Begäran om radering skickas till dataskyddsombud@avanza.se eller hanteras via inloggad kundservice. Uppgifter Avanza är skyldiga att spara enligt bokföringslagen och penningtvättslagen (transaktions- och kundkännedomsuppgifter, normalt ca 5–7 år) kan inte raderas förrän lagringsplikten upphört.',
+    instructions_en:
+      "Deletion requests go to dataskyddsombud@avanza.se or via logged-in customer service. Records Avanza must retain under accounting and anti-money-laundering law (transaction and KYC data, normally ~5-7 years) cannot be deleted until that period expires.",
+    level1_available: true,
+    level2_available: true,
+    level3_available: true,
+    utgivningsbevis: false,
+    request_type: 'gdpr_art17',
+  },
+  {
+    id: 'nordnet',
+    name: 'Nordnet',
+    category: 'Finans',
+    country: 'SE',
+    gdpr_email: 'dataprotection@nordnet.se',
+    gdpr_url: 'https://www.nordnet.se/info/personuppgifter',
+    instructions_sv:
+      'Begäran om radering skickas via meddelande i inloggat läge eller till dataprotection@nordnet.se. Bokföringspliktiga uppgifter (t.ex. transaktionshistorik) måste enligt bokföringslagen sparas i minst 7 år och kan inte raderas dessförinnan.',
+    instructions_en:
+      'Deletion requests go via a logged-in message or to dataprotection@nordnet.se. Bookkeeping-related records (e.g. transaction history) must be retained for at least 7 years under Swedish accounting law.',
+    level1_available: true,
+    level2_available: true,
+    level3_available: true,
+    utgivningsbevis: false,
+    request_type: 'gdpr_art17',
+  },
+  {
+    id: 'folksam',
+    name: 'Folksam',
+    category: 'Försäkring',
+    country: 'SE',
+    gdpr_email: 'dataskyddsombud@folksam.se',
+    gdpr_url: 'https://www.folksam.se/hjalp/gdpr-hantering-av-personuppgifter',
+    instructions_sv:
+      'Begäran om radering skickas till dataskyddsombud@folksam.se, via kundservice (0771-950 950) eller post. Uppgifter kopplade till försäkrings- och skadeärenden sparas normalt kvar så länge preskriptionstiden löper (enligt försäkringsavtalslagen vanligen upp till 10 år) innan radering är möjlig. Obs: Folksam LO Pension och KPA Pension är separata bolag med egna dataskyddsombud.',
+    instructions_en:
+      'Deletion requests go to dataskyddsombud@folksam.se, customer service, or by post. Data linked to insurance and claims cases is normally kept for the statute-of-limitations period (typically up to 10 years) before deletion is possible. Note: Folksam LO Pension and KPA Pension are separate companies with their own DPOs.',
+    level1_available: true,
+    level2_available: true,
+    level3_available: true,
+    utgivningsbevis: false,
+    request_type: 'gdpr_art17',
+  },
+  {
+    id: 'lansforsakringar-forsakring',
+    name: 'Länsförsäkringar (försäkring)',
+    category: 'Försäkring',
+    country: 'SE',
+    gdpr_email: 'dataskyddsombud@lansforsakringar.se',
+    gdpr_url: 'https://www.lansforsakringar.se/privat/kundservice/personuppgifter/',
+    instructions_sv:
+      'Kontakta ditt regionala länsförsäkringsbolag eller dataskyddsombud@lansforsakringar.se för att begära radering. Uppgifter om skadeärenden sparas normalt under gällande preskriptionstid (vanligen upp till 10 år enligt försäkringsavtalslagen) innan de kan raderas. Detta gäller Länsförsäkringars försäkringsverksamhet — se separat post för Länsförsäkringar Bank.',
+    instructions_en:
+      'Contact your regional Länsförsäkringar company or dataskyddsombud@lansforsakringar.se to request deletion. Claims-related data is normally retained for the statute-of-limitations period (typically up to 10 years) before deletion. This covers Länsförsäkringar\'s insurance business — see the separate entry for Länsförsäkringar Bank.',
+    level1_available: true,
+    level2_available: true,
+    level3_available: true,
+    utgivningsbevis: false,
+    request_type: 'gdpr_art17',
+  },
+  {
+    id: 'if-skadeforsakring',
+    name: 'If Skadeförsäkring',
+    category: 'Försäkring',
+    country: 'SE',
+    gdpr_email: 'registerutdrag@if.se',
+    gdpr_url: 'https://www.if.se/om-webbplatsen/hantering-av-personuppgifter',
+    instructions_sv:
+      'Skicka en "GDPR-begäran" via meddelande på Mina sidor, eller e-posta registerutdrag@if.se (dataskyddsombud: DPO@if.se). Uppgifter om skadeärenden sparas normalt så länge preskriptionstiden löper, vanligen upp till 10 år, innan radering är möjlig.',
+    instructions_en:
+      'Submit a "GDPR request" via a message on Mina sidor, or email registerutdrag@if.se (data protection officer: DPO@if.se). Claims data is normally kept for the statute-of-limitations period, typically up to 10 years, before deletion is possible.',
+    level1_available: true,
+    level2_available: true,
+    level3_available: true,
+    utgivningsbevis: false,
+    request_type: 'gdpr_art17',
+  },
+  {
+    id: 'trygg-hansa',
+    name: 'Trygg-Hansa',
+    category: 'Försäkring',
+    country: 'SE',
+    gdpr_email: 'registerutdrag@trygghansa.se',
+    gdpr_url: 'https://www.trygghansa.se/om-trygghansa/om-webbplatsen/personuppgifter',
+    instructions_sv:
+      'Skicka e-post till registerutdrag@trygghansa.se (märk "Registerutdrag"); specifika dataskyddsfrågor går till dpo@trygghansa.se. Uppgifter kopplade till skadeärenden sparas normalt under gällande preskriptionstid (vanligen upp till 10 år) innan de kan raderas.',
+    instructions_en:
+      'Email registerutdrag@trygghansa.se (marked "Registerutdrag"); specific data protection questions go to dpo@trygghansa.se. Claims-related data is normally retained for the statute-of-limitations period (typically up to 10 years) before it can be deleted.',
+    level1_available: true,
+    level2_available: true,
+    level3_available: true,
+    utgivningsbevis: false,
+    request_type: 'gdpr_art17',
+  },
+
+  // ── Group 1g: Nordic/Swedish retail & e-commerce ───────────────────────
+  {
+    id: 'elgiganten',
+    name: 'Elgiganten',
+    category: 'Shopping',
+    country: 'SE',
+    gdpr_email: 'infosec@elgiganten.se',
+    gdpr_url: 'https://www.elgiganten.se/kundtjanst/gdpr-personuppgiftspolicy',
+    instructions_sv:
+      'Logga in på ditt kundkonto (Min Sida) och använd "radera mig"-funktionen, eller kontakta dataskyddsombudet på infosec@elgiganten.se. Orderinformation som Elgiganten enligt bokföringslagen måste spara raderas inte, men blir osökbar utan originalkvittots ordernummer.',
+    instructions_en:
+      'Log in to your customer account (Min Sida) and use the "delete me" function, or contact the data protection officer at infosec@elgiganten.se. Order data required by Swedish accounting law is not deleted, but becomes unsearchable without the original order number.',
+    level1_available: true,
+    level2_available: true,
+    level3_available: true,
+    utgivningsbevis: false,
+    request_type: 'gdpr_art17',
+  },
+  {
+    id: 'ahlens',
+    name: 'Åhléns',
+    category: 'Shopping',
+    country: 'SE',
+    gdpr_email: 'dataskydd@ahlens.se',
+    gdpr_url: 'https://www.ahlens.se/handla-pa-ahlens/integritetspolicy',
+    instructions_sv:
+      'Kontakta dataskyddsombudet via dataskydd@ahlens.se för att begära radering, eller använd det BankID-verifierade formuläret som länkas i integritetspolicyn. Radering sker "i vissa fall" — uppgifter Åhléns är skyldigt att spara enligt lag (t.ex. bokföring) blockeras istället för att raderas.',
+    instructions_en:
+      'Contact the data protection officer at dataskydd@ahlens.se to request deletion, or use the BankID-verified form linked from the privacy policy. Deletion happens "in certain cases" — data Åhléns must retain by law (e.g. accounting) is blocked rather than deleted.',
+    level1_available: true,
+    level2_available: true,
+    level3_available: true,
+    utgivningsbevis: false,
+    request_type: 'gdpr_art17',
+  },
+  {
+    id: 'cdon',
+    name: 'CDON',
+    category: 'Shopping',
+    country: 'SE',
+    gdpr_email: 'kunddata@cdon.com',
+    gdpr_url: 'https://cdon.se/cdon/integritetspolicy/',
+    instructions_sv:
+      'Skicka en begäran om radering till CDON:s dataskyddsombud (kunddata@cdon.com) eller kundtjänst (customerservice@cdon.com). CDON tar bort uppgifterna om de inte längre behövs för ändamålet eller krävs enligt lag (t.ex. bokföringslagen).',
+    instructions_en:
+      "Send a deletion request to CDON's data protection officer (kunddata@cdon.com) or customer service (customerservice@cdon.com). CDON removes data unless still needed for its purpose or legally required (e.g. accounting law).",
+    level1_available: true,
+    level2_available: true,
+    level3_available: true,
+    utgivningsbevis: false,
+    request_type: 'gdpr_art17',
+  },
+  {
+    id: 'power-mediamarkt',
+    name: 'Power (f.d. MediaMarkt)',
+    category: 'Shopping',
+    country: 'SE',
+    gdpr_email: 'privacy@power.se',
+    gdpr_url: 'https://www.power.se/kundservice/villkor/dataskydd-personuppgifter/integritetspolicy/',
+    instructions_sv:
+      'OBS: MediaMarkt finns inte längre i Sverige — alla varuhus togs över och namnbyttes till Power under 2023–2024. Gamla MediaMarkt-konton hanteras nu av Power Sverige AB. Begär radering via Powers begäransida (BankID-verifierad) eller kontakta privacy@power.se / kundservice@power.se.',
+    instructions_en:
+      'NOTE: MediaMarkt no longer exists in Sweden — all stores were rebranded to Power during 2023–2024. Former MediaMarkt accounts are now handled by Power Sverige AB. Request deletion via Power\'s request page (BankID-verified) or contact privacy@power.se / kundservice@power.se.',
+    level1_available: true,
+    level2_available: true,
+    level3_available: true,
+    utgivningsbevis: false,
+    request_type: 'gdpr_art17',
+  },
+  {
+    id: 'mathem',
+    name: 'Mathem',
+    category: 'Shopping',
+    country: 'SE',
+    gdpr_email: 'privacy@mathem.se',
+    gdpr_url: 'https://www.mathem.se/se/legal/gdpr/',
+    instructions_sv:
+      'Stäng och radera ditt konto själv på profilsidan (inom 30 dagar), eller skicka en begäran till privacy@mathem.se eller dataskyddsombudet på dpo@mathem.se. Uppgifter Mathem enligt lag måste spara (t.ex. bokföringslagen) undantas.',
+    instructions_en:
+      'Close and delete your account yourself on your profile page (within 30 days), or send a request to privacy@mathem.se or the data protection officer at dpo@mathem.se. Data Mathem must legally retain (e.g. accounting law) is excepted.',
+    level1_available: true,
+    level2_available: true,
+    level3_available: true,
+    utgivningsbevis: false,
+    request_type: 'gdpr_art17',
+  },
+
   // ── Group 2: Swedish opt-out / people-search sites ─────────────────────────
   // These hold utgivningsbevis and can legally refuse GDPR Art. 17 erasure.
   // They offer voluntary opt-out processes instead.
