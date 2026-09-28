@@ -44,6 +44,8 @@ export function Request() {
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [markingSent, setMarkingSent] = useState(false)
+  const [markedSent, setMarkedSent] = useState(false)
 
   if (!company) {
     return (
@@ -131,6 +133,39 @@ export function Request() {
     setTimeout(() => setCopied(false), 2000)
   }
 
+  // Cipher has no auto-send to hang a "sent" event off of, so response tracking
+  // (an advertised Cipher feature) needs an explicit signal from the user that
+  // they actually sent the copied letter themselves.
+  async function handleMarkSentL2() {
+    if (!company) return
+    setMarkingSent(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single()
+
+      const { error: dbError } = await supabase.from('requests').upsert({
+        user_id: user.id,
+        company_id: company.id,
+        company_name: company.name,
+        user_email: user.email ?? '',
+        user_name: profile?.full_name ?? user.email ?? '',
+        status: 'sent',
+        sent_at: new Date().toISOString(),
+        request_type: company.request_type,
+        sent_via: 'cipher_manual',
+        company_gdpr_email: company.gdpr_email,
+      }, { onConflict: 'user_id,company_id' })
+
+      if (!dbError) {
+        setMarkedSent(true)
+        trackFunnel('request_marked_sent', { company_id: company.id })
+      }
+    } finally {
+      setMarkingSent(false)
+    }
+  }
+
   async function handleSendL3(e: React.FormEvent) {
     e.preventDefault()
     if (!company) return
@@ -156,7 +191,9 @@ export function Request() {
 
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        const { error: dbError } = await supabase.from('requests').insert({
+        // Upsert on (user_id, company_id) -- revisiting and re-sending updates the
+        // same tracked row instead of cluttering the dashboard with duplicates.
+        const { error: dbError } = await supabase.from('requests').upsert({
           user_id: user.id,
           company_id: company.id,
           company_name: company.name,
@@ -164,7 +201,10 @@ export function Request() {
           user_name: userName,
           status: 'sent',
           sent_at: new Date().toISOString(),
-        })
+          request_type: company.request_type,
+          sent_via: 'ghost_auto',
+          company_gdpr_email: company.gdpr_email,
+        }, { onConflict: 'user_id,company_id' })
         if (dbError) {
           // Email was sent — show success, but warn that tracking failed
           console.error('Failed to save request record:', dbError.message)
@@ -353,16 +393,32 @@ export function Request() {
                   <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-4 font-mono text-sm text-gray-800 whitespace-pre-wrap break-words leading-relaxed">
                     {mailTemplate}
                   </div>
-                  <button
-                    onClick={handleCopy}
-                    className={`px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                      copied
-                        ? 'bg-green-600 text-white'
-                        : 'bg-brand-600 text-white hover:bg-brand-700'
-                    }`}
-                  >
-                    {copied ? t.request.templateCopied : t.request.copyTemplate}
-                  </button>
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      onClick={handleCopy}
+                      className={`px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+                        copied
+                          ? 'bg-green-600 text-white'
+                          : 'bg-brand-600 text-white hover:bg-brand-700'
+                      }`}
+                    >
+                      {copied ? t.request.templateCopied : t.request.copyTemplate}
+                    </button>
+                    <button
+                      onClick={handleMarkSentL2}
+                      disabled={markingSent || markedSent}
+                      className={`px-4 py-3 rounded-xl text-sm font-medium transition-colors disabled:opacity-60 ${
+                        markedSent
+                          ? 'bg-green-50 text-green-700 border border-green-200'
+                          : 'bg-white text-gray-700 border border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      {markedSent ? t.request.markedSent : markingSent ? t.request.marking : t.request.markSent}
+                    </button>
+                  </div>
+                  {markedSent && (
+                    <p className="text-xs text-gray-500 mt-2">{t.request.markSentHint}</p>
+                  )}
                 </>
               ) : (
                 <div className="text-gray-600 text-sm">

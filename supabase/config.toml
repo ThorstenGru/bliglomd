@@ -7,9 +7,9 @@ project_id = "ydkahdqvuykpmjkpunck"
 #   - stripe-webhook: called by Stripe's servers, authenticated via the
 #     stripe-signature header (verified inside the function) instead.
 #   - cleanup-unconfirmed, admin-weekly-digest, admin-monthly-report,
-#     admin-weekly-db-dump, send-reminders: called only by pg_cron via
-#     net.http_post, authenticated via a per-function bearer secret stored
-#     in Supabase Vault (verified inside each function) instead.
+#     admin-weekly-db-dump, send-reminders, send-followups: called only by
+#     pg_cron via net.http_post, authenticated via a per-function bearer
+#     secret stored in Supabase Vault (verified inside each function) instead.
 # Everything else is invoked by a logged-in user via supabase.functions.invoke()
 # and must keep gateway JWT enforcement on.
 #
@@ -35,6 +35,9 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.send-reminders]
+verify_jwt = false
+
+[functions.send-followups]
 verify_jwt = false
 
 [functions.stripe-checkout]

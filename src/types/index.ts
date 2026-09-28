@@ -55,6 +55,9 @@ export interface Request {
   response_at: string | null
   notes: string | null
   created_at: string
+  /** GDPR Art. 17 vs opt-out vs authority -- lets follow-up jobs filter without
+   *  duplicating the company-id lists already in src/data/companies.ts */
+  request_type: RequestType | null
 }
 
 export interface Scan {
