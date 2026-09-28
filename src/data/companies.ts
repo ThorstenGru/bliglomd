@@ -860,10 +860,18 @@ export const COMPANIES: Company[] = [
   },
 ]
 
+// Sweden first within a group, otherwise stable (preserves the existing hand-picked
+// order among Swedish entries, and among non-Swedish entries) -- explicit so it holds
+// as entries are added later, rather than relying on someone inserting them in the
+// right place by hand.
+function swedenFirst(list: Company[]): Company[] {
+  return [...list].sort((a, b) => Number(b.country === 'SE') - Number(a.country === 'SE'))
+}
+
 /** Companies sorted by group: news media → GDPR companies → opt-out sites → authority tools */
 export const COMPANIES_SORTED = [
-  ...COMPANIES.filter((c) => c.request_type === 'gdpr_art17' && c.utgivningsbevis),
-  ...COMPANIES.filter((c) => c.request_type === 'gdpr_art17' && !c.utgivningsbevis),
-  ...COMPANIES.filter((c) => c.request_type === 'opt_out'),
-  ...COMPANIES.filter((c) => c.request_type === 'authority'),
+  ...swedenFirst(COMPANIES.filter((c) => c.request_type === 'gdpr_art17' && c.utgivningsbevis)),
+  ...swedenFirst(COMPANIES.filter((c) => c.request_type === 'gdpr_art17' && !c.utgivningsbevis)),
+  ...swedenFirst(COMPANIES.filter((c) => c.request_type === 'opt_out')),
+  ...swedenFirst(COMPANIES.filter((c) => c.request_type === 'authority')),
 ]
