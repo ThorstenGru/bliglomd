@@ -59,8 +59,34 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ error: 'The admin account cannot be deleted' }), { status: 403, headers: { ...headers, 'Content-Type': 'application/json' } })
   }
 
-  // Delete the auth user — CASCADE handles profiles, requests, scans, reminders
   const admin = createClient(supabaseUrl, serviceKey)
+
+  // Cancel any active Stripe subscription BEFORE deleting the account -- otherwise
+  // the customer keeps being billed monthly with no account or stripe-portal access
+  // left to stop it themselves. Best-effort: a Stripe failure here must not block
+  // the actual account deletion (the user's GDPR right to erasure comes first);
+  // it's logged so it can be caught and cancelled manually if it ever happens.
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('stripe_subscription_id')
+    .eq('id', user.id)
+    .single()
+
+  if (profile?.stripe_subscription_id) {
+    const live = Deno.env.get('STRIPE_MODE') === 'live'
+    const stripeKey = Deno.env.get(live ? 'STRIPE_SECRET_KEY_LIVE' : 'STRIPE_SECRET_KEY')
+    if (stripeKey) {
+      const cancelRes = await fetch(`https://api.stripe.com/v1/subscriptions/${profile.stripe_subscription_id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Basic ${btoa(stripeKey + ':')}` },
+      })
+      if (!cancelRes.ok) {
+        console.error('Failed to cancel Stripe subscription on account deletion:', await cancelRes.text())
+      }
+    }
+  }
+
+  // Delete the auth user — CASCADE handles profiles, requests, scans, reminders
   const { error: deleteError } = await admin.auth.admin.deleteUser(user.id)
   if (deleteError) {
     return new Response(

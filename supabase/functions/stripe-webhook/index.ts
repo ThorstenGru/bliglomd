@@ -88,9 +88,17 @@ Deno.serve(async (req) => {
       case 'customer.subscription.updated': {
         const sub = event.data.object
         const priceId = sub.items?.data?.[0]?.price?.id
-        const level = priceId ? await levelFromPrice(priceId, stripeAuth) : null
-        const status = sub.status === 'active' ? 'active'
+        const priceLevel = priceId ? await levelFromPrice(priceId, stripeAuth) : null
+        const isActive = sub.status === 'active'
+        const status = isActive ? 'active'
           : sub.status === 'past_due' ? 'past_due' : 'inactive'
+
+        // Paid-tier access requires a currently active subscription -- any other
+        // status (past_due, unpaid, incomplete, paused, etc.) drops the user back
+        // to the free tier immediately, not just at final cancellation. Recovery
+        // happens via invoice.payment_succeeded restoring the level once billing
+        // actually succeeds again.
+        const level = isActive ? priceLevel : 1
 
         const updates: Record<string, unknown> = {
           stripe_subscription_id: sub.id,
@@ -115,15 +123,29 @@ Deno.serve(async (req) => {
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object
         if (invoice.subscription) {
-          await sb.from('profiles').update({ subscription_status: 'active' })
-            .eq('stripe_customer_id', invoice.customer)
+          // Restore the correct tier level here too, not just the status -- this is
+          // what un-does a payment_failed downgrade once a retry actually succeeds.
+          const subRes = await fetch(`${STRIPE_BASE}/subscriptions/${invoice.subscription}`, {
+            headers: { Authorization: stripeAuth },
+          })
+          const sub = await subRes.json()
+          const priceId = sub.items?.data?.[0]?.price?.id
+          const level = priceId ? await levelFromPrice(priceId, stripeAuth) : null
+
+          const updates: Record<string, unknown> = { subscription_status: 'active' }
+          if (level) updates.level = level
+
+          await sb.from('profiles').update(updates).eq('stripe_customer_id', invoice.customer)
         }
         break
       }
 
       case 'invoice.payment_failed': {
+        // Immediate downgrade to the free tier on any failed payment -- no grace
+        // period. If a later retry succeeds, invoice.payment_succeeded above
+        // restores the correct level.
         const invoice = event.data.object
-        await sb.from('profiles').update({ subscription_status: 'past_due' })
+        await sb.from('profiles').update({ level: 1, subscription_status: 'past_due' })
           .eq('stripe_customer_id', invoice.customer)
         break
       }

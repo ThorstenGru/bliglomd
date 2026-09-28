@@ -153,11 +153,29 @@ Deno.serve(async (req) => {
       metadata: { deleted_email: authUser.email },
     })
 
-    // 4. Delete the auth user — CASCADE removes profiles, requests etc via FK
+    // 4. Cancel any active Stripe subscription before deleting -- otherwise the
+    // customer keeps being billed with no account left to stop it themselves.
+    // Best-effort: must not block the deletion itself.
+    const stripeSubId = (profile as { stripe_subscription_id?: string } | null)?.stripe_subscription_id
+    if (stripeSubId) {
+      const live = Deno.env.get('STRIPE_MODE') === 'live'
+      const stripeKey = Deno.env.get(live ? 'STRIPE_SECRET_KEY_LIVE' : 'STRIPE_SECRET_KEY')
+      if (stripeKey) {
+        const cancelRes = await fetch(`https://api.stripe.com/v1/subscriptions/${stripeSubId}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Basic ${btoa(stripeKey + ':')}` },
+        })
+        if (!cancelRes.ok) {
+          console.error('Failed to cancel Stripe subscription on admin delete:', await cancelRes.text())
+        }
+      }
+    }
+
+    // 5. Delete the auth user — CASCADE removes profiles, requests etc via FK
     const { error: deleteErr } = await client.auth.admin.deleteUser(userId)
     if (deleteErr) throw deleteErr
 
-    // 5. Email report via Brevo (sent after confirmed deletion to avoid false reports)
+    // 6. Email report via Brevo (sent after confirmed deletion to avoid false reports)
     const brevoKey = Deno.env.get('BREVO_API_KEY')
     if (brevoKey) {
       const emailRes = await fetch('https://api.brevo.com/v3/smtp/email', {
