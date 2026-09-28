@@ -128,14 +128,14 @@ export const TIERS: Record<1 | 2 | 3, Tier> = {
         'BliGlömd skickar åt dig',
         'Automatisk uppföljning',
         'Påminnelse vid utebliven respons',
-        'Fullständig radering på autopilot',
+        'Påminnelse om förnyelse av BankID-spärrar',
       ],
       en: [
         'Everything in Cipher',
         'BliGlömd sends for you',
         'Automatic follow-up',
         'Reminder on missed response',
-        'Complete erasure on autopilot',
+        'Renewal reminders for BankID opt-outs',
       ],
     },
     timelineHint: {
