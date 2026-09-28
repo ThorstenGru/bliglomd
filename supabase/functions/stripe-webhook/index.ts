@@ -2,11 +2,28 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const STRIPE_BASE = 'https://api.stripe.com/v1'
 
+// Fixed-length XOR-accumulate compare -- avoids a timing side-channel on the
+// signature check (a plain === can leak how many leading hex chars matched).
+function constantTimeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false
+  let diff = 0
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i)
+  return diff === 0
+}
+
 async function verifySignature(payload: string, sigHeader: string, secret: string): Promise<boolean> {
   const parts = sigHeader.split(',')
   const t = parts.find(p => p.startsWith('t='))?.slice(2)
   const v1 = parts.find(p => p.startsWith('v1='))?.slice(3)
   if (!t || !v1) return false
+
+  // Reject stale signatures to stop replay -- an HMAC signature never expires on
+  // its own, so without this a previously-valid (payload, signature) pair -- e.g.
+  // ever captured in a log or proxy -- would stay usable forever. 5 minutes
+  // matches Stripe's own recommended tolerance window.
+  const timestamp = parseInt(t, 10)
+  if (!Number.isFinite(timestamp) || Math.abs(Date.now() / 1000 - timestamp) > 300) return false
+
   const signed = `${t}.${payload}`
   const key = await crypto.subtle.importKey(
     'raw', new TextEncoder().encode(secret),
@@ -14,7 +31,7 @@ async function verifySignature(payload: string, sigHeader: string, secret: strin
   )
   const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(signed))
   const computed = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('')
-  return computed === v1
+  return constantTimeEqual(computed, v1)
 }
 
 async function levelFromPrice(priceId: string, stripeAuth: string): Promise<number | null> {

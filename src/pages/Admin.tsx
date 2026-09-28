@@ -210,10 +210,20 @@ function SubBadge({ status }: { status: AdminUser['subscription_status'] }) {
   )
 }
 
+// Guards against CSV/formula injection: a cell starting with =, +, -, @, tab or CR
+// is interpreted as a formula by Excel/Sheets when the file is opened. Several of
+// these exports include user-controlled text (search terms, names), so prefix
+// those with a single quote so they render as literal text instead of executing.
+const FORMULA_LEAD = /^[=+\-@\t\r]/
+
 function toCsv(rows: Record<string, unknown>[]): string {
   if (rows.length === 0) return ''
   const cols = Object.keys(rows[0])
-  const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`
+  const esc = (v: unknown) => {
+    let s = String(v ?? '')
+    if (FORMULA_LEAD.test(s)) s = `'${s}`
+    return `"${s.replace(/"/g, '""')}"`
+  }
   return [cols.join(','), ...rows.map(r => cols.map(c => esc(r[c])).join(','))].join('\n')
 }
 

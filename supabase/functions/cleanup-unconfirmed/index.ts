@@ -8,13 +8,13 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Verify cleanup secret — set via `supabase secrets set CLEANUP_SECRET=<uuid>`
+    // Verify cleanup secret — set via `supabase secrets set CLEANUP_SECRET=<uuid>`.
+    // Fails closed: a missing secret rejects every request rather than silently
+    // allowing them through (this endpoint would otherwise mass-delete accounts).
     const cleanupSecret = Deno.env.get('CLEANUP_SECRET')
-    if (cleanupSecret) {
-      const auth = req.headers.get('Authorization')?.replace('Bearer ', '')
-      if (auth !== cleanupSecret) {
-        return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403 })
-      }
+    const auth = req.headers.get('Authorization')?.replace('Bearer ', '')
+    if (!cleanupSecret || auth !== cleanupSecret) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403 })
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!

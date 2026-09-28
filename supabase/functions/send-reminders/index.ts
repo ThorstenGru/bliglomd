@@ -17,12 +17,11 @@ const REMINDER_COMPANIES: Record<string, { reminderMonths: number; nameSv: strin
 }
 
 Deno.serve(async (req) => {
+  // Fails closed: a missing secret rejects every request instead of allowing them.
   const remindersSecret = Deno.env.get('REMINDERS_SECRET')
-  if (remindersSecret) {
-    const auth = req.headers.get('Authorization')?.replace('Bearer ', '')
-    if (auth !== remindersSecret) {
-      return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403 })
-    }
+  const auth = req.headers.get('Authorization')?.replace('Bearer ', '')
+  if (!remindersSecret || auth !== remindersSecret) {
+    return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403 })
   }
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')

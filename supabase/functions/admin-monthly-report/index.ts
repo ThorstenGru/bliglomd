@@ -195,12 +195,11 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Fails closed: a missing secret rejects every request instead of allowing them.
     const reportSecret = Deno.env.get('MONTHLY_REPORT_SECRET')
-    if (reportSecret) {
-      const auth = req.headers.get('Authorization')?.replace('Bearer ', '')
-      if (auth !== reportSecret) {
-        return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403 })
-      }
+    const auth = req.headers.get('Authorization')?.replace('Bearer ', '')
+    if (!reportSecret || auth !== reportSecret) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403 })
     }
 
     const brevoKey = Deno.env.get('BREVO_API_KEY')

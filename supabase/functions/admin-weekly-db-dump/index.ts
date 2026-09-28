@@ -215,12 +215,12 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Fails closed: a missing secret rejects every request instead of allowing them
+    // (this endpoint exports the full customer database — must never fail open).
     const dumpSecret = Deno.env.get('DB_DUMP_SECRET')
-    if (dumpSecret) {
-      const auth = req.headers.get('Authorization')?.replace('Bearer ', '')
-      if (auth !== dumpSecret) {
-        return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403 })
-      }
+    const auth = req.headers.get('Authorization')?.replace('Bearer ', '')
+    if (!dumpSecret || auth !== dumpSecret) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403 })
     }
 
     const brevoKey = Deno.env.get('BREVO_API_KEY')

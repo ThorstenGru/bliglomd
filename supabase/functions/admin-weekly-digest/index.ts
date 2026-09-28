@@ -117,13 +117,12 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Verify digest secret — set via `supabase secrets set DIGEST_SECRET=<uuid>`
+    // Verify digest secret — set via `supabase secrets set DIGEST_SECRET=<uuid>`.
+    // Fails closed: a missing secret rejects every request instead of allowing them.
     const digestSecret = Deno.env.get('DIGEST_SECRET')
-    if (digestSecret) {
-      const auth = req.headers.get('Authorization')?.replace('Bearer ', '')
-      if (auth !== digestSecret) {
-        return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403 })
-      }
+    const auth = req.headers.get('Authorization')?.replace('Bearer ', '')
+    if (!digestSecret || auth !== digestSecret) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403 })
     }
 
     const brevoKey = Deno.env.get('BREVO_API_KEY')
