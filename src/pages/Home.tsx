@@ -534,6 +534,7 @@ export function Home({ session }: HomeProps) {
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 'clamp(12px, 4vw, 24px)' }}>
             <Link to="/privacy" className="py-3 sm:py-0" style={{ fontSize: 12, color: '#94A3B8', textDecoration: 'none' }}>{t.home.footerPrivacy}</Link>
             <Link to="/terms" className="py-3 sm:py-0" style={{ fontSize: 12, color: '#94A3B8', textDecoration: 'none' }}>{t.home.footerTerms}</Link>
+            <Link to="/roadmap" className="py-3 sm:py-0" style={{ fontSize: 12, color: '#94A3B8', textDecoration: 'none' }}>{t.home.footerRoadmap}</Link>
             <Link to="/status" className="py-3 sm:py-0" style={{ fontSize: 12, color: '#94A3B8', textDecoration: 'none' }}>
               {t.home.footerStatus}
             </Link>
