@@ -5,21 +5,12 @@ import { COMPANIES_SORTED } from '../data/companies'
 import { CompanyCard } from '../components/CompanyCard'
 import { trackFunnel, trackSearchNoMatch } from '../lib/analytics'
 import { useLang } from '../contexts/LanguageContext'
-import { extractFunctionErrorMessage } from '../lib/functionError'
+import { checkEmailBreaches, type XonBreach } from '../lib/breachCheck'
 
 const mediaCompanies   = COMPANIES_SORTED.filter((c) => c.request_type === 'gdpr_art17' && c.utgivningsbevis)
 const gdprCompanies    = COMPANIES_SORTED.filter((c) => c.request_type === 'gdpr_art17' && !c.utgivningsbevis)
 const optOutCompanies  = COMPANIES_SORTED.filter((c) => c.request_type === 'opt_out')
 const authorityEntries = COMPANIES_SORTED.filter((c) => c.request_type === 'authority')
-
-interface XonBreach {
-  breach: string
-  xposed_date: string
-  domain: string
-  industry: string
-  xposed_data: string
-  xposed_records: number
-}
 
 export function Scan() {
   const { t } = useLang()
@@ -57,15 +48,9 @@ export function Scan() {
     setError(null)
 
     try {
-      const { data, error: fnError } = await supabase.functions.invoke('scan-email', {
-        body: { email },
-      })
-
-      if (fnError) throw new Error(await extractFunctionErrorMessage(fnError))
-
-      const foundBreaches: XonBreach[] = data?.breaches ?? []
+      const { breaches: foundBreaches, unavailable } = await checkEmailBreaches(email)
       setBreaches(foundBreaches)
-      setBreachCheckUnavailable(Boolean(data?.unavailable))
+      setBreachCheckUnavailable(unavailable)
       setHasScanned(true)
       trackFunnel('scan_completed', { breach_count: foundBreaches.length })
 

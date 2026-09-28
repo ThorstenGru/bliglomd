@@ -6,18 +6,20 @@ project_id = "ydkahdqvuykpmjkpunck"
 # caller can never present a Supabase session JWT:
 #   - stripe-webhook: called by Stripe's servers, authenticated via the
 #     stripe-signature header (verified inside the function) instead.
-#   - scan-email: called from the Trace scan flow.
 #   - cleanup-unconfirmed, admin-weekly-digest, admin-monthly-report,
 #     admin-weekly-db-dump, send-reminders: called only by pg_cron via
 #     net.http_post, authenticated via a per-function bearer secret stored
 #     in Supabase Vault (verified inside each function) instead.
 # Everything else is invoked by a logged-in user via supabase.functions.invoke()
 # and must keep gateway JWT enforcement on.
+#
+# (Breach checking for the Trace scan flow no longer goes through an edge
+# function at all -- see src/lib/breachCheck.ts. It calls XposedOrNot's free,
+# CORS-enabled endpoints directly from the browser, since their bot-protection
+# blocks server-side/datacenter callers, including Supabase's, on the richer
+# endpoint a backend proxy would otherwise use.)
 
 [functions.stripe-webhook]
-verify_jwt = false
-
-[functions.scan-email]
 verify_jwt = false
 
 [functions.cleanup-unconfirmed]
