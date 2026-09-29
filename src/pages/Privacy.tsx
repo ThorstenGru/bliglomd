@@ -52,8 +52,8 @@ export function Privacy() {
           {
             title: isEn ? '5. How long do we keep your data?' : '5. Hur länge sparar vi dina uppgifter?',
             body: isEn
-              ? 'Account and service data: deleted when you delete your account. Payment/accounting records: 7 years, counted from the end of the calendar year in which the financial year concluded, as required by the Swedish Bookkeeping Act (1999:1078) Ch. 7 §2. Consent records: 7 years (evidence of contractual agreement). Traffic statistics: 90 days. Anonymised usage data: indefinitely (not personal data).'
-              : 'Konto- och tjänstedata: raderas när du raderar ditt konto. Betalnings- och bokföringsunderlag: 7 år, räknat från utgången av det kalenderår då räkenskapsåret avslutades, enligt Bokföringslagen (1999:1078) 7 kap. 2 §. Samtyckesloggar: 7 år (bevis för avtalsslut). Besöksstatistik: 90 dagar. Anonymiserad användningsdata: på obestämd tid (inte personuppgifter).',
+              ? 'Account and service data — including consent records: permanently deleted when you delete your account. Deletion is total: everything is removed at that point and cannot be recovered. Payment/accounting records held by Stripe are a separate exception, kept for 7 years as required by the Swedish Bookkeeping Act (1999:1078) Ch. 7 §2, regardless of your BliGlömd account deletion. Traffic statistics: 90 days. Anonymised usage data: indefinitely (not personal data).'
+              : 'Konto- och tjänstedata — inklusive samtyckesloggar: raderas permanent när du raderar ditt konto. Raderingen är total: allt tas bort vid det tillfället och kan inte återställas. Betalnings- och bokföringsunderlag som Stripe innehar är ett separat undantag och sparas där i 7 år enligt Bokföringslagen (1999:1078) 7 kap. 2 §, oavsett om du raderar ditt BliGlömd-konto. Besöksstatistik: 90 dagar. Anonymiserad användningsdata: på obestämd tid (inte personuppgifter).',
           },
           {
             title: isEn ? '6. Your rights' : '6. Dina rättigheter',

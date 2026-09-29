@@ -82,8 +82,10 @@ export function Scan() {
       <form onSubmit={handleScan} className="mb-10">
         <div className="flex flex-col sm:flex-row gap-3">
           <input
+            id="scan-email"
             type="email"
             required
+            aria-label={t.scan.placeholder}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder={t.scan.placeholder}
@@ -168,7 +170,9 @@ export function Scan() {
             <h2 className="text-xl font-semibold text-gray-900 mb-4">{t.scan.companiesTitle}</h2>
 
             <input
+              id="scan-company-search"
               type="search"
+              aria-label={t.scan.searchPlaceholder}
               value={companySearch}
               onChange={(e) => setCompanySearch(e.target.value)}
               placeholder={t.scan.searchPlaceholder}

@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { levelFromPrice } from '../_shared/stripeLevel.ts'
 
 const STRIPE_BASE = 'https://api.stripe.com/v1'
 
@@ -32,15 +33,6 @@ async function verifySignature(payload: string, sigHeader: string, secret: strin
   const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(signed))
   const computed = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('')
   return constantTimeEqual(computed, v1)
-}
-
-async function levelFromPrice(priceId: string, stripeAuth: string): Promise<number | null> {
-  const res = await fetch(`${STRIPE_BASE}/prices/${priceId}?expand[]=product`, {
-    headers: { Authorization: stripeAuth },
-  })
-  const price = await res.json()
-  const raw = price.product?.metadata?.bliglomd_level
-  return raw ? parseInt(raw, 10) : null
 }
 
 Deno.serve(async (req) => {

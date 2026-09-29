@@ -376,6 +376,7 @@ export function Admin() {
   const [traffic, setTraffic]                     = useState<TrafficData | null>(null)
   const [trafficLoading, setTrafficLoading]       = useState(false)
   const [loginChecked, setLoginChecked]           = useState(false)
+  const [hadExistingSession, setHadExistingSession] = useState(false)
   const [loginEmail, setLoginEmail]               = useState('')
   const [loginPassword, setLoginPassword]         = useState('')
   const [loginError, setLoginError]               = useState<string | null>(null)
@@ -447,7 +448,13 @@ export function Admin() {
     // Supabase persists sessions in localStorage — without this, reopening /xadm
     // with an old session (admin or otherwise) would skip straight past login.
     // The admin route must always demand fresh credentials, never reuse a session.
-    supabase.auth.signOut().finally(() => setLoginChecked(true))
+    // A visitor landing here with an unrelated logged-in session (e.g. their own
+    // free account, found the route in the bundle) previously got signed out with
+    // zero explanation — surface that instead of silently ending their session.
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) setHadExistingSession(true)
+      supabase.auth.signOut().finally(() => setLoginChecked(true))
+    })
   }, [])
 
   async function handleAdminLogin(e: React.FormEvent) {
@@ -606,8 +613,15 @@ export function Admin() {
             </div>
           </div>
 
-          <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>E-postadress</label>
+          {hadExistingSession && (
+            <p style={{ fontSize: 12, color: '#92400E', background: '#FEF3C7', borderRadius: 8, padding: '8px 12px', margin: '0 0 16px' }}>
+              Du loggades ut från ditt tidigare konto — adminpanelen kräver alltid en egen, färsk inloggning.
+            </p>
+          )}
+
+          <label htmlFor="admin-login-email" style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>E-postadress</label>
           <input
+            id="admin-login-email"
             type="email"
             required
             autoComplete="username"
@@ -616,8 +630,9 @@ export function Admin() {
             style={{ width: '100%', padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 13, color: '#1E293B', outline: 'none', boxSizing: 'border-box', marginBottom: 14 }}
           />
 
-          <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Lösenord</label>
+          <label htmlFor="admin-login-password" style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Lösenord</label>
           <input
+            id="admin-login-password"
             type="password"
             required
             autoComplete="current-password"

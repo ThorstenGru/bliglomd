@@ -278,8 +278,9 @@ export function Dashboard() {
 
                     {/* Action: update status */}
                     <div className="flex items-center gap-3 flex-wrap">
-                      <label className="text-xs font-medium text-gray-600">{t.dashboard.updateStatus}</label>
+                      <label htmlFor={`status-select-${req.id}`} className="text-xs font-medium text-gray-600">{t.dashboard.updateStatus}</label>
                       <select
+                        id={`status-select-${req.id}`}
                         value={req.status}
                         onChange={(e) => updateStatus(req.id, e.target.value as Request['status'])}
                         className="text-xs border border-gray-300 rounded-lg px-2.5 py-1.5 min-h-[44px] sm:min-h-0 focus:outline-none focus:ring-1 focus:ring-brand-500 bg-white"
@@ -302,9 +303,11 @@ export function Dashboard() {
 
                     {/* Notes */}
                     <div className="mt-4 pt-4 border-t border-gray-100">
-                      <p className="text-xs font-medium text-gray-500 mb-2">{t.dashboard.addNote}</p>
+                      <p id={`add-note-label-${req.id}`} className="text-xs font-medium text-gray-500 mb-2">{t.dashboard.addNote}</p>
                       <div className="flex gap-2">
                         <textarea
+                          id={`note-text-${req.id}`}
+                          aria-labelledby={`add-note-label-${req.id}`}
                           value={noteText}
                           onChange={(e) => setNoteText(e.target.value)}
                           rows={2}

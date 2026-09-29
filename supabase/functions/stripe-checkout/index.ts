@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { levelFromPrice } from '../_shared/stripeLevel.ts'
 
 const ALLOWED_ORIGINS = ['https://xn--bliglmd-e1a.se', 'http://localhost:5173']
 const STRIPE_BASE = 'https://api.stripe.com/v1'
@@ -146,13 +147,4 @@ function json(body: unknown, status: number, cors: Record<string, string>) {
     status,
     headers: { ...cors, 'Content-Type': 'application/json' },
   })
-}
-
-async function levelFromPrice(priceId: string, stripeAuth: string): Promise<number | null> {
-  const res = await fetch(`${STRIPE_BASE}/prices/${priceId}?expand[]=product`, {
-    headers: { Authorization: stripeAuth },
-  })
-  const price = await res.json()
-  const raw = price.product?.metadata?.bliglomd_level
-  return raw ? parseInt(raw, 10) : null
 }

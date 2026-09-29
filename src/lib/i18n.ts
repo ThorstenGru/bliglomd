@@ -267,6 +267,53 @@ export const translations = {
       failed: 'Misslyckad',
       expired: 'Utgången',
     },
+    cookieNotice: {
+      body: 'Vi använder endast strikt nödvändig lokal lagring för inloggning, och anonym, sessionsbaserad besöksstatistik på våra egna servrar. Ingen reklam, inga tredjepartskakor och ingen spårning mellan webbplatser.',
+      link: 'Läs mer i vår integritetspolicy',
+      accept: 'Jag förstår',
+    },
+    roadmapPage: {
+      badge: 'Kommer snart',
+      title: 'Det här bygger vi härnäst',
+      subtitle: 'En titt på vad vi planerar — inget av detta är tillgängligt än, och inga datum är satta.',
+      items: [
+        {
+          title: 'Löpande dataintrångsbevakning',
+          body: 'Vi bevakar din e-post kontinuerligt och meddelar dig direkt om den dyker upp i ett nytt dataintrång — inte bara vid en engångsskanning.',
+          tag: 'Cipher & Ghost',
+        },
+        {
+          title: 'Automatisk förnyelse av spärrar',
+          body: 'Vi håller koll på när dina 12-månadersspärrar (Ratsit, Merinfo m.fl.) börjar löpa ut och guidar dig genom förnyelsen i god tid, med allt förifyllt.',
+          tag: 'Ghost',
+        },
+        {
+          title: 'Eskalering vid uteblivet svar',
+          body: 'Svarar inte ett företag inom 30 dagar skickar vi automatiskt en skarpare påminnelse — och för Ghost, ett färdigt klagomål till Integritetsskyddsmyndigheten (IMY).',
+          tag: 'Cipher & Ghost',
+        },
+        {
+          title: 'Årlig integritetsrapport',
+          body: 'En gång om året sammanställer vi vad som hänt sedan sist: företag du rensat, intrång vi hittat, och spärrar som snart löper ut.',
+          tag: 'Cipher & Ghost',
+        },
+        {
+          title: 'Familjeskydd',
+          body: 'Skydda hela familjen under ett och samma abonnemang — en lösning för dig som redan sköter det här åt fler än dig själv.',
+          tag: 'Ny nivå',
+        },
+        {
+          title: 'Dödsbo-tjänst',
+          body: 'Hjälp med att avsluta en avliden anhörigs digitala konton och abonnemang, som dödsbodelägare.',
+          tag: 'Engångsköp',
+        },
+        {
+          title: 'Företagspaket',
+          body: 'BliGlömd som medarbetarförmån, eller som en del av en strukturerad offboarding-process när någon slutar.',
+          tag: 'Företag',
+        },
+      ],
+    },
   },
 
   en: {
@@ -533,6 +580,53 @@ export const translations = {
       removed: 'Removed',
       failed: 'Failed',
       expired: 'Expired',
+    },
+    cookieNotice: {
+      body: 'We only use strictly necessary local storage for sign-in, and anonymous, session-based traffic statistics on our own servers. No ads, no third-party cookies, and no cross-site tracking.',
+      link: 'Read more in our Privacy Policy',
+      accept: 'Got it',
+    },
+    roadmapPage: {
+      badge: 'Coming soon',
+      title: "What's next for BliGlömd",
+      subtitle: "A look at what we're planning — not yet available, and dates aren't fixed.",
+      items: [
+        {
+          title: 'Continuous breach monitoring',
+          body: 'We keep watching your email and alert you the moment it shows up in a new data breach — not just at a one-time scan.',
+          tag: 'Cipher & Ghost',
+        },
+        {
+          title: 'Automatic opt-out renewal',
+          body: "We track when your 12-month opt-outs (Ratsit, Merinfo, etc.) are about to expire and guide you through renewing in good time, pre-filled.",
+          tag: 'Ghost',
+        },
+        {
+          title: 'Escalation on no response',
+          body: "If a company doesn't respond within 30 days, we automatically send a firmer follow-up — and for Ghost, a ready-made complaint to the Swedish Data Protection Authority (IMY).",
+          tag: 'Cipher & Ghost',
+        },
+        {
+          title: 'Annual privacy report',
+          body: 'Once a year, we sum up what happened: companies cleared, breaches found, and opt-outs coming up for renewal.',
+          tag: 'Cipher & Ghost',
+        },
+        {
+          title: 'Family protection',
+          body: 'Protect your whole household under one subscription — for when you already handle this for more than just yourself.',
+          tag: 'New tier',
+        },
+        {
+          title: "Digital estate service",
+          body: "Help closing a deceased relative's digital accounts and subscriptions, as an estate administrator.",
+          tag: 'One-time purchase',
+        },
+        {
+          title: 'Employer packages',
+          body: 'BliGlömd as an employee benefit, or as part of a structured offboarding process when someone leaves.',
+          tag: 'Business',
+        },
+      ],
     },
   },
 } as const

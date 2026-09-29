@@ -484,8 +484,9 @@ export function Request() {
               {company.gdpr_email ? (
                 <form onSubmit={handleSendL3} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">{t.request.yourName}</label>
+                    <label htmlFor="request-your-name" className="block text-sm font-medium text-gray-700 mb-1">{t.request.yourName}</label>
                     <input
+                      id="request-your-name"
                       type="text"
                       required
                       value={userName}
@@ -495,8 +496,9 @@ export function Request() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">{t.request.yourEmail}</label>
+                    <label htmlFor="request-your-email" className="block text-sm font-medium text-gray-700 mb-1">{t.request.yourEmail}</label>
                     <input
+                      id="request-your-email"
                       type="email"
                       required
                       value={userEmail}

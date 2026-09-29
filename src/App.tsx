@@ -4,6 +4,7 @@ import { supabase } from './lib/supabase'
 import { trackPageview } from './lib/analytics'
 import { LanguageProvider, useLang } from './contexts/LanguageContext'
 import { NavBar } from './components/NavBar'
+import { CookieNotice } from './components/CookieNotice'
 import { Home } from './pages/Home'
 import { Scan } from './pages/Scan'
 import { Request } from './pages/Request'
@@ -96,6 +97,7 @@ function AppShell() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <CookieNotice />
     </div>
   )
 }
