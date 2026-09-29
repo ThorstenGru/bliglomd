@@ -15,7 +15,6 @@ interface CheckResult {
 interface ComponentDef {
   id: string
   category: Category
-  docsUrl?: string
   check: () => Promise<CheckResult>
 }
 
@@ -30,13 +29,11 @@ const COMPONENTS: ComponentDef[] = [
   {
     id: 'frontend',
     category: 'frontend',
-    docsUrl: 'https://xn--bliglmd-e1a.se/',
     check: async () => ({ status: 'operational', detail: window.location.origin }),
   },
   {
     id: 'supabase_platform',
     category: 'backend',
-    docsUrl: `${SB_URL}/rest/v1/`,
     check: async () => {
       if (!SB_URL || !SB_KEY) return { status: 'unconfigured', detail: 'VITE_SUPABASE_URL not set' }
       const t0 = performance.now()
@@ -65,7 +62,6 @@ const COMPONENTS: ComponentDef[] = [
   {
     id: 'supabase_auth',
     category: 'backend',
-    docsUrl: `${SB_URL}/auth/v1/health`,
     check: async () => {
       if (!SB_URL || !SB_KEY) return { status: 'unconfigured' }
       const t0 = performance.now()
@@ -137,7 +133,6 @@ const COMPONENTS: ComponentDef[] = [
   {
     id: 'brevo',
     category: 'external',
-    docsUrl: 'https://www.brevo.com',
     check: async () => {
       const t0 = performance.now()
       try {
@@ -151,7 +146,6 @@ const COMPONENTS: ComponentDef[] = [
   {
     id: 'hibp',
     category: 'external',
-    docsUrl: 'https://xposedornot.com',
     check: async () => {
       const t0 = performance.now()
       try {
@@ -165,7 +159,6 @@ const COMPONENTS: ComponentDef[] = [
   {
     id: 'stripe',
     category: 'external',
-    docsUrl: 'https://status.stripe.com',
     check: async () => {
       const t0 = performance.now()
       try {
@@ -199,10 +192,10 @@ const T = {
     ms: 'ms',
     categories: {
       frontend: 'Frontend',
-      backend: 'Backend-plattform',
+      backend: 'Plattform',
       database: 'Databas',
-      edge_functions: 'Edge Functions (Serverless)',
-      external: 'Externa tjänster',
+      edge_functions: 'Bakgrundstjänster',
+      external: 'Externa leverantörer',
     },
     statusLabel: {
       operational: 'Driftsäker',
@@ -213,36 +206,36 @@ const T = {
     },
     components: {
       frontend: {
-        name: 'Webbapp (GitHub Pages)',
-        desc: 'React-appen du använder just nu — hostad på GitHub Pages',
+        name: 'Webbapp',
+        desc: 'Applikationen du använder just nu',
       },
       supabase_platform: {
-        name: 'Supabase Platform',
-        desc: 'Huvudplattform som driver databas, autentisering och Edge Functions',
+        name: 'API-plattform',
+        desc: 'Huvudplattformen som driver applikationen',
       },
       supabase_auth: {
-        name: 'Supabase Auth',
-        desc: 'Autentiseringstjänst — hanterar inloggning, registrering och sessioner',
+        name: 'Inloggning och sessioner',
+        desc: 'Hanterar inloggning, registrering och sessioner',
       },
       supabase_db: {
-        name: 'Supabase Databas (PostgreSQL)',
-        desc: 'Lagrar GDPR-förfrågningar, användarprofiler, skanningar och påminnelser',
+        name: 'Databas',
+        desc: 'Lagrar dina uppgifter säkert',
       },
       edge_send: {
-        name: 'Edge Function: send-request',
-        desc: 'Serverlös funktion som skickar GDPR-raderingsmail via Brevo API',
+        name: 'E-postutskick',
+        desc: 'Skickar GDPR-raderingsförfrågningar via e-post',
       },
       brevo: {
-        name: 'Brevo Mail API',
-        desc: 'Extern e-posttjänst — levererar GDPR-raderingsmail till företagen och kontobekräftelser',
+        name: 'E-postleverantör',
+        desc: 'Levererar transaktionella e-postmeddelanden och kontobekräftelser',
       },
       hibp: {
-        name: 'XposedOrNot API',
-        desc: 'Gratis extern tjänst — kontrollerar om e-postadressen förekommer i dataintrång',
+        name: 'Dataintrångskontroll',
+        desc: 'Kontrollerar om en e-postadress förekommer i kända dataintrång',
       },
       stripe: {
-        name: 'Stripe API',
-        desc: 'Extern betaltjänst — hanterar alla kort- och abonnemangsbetalningar',
+        name: 'Betaltjänst',
+        desc: 'Hanterar kort- och abonnemangsbetalningar',
       },
     },
     backHome: '← Hem',
@@ -265,10 +258,10 @@ const T = {
     ms: 'ms',
     categories: {
       frontend: 'Frontend',
-      backend: 'Backend Platform',
+      backend: 'Platform',
       database: 'Database',
-      edge_functions: 'Edge Functions (Serverless)',
-      external: 'External Services',
+      edge_functions: 'Background Services',
+      external: 'External Providers',
     },
     statusLabel: {
       operational: 'Operational',
@@ -279,36 +272,36 @@ const T = {
     },
     components: {
       frontend: {
-        name: 'Web App (GitHub Pages)',
-        desc: 'The React app you are using right now — hosted on GitHub Pages',
+        name: 'Web App',
+        desc: 'The application you are using right now',
       },
       supabase_platform: {
-        name: 'Supabase Platform',
-        desc: 'Core platform powering the database, authentication and Edge Functions',
+        name: 'API Platform',
+        desc: 'Core platform powering the application',
       },
       supabase_auth: {
-        name: 'Supabase Auth',
-        desc: 'Authentication service — manages login, registration and sessions',
+        name: 'Sign-in and sessions',
+        desc: 'Handles login, registration and sessions',
       },
       supabase_db: {
-        name: 'Supabase Database (PostgreSQL)',
-        desc: 'Stores GDPR requests, user profiles, scans and reminders',
+        name: 'Database',
+        desc: 'Stores your data securely',
       },
       edge_send: {
-        name: 'Edge Function: send-request',
-        desc: 'Serverless function that sends GDPR deletion emails via Brevo API',
+        name: 'Email delivery',
+        desc: 'Sends GDPR deletion requests via email',
       },
       brevo: {
-        name: 'Brevo Mail API',
-        desc: 'External email service — delivers GDPR deletion emails to companies and account confirmations',
+        name: 'Email provider',
+        desc: 'Delivers transactional email and account confirmations',
       },
       hibp: {
-        name: 'XposedOrNot API',
-        desc: 'Free external service — checks if an email address appears in known data breaches',
+        name: 'Breach-check provider',
+        desc: 'Checks if an email address appears in known data breaches',
       },
       stripe: {
-        name: 'Stripe API',
-        desc: 'External payment service — handles all card and subscription payments',
+        name: 'Payment provider',
+        desc: 'Handles card and subscription payments',
       },
     },
     backHome: '← Home',
@@ -468,29 +461,15 @@ export function Status() {
 
                         {/* Info */}
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-semibold text-gray-900 text-sm">
-                              {compText?.name ?? comp.id}
-                            </span>
-                            {comp.docsUrl && (
-                              <a
-                                href={comp.docsUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-xs text-gray-400 hover:text-gray-600 inline-flex items-center justify-center p-2 -m-2"
-                              >
-                                ↗
-                              </a>
-                            )}
-                          </div>
+                          <span className="font-semibold text-gray-900 text-sm">
+                            {compText?.name ?? comp.id}
+                          </span>
                           <p className="text-xs text-gray-500 mt-0.5">{compText?.desc}</p>
-                          {result.detail && (
-                            <p className="text-xs text-gray-400 mt-0.5 italic">{result.detail}</p>
-                          )}
                         </div>
                       </div>
 
-                      {/* Right side: status + response time */}
+                      {/* Right side: status only -- no response time or raw error detail publicly,
+                          to avoid handing an attacker free infrastructure/timing reconnaissance. */}
                       <div className="shrink-0 text-right">
                         <span
                           className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
@@ -503,11 +482,6 @@ export function Status() {
                         >
                           {t.statusLabel[result.status]}
                         </span>
-                        {result.responseTime !== undefined && (
-                          <p className="text-xs text-gray-400 mt-1">
-                            {result.responseTime} {t.ms}
-                          </p>
-                        )}
                       </div>
                     </div>
                   )
