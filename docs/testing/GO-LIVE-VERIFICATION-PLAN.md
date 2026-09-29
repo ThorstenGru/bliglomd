@@ -10,11 +10,17 @@
 ## 0. How to use this document
 
 - Work top to bottom. Each check has a **checkbox**, an **expected result**, and space to note actual result / defect.
-- `[ME]` = Thorsten must personally perform this step (real money, real credentials, or a device/account only he controls).
-- `[CLAUDE]` = Claude can drive this via browser/CLI/API on request.
-- `[EITHER]` = either of us, whoever is at the keyboard.
-- Anything touching **real card data or an actual live charge** is marked `[ME]` — see §14 for why, and for the one exception (Claude can navigate up to the Stripe Checkout page and read back results, but the card entry and "Pay" click on a live charge should be Thorsten's, with each real charge confirmed explicitly before it happens).
+- `[ME]` = Thorsten must personally perform this step (real money, real credentials, or a judgment call only he can make).
+- `[CLAUDE]` = Claude drives this via browser/CLI/API, autonomously, without waiting for a go-ahead each time.
+- `[EITHER]` — removed as a category (2026-09-29): every check has been reassigned to whichever of the two can actually do it, so nothing is ambiguous about who acts.
+- Anything touching **real card data or an actual live charge/refund decision** stays `[ME]` — see §14. This is a fixed boundary, not a default that more automation moves: Claude will not type card numbers, click "Pay" on a real charge, or decide to keep vs. refund real money. Everything else around it (driving the checkout flow up to that point, reading back webhook/DB/Stripe Dashboard results afterward) is `[CLAUDE]`.
 - A "PASS" requires the *expected result*, not just "didn't crash." Write down the actual behavior if it differs.
+
+### 0.1 Operating policy (set 2026-09-29)
+
+- **Fix forward, stay live.** No rollback is the default response to a bug found after go-live. Claude commits and pushes fixes to `main` as frequently as possible — every push deploys straight to production (GitHub Pages, no staging environment), gated only by the `tsc --noEmit` CI check.
+- **Sandbox is still used for simulation, not as a rollback.** Destructive/edge-case tests that would otherwise require breaking a real payment (§7.4 replay attacks, §13.4 forced failed payments, webhook fuzzing) run against Stripe **sandbox** — this is test-environment simulation, not reverting the live product, and never affects a real customer.
+- **The `STRIPE_MODE` sandbox/live toggle stays in the code as an emergency-only escape hatch**, not a normal remediation path. It is only used if a regression is actively costing real money or granting free access it shouldn't (e.g. the paywall-bypass class of bug) faster than a code fix can land. Using it is Thorsten's call, not a default.
 
 ---
 
@@ -48,12 +54,12 @@ Shared components: `NavBar`, `AuthModal`, `ConsentModal`, `CookieNotice`, `Compa
 |---|---|---|---|
 | 2.1 `[CLAUDE]` | Confirm `git status` clean, local == `origin/main` | Clean, in sync | |
 | 2.2 `[CLAUDE]` | Read current value of `STRIPE_MODE` secret (can't decrypt value via CLI list — confirm via a harmless code path, e.g. attempt a checkout and see which price IDs are accepted) | Matches intended mode for this test pass | |
-| 2.3 `[EITHER]` | Confirm which Stripe **account mode** the Stripe Dashboard is showing (top-left toggle) matches `STRIPE_MODE` | Same mode, no mismatch | |
+| 2.3 `[CLAUDE]` | Confirm which Stripe **account mode** the Stripe Dashboard/API is showing matches `STRIPE_MODE` | Same mode, no mismatch | |
 | 2.4 `[CLAUDE]` | Confirm Stripe webhook endpoint (Dashboard → Developers → Webhooks) is registered for the **live** endpoint URL, enabled, listening for: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_succeeded`, `invoice.payment_failed` | All 5 events enabled, endpoint status "Enabled" | |
 | 2.5 `[CLAUDE]` | Confirm `STRIPE_CIPHER_PRICE_ID_LIVE` / `STRIPE_GHOST_PRICE_ID_LIVE` in Supabase secrets match the price IDs hardcoded in `src/config/tiers.ts` (`price_1UKwmcAT2u1nHxljnXod1E5E`, `price_1UKwnWAT2u1nHxljl0QiaEC4`) | Identical | |
 | 2.6 `[CLAUDE]` | Load `/status` live and let it finish checking (not "Checking...") | All components green/operational | |
 | 2.7 `[CLAUDE]` | Confirm `public/CNAME` still reads `bliglömd.se` and TLS cert is valid (not expiring within 14 days) | Valid | |
-| 2.8 `[EITHER]` | Confirm the Stripe **live** balance/payouts destination bank account is correctly set in the Stripe Dashboard (this is the one place a real customer's money will actually go) | Correct account confirmed by Thorsten | |
+| 2.8 `[CLAUDE]` fetches, `[ME]` confirms | Claude pulls the current live payouts destination from the Stripe Dashboard/API and shows it to Thorsten; Thorsten confirms it's the right bank account (this is the one place a real customer's money actually goes, and only he can vouch it's correct) | Correct account confirmed by Thorsten | |
 
 **Do not proceed past §14 (live payment) until every row above is PASS.**
 
@@ -191,7 +197,7 @@ These are re-tests of previously-found-and-fixed bugs, done again because a go-l
 - **Responsive/mobile**: `[CLAUDE]` resize to mobile width, re-walk §3 steps 1–9 and the pricing cards/checkout entry point.
 - **Accessibility**: `[CLAUDE]` spot-check today's a11y commit (`e72075b`) actually improved something checkable (keyboard nav through pricing cards and AuthModal, focus trap in modals, alt text on icons/badges).
 - **Cookie notice**: `[CLAUDE]` confirm the new `CookieNotice` component's copy matches the Privacy Policy §7 claims exactly (no cookie-consent-required claim that contradicts "strictly necessary, no consent needed").
-- **Browser matrix**: `[EITHER]` spot check Chrome + at least one of Safari/Firefox for the checkout flow specifically (Stripe.js/redirect behavior is the most likely cross-browser breakage point).
+- **Browser matrix**: `[CLAUDE]` spot check Chrome + at least one of Safari/Firefox for the checkout flow specifically (Stripe.js/redirect behavior is the most likely cross-browser breakage point).
 - **Roadmap page**: `[CLAUDE]` confirm `/roadmap` (footer "Coming soon" link) renders correctly and doesn't promise anything already contradicted by the Terms' "no guarantees, features may be removed without notice" clause.
 
 ---
@@ -269,7 +275,7 @@ This is the one part of the plan involving real money and real card data. A few 
 ## 17. Appendix
 
 - **Repo**: `github.com/ThorstenGru/bliglomd`, local at `...\Desktop\Claude Code Folder\bliglomd`.
-- **Rollback plan if live mode misbehaves again**: flip `STRIPE_MODE` back to `sandbox` (single Supabase secret), redeploy frontend if `tiers.ts` price IDs also need reverting to the sandbox pair noted in code comments (`price_1UJF2CAR7wxHkiWgazzRxQYe` Cipher, `price_1UJF2DAR7wxHkiWgOIfZS2jj` Ghost).
+- **Operating policy**: fix forward on `main`, no rollback as the default response to a bug (see §0.1). The `STRIPE_MODE` sandbox/live toggle (flip to `sandbox` + revert `tiers.ts` price IDs to `price_1UJF2CAR7wxHkiWgazzRxQYe` Cipher / `price_1UJF2DAR7wxHkiWgOIfZS2jj` Ghost) stays available only as an emergency stop — e.g. a live paywall-bypass regression actively granting free access or mischarging customers faster than a code fix can land — and is Thorsten's call to invoke, not a routine step.
 - **Admin identity**: `admin@xn--bliglmd-e1a.se`, undeletable, excluded from customer metrics.
 - **Contact for legal/data queries shown to customers**: `kontakt@bliglömd.se`.
 
