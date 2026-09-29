@@ -90,7 +90,7 @@ export function Privacy() {
           </div>
         ))}
 
-        <div style={{ marginTop: 48, borderTop: '1px solid #E2E8F0', paddingTop: 24, fontSize: 12, color: '#94A3B8', lineHeight: 1.7 }}>
+        <div style={{ marginTop: 48, borderTop: '1px solid #E2E8F0', paddingTop: 24, fontSize: 12, color: '#64748B', lineHeight: 1.7 }}>
           <p>© 2026 BliGlömd · kontakt@bliglömd.se</p>
         </div>
 

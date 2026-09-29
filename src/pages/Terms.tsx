@@ -252,7 +252,7 @@ export function Terms() {
         </div>
 
         {/* Footer note */}
-        <div style={{ marginTop: 48, borderTop: '1px solid #E2E8F0', paddingTop: 24, fontSize: 12, color: '#94A3B8', lineHeight: 1.7 }}>
+        <div style={{ marginTop: 48, borderTop: '1px solid #E2E8F0', paddingTop: 24, fontSize: 12, color: '#64748B', lineHeight: 1.7 }}>
           <p>
             {isEn
               ? `© 2026 BliGlömd. Contact: kontakt@bliglömd.se. Terms version: ${TERMS_VERSION}.`

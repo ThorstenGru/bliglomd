@@ -36,7 +36,8 @@ export interface Company {
   /** Sensitive: shows criminal records or similar; show warning before proceeding */
   sensitive?: boolean
   /** Per-company warning shown in card and request flow */
-  warning?: string
+  warning_sv?: string
+  warning_en?: string
   /** Custom reminder interval in days (default 30 for L3, 365 for Ratsit) */
   reminder_days?: number
 }

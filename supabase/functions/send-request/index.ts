@@ -63,9 +63,15 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json().catch(() => ({}))
-    const { companyName, gdprEmail, userName, userEmail, lang } = body
+    const { companyId, companyName, gdprEmail, requestType, userName, userEmail, lang } = body
 
     // Input validation
+    if (!companyId || typeof companyId !== 'string') {
+      return new Response(
+        JSON.stringify({ success: false, error: 'companyId is required' }),
+        { status: 400, headers: { ...headers, 'Content-Type': 'application/json' } }
+      )
+    }
     if (!companyName || typeof companyName !== 'string') {
       return new Response(
         JSON.stringify({ success: false, error: 'companyName is required' }),
@@ -130,6 +136,28 @@ Deno.serve(async (req) => {
 
     if (!res.ok) {
       throw new Error(`Brevo API error ${res.status}: ${JSON.stringify(data)}`)
+    }
+
+    // Track the send server-side, using the service-role key, now that the Ghost-tier
+    // check above has actually run -- this is the only place sent_via='ghost_auto' may be
+    // written (see migration 032_requests_ghost_auto_lockdown.sql, which reverts any
+    // client-side attempt to set it directly).
+    const sbAdmin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
+    const { error: dbError } = await sbAdmin.from('requests').upsert({
+      user_id: user.id,
+      company_id: companyId,
+      company_name: companyName,
+      user_email: userEmail,
+      user_name: userName,
+      status: 'sent',
+      sent_at: new Date().toISOString(),
+      request_type: typeof requestType === 'string' ? requestType : null,
+      sent_via: 'ghost_auto',
+      company_gdpr_email: gdprEmail,
+    }, { onConflict: 'user_id,company_id' })
+    if (dbError) {
+      // Email was already sent -- log but don't fail the request over tracking.
+      console.error('Failed to save request record:', dbError.message)
     }
 
     return new Response(

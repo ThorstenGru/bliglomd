@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useLang } from '../contexts/LanguageContext'
 
@@ -440,12 +441,12 @@ export function Status() {
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="mb-2">
-                <a
-                  href="/"
+                <Link
+                  to="/"
                   className="text-white/80 hover:text-white text-sm inline-block py-2 -my-2"
                 >
                   {t.backHome}
-                </a>
+                </Link>
               </div>
               <h1 className="text-2xl sm:text-3xl font-bold">{t.title}</h1>
               <p className="mt-1 text-white/90 text-sm">{t.subtitle}</p>

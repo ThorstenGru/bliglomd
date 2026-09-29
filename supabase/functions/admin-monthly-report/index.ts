@@ -75,7 +75,11 @@ async function fetchPaidInvoices(stripeAuth: string, gte: number, lt: number): P
         customerEmail: inv.customer?.email ?? inv.customer_email ?? '',
         customerName: inv.customer?.name ?? '',
         plan: level ? (LEVEL_NAME[level] ?? `Level ${level}`) : (line?.price?.nickname ?? 'Okänd'),
-        amount: (inv.amount_paid ?? 0) / 100,
+        // Stripe keeps invoice.status='paid' and amount_paid unchanged after a refund --
+        // post-payment credit notes (which is how refunds against a paid invoice show up)
+        // are tracked separately in post_payment_credit_notes_amount, so net it out here
+        // or a refunded month's revenue gets overstated.
+        amount: ((inv.amount_paid ?? 0) - (inv.post_payment_credit_notes_amount ?? 0)) / 100,
         currency: String(inv.currency ?? '').toUpperCase(),
         invoiceId: inv.id,
         status: inv.status,

@@ -42,7 +42,8 @@ Deno.serve(async (req) => {
       return json({ error: 'No active subscription' }, 400, cors)
     }
 
-    const STRIPE_KEY = Deno.env.get('STRIPE_SECRET_KEY')!
+    const live = Deno.env.get('STRIPE_MODE') === 'live'
+    const STRIPE_KEY = Deno.env.get(live ? 'STRIPE_SECRET_KEY_LIVE' : 'STRIPE_SECRET_KEY')!
     const stripeAuth = `Basic ${btoa(STRIPE_KEY + ':')}`
 
     const res = await fetch('https://api.stripe.com/v1/billing_portal/sessions', {

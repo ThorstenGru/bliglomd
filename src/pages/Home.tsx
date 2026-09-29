@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useLang } from '../contexts/LanguageContext'
 import { BrandLogo } from '../components/BrandLogo'
@@ -22,135 +22,6 @@ function TreKronor({ size = 22 }: { size?: number }) {
   )
 }
 
-// ── Count-up animation ────────────────────────────────────────────────────────
-
-function useCountUp(target: number, duration = 1200): number {
-  const [value, setValue] = useState(Math.floor(target * 0.88))
-  useEffect(() => {
-    const start = Math.floor(target * 0.88)
-    const steps = 24
-    const step = (target - start) / steps
-    let count = 0
-    let current = start
-    const id = setInterval(() => {
-      count++
-      current += step
-      if (count >= steps) {
-        setValue(target)
-        clearInterval(id)
-      } else {
-        setValue(Math.floor(current))
-      }
-    }, duration / steps)
-    return () => clearInterval(id)
-  }, [target, duration])
-  return value
-}
-
-// ── Testimonial carousel ──────────────────────────────────────────────────────
-
-const TESTIMONIALS = [
-  {
-    quote: 'Skickade fem förfrågningar på under tre minuter. Aftonbladet bekräftade radering inom en vecka. Äntligen ett verktyg som faktiskt gör jobbet.',
-    name: 'Maria Lindqvist', city: 'Stockholm', initials: 'ML', bg: '#DBEAFE', fg: '#2563EB',
-  },
-  {
-    quote: 'Lexbase visade min gamla dömande dom. BliGlömd skickade förfrågan automatiskt — borttagen på 8 dagar. Enkelt som det ska vara.',
-    name: 'Johan Bergström', city: 'Göteborg', initials: 'JB', bg: '#D1FAE5', fg: '#16A34A',
-  },
-  {
-    quote: 'Hittade 4 dataintrång kopplade till min e-post. Ratsit, Merinfo och Hitta.se — alla förfrågningar klara på 2 minuter. Imponerad!',
-    name: 'Karin Nordström', city: 'Malmö', initials: 'KN', bg: '#F3E8FF', fg: '#7C3AED',
-  },
-  {
-    quote: 'Mina uppgifter syntes på 6 söktjänster. Nu är de borta. Värt varenda krona och mer därtill.',
-    name: 'Emma Söderström', city: 'Uppsala', initials: 'ES', bg: '#FEF9C3', fg: '#92400E',
-  },
-  {
-    quote: 'Extremt enkelt att använda. Fick bekräftelse från Ratsit på 5 dagar. Rekommenderar varmt till alla som värnar om sin integritet.',
-    name: 'Anders Persson', city: 'Linköping', initials: 'AP', bg: '#FFE4E6', fg: '#E11D48',
-  },
-]
-
-function TestimonialCarousel() {
-  const { t } = useLang()
-  const [idx, setIdx]         = useState(0)
-  const [visible, setVisible] = useState(true)
-  const fadeRef = useRef<ReturnType<typeof setTimeout>>()
-
-  useEffect(() => {
-    const id = setInterval(() => {
-      clearTimeout(fadeRef.current)
-      setVisible(false)
-      fadeRef.current = setTimeout(() => {
-        setIdx(i => (i + 1) % TESTIMONIALS.length)
-        setVisible(true)
-      }, 340)
-    }, 4800)
-    return () => {
-      clearInterval(id)
-      clearTimeout(fadeRef.current)
-    }
-  }, [])
-
-  function jumpTo(i: number) {
-    clearTimeout(fadeRef.current)
-    setVisible(false)
-    fadeRef.current = setTimeout(() => { setIdx(i); setVisible(true) }, 200)
-  }
-
-  const item = TESTIMONIALS[idx]
-
-  return (
-    <div style={{ maxWidth: 520, margin: '0 auto' }}>
-      <div
-        style={{
-          background: 'white', border: '1px solid #E2E8F0', borderRadius: 14, padding: '24px 28px', textAlign: 'left',
-          opacity: visible ? 1 : 0,
-          transform: visible ? 'translateY(0)' : 'translateY(6px)',
-          transition: 'opacity 0.32s ease, transform 0.32s ease',
-        }}
-      >
-        <p style={{ fontSize: 15, color: '#F59E0B', marginBottom: 10, letterSpacing: 1 }}>★★★★★</p>
-        <p style={{ fontSize: 14, color: '#374151', lineHeight: 1.65, marginBottom: 16, fontStyle: 'italic' }}>
-          "{item.quote}"
-        </p>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 34, height: 34, borderRadius: '50%', background: item.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, color: item.fg, flexShrink: 0 }}>
-            {item.initials}
-          </div>
-          <div>
-            <p style={{ fontSize: 13, fontWeight: 600, color: '#1E293B' }}>{item.name}</p>
-            <p style={{ fontSize: 11, color: '#94A3B8' }}>{item.city} · {t.home.verifiedUser}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Dot indicators */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 14 }}>
-        {TESTIMONIALS.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => jumpTo(i)}
-            className="p-2.5 -m-1"
-            style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}
-            aria-label={`Omdöme ${i + 1}`}
-          >
-            <span
-              style={{
-                display: 'block',
-                width: i === idx ? 18 : 6, height: 6, borderRadius: 3,
-                background: i === idx ? '#2563EB' : '#CBD5E1',
-                transition: 'all 0.3s ease',
-              }}
-            />
-          </button>
-        ))}
-      </div>
-    </div>
-  )
-}
-
 // ── Home ──────────────────────────────────────────────────────────────────────
 
 interface HomeProps {
@@ -159,8 +30,6 @@ interface HomeProps {
 
 export function Home({ session }: HomeProps) {
   const { t, lang } = useLang()
-  const reqCount  = useCountUp(3847)
-  const userCount = useCountUp(1200)
   const [upgrading, setUpgrading] = useState<string | null>(null)
   const [stripeError, setStripeError] = useState<string | null>(null)
   const [consentPriceId, setConsentPriceId] = useState<string | null>(null)
@@ -239,34 +108,7 @@ export function Home({ session }: HomeProps) {
               {t.nav.scan}
             </Link>
           )}
-          <span style={{ fontSize: 13, color: '#94A3B8' }}>{t.home.ctaSub}</span>
-        </div>
-
-        {/* Social proof — animated count-up */}
-        <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-6 md:gap-8 mb-10">
-          <div style={{ textAlign: 'center' }}>
-            <p style={{ fontSize: 26, fontWeight: 800, color: '#1E3A8A', letterSpacing: '-0.03em', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
-              {reqCount.toLocaleString('sv-SE')}
-            </p>
-            <p style={{ fontSize: 12, color: '#94A3B8', marginTop: 3 }}>{t.home.requestsSent}</p>
-          </div>
-          <div style={{ width: 1, height: 36, background: '#E2E8F0' }} aria-hidden="true" />
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, marginBottom: 3 }}>
-              <span style={{ fontSize: 26, fontWeight: 800, color: '#1E3A8A', letterSpacing: '-0.03em', lineHeight: 1 }}>4,8</span>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="#F59E0B" aria-hidden="true">
-                <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
-              </svg>
-            </div>
-            <p style={{ fontSize: 12, color: '#94A3B8' }}>{t.home.avgRating}</p>
-          </div>
-          <div style={{ width: 1, height: 36, background: '#E2E8F0' }} aria-hidden="true" />
-          <div style={{ textAlign: 'center' }}>
-            <p style={{ fontSize: 26, fontWeight: 800, color: '#1E3A8A', letterSpacing: '-0.03em', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
-              {userCount.toLocaleString('sv-SE')}+
-            </p>
-            <p style={{ fontSize: 12, color: '#94A3B8', marginTop: 3 }}>{t.home.activeUsers}</p>
-          </div>
+          <span style={{ fontSize: 13, color: '#64748B' }}>{t.home.ctaSub}</span>
         </div>
 
         {/* Trust badges */}
@@ -303,9 +145,9 @@ export function Home({ session }: HomeProps) {
         </div>
       </section>
 
-      {/* ── TRUST STRIP + TESTIMONIAL CAROUSEL ───────────────────── */}
+      {/* ── TRUST STRIP ──────────────────────────────────────────── */}
       <div style={{ padding: '20px 24px 28px', textAlign: 'center' }}>
-        <div className="flex items-center justify-center flex-wrap gap-3 sm:gap-4 md:gap-6 mb-7">
+        <div className="flex items-center justify-center flex-wrap gap-3 sm:gap-4 md:gap-6">
           <span style={{ fontSize: 12, color: '#64748B' }}>✓ {t.home.trustNeverSell}</span>
           <span style={{ color: '#CBD5E1' }}>|</span>
           <span style={{ fontSize: 12, color: '#64748B' }}>✓ {t.home.trustCancelAnytime}</span>
@@ -314,8 +156,6 @@ export function Home({ session }: HomeProps) {
           <span style={{ color: '#CBD5E1' }}>|</span>
           <span style={{ fontSize: 12, color: '#64748B' }}>✓ {t.home.trust256bit}</span>
         </div>
-
-        <TestimonialCarousel />
       </div>
 
       {/* ── NOTICE BANNER ────────────────────────────────────────── */}
@@ -405,7 +245,7 @@ export function Home({ session }: HomeProps) {
               {/* Price */}
               <div style={{ marginBottom: 20 }}>
                 <span style={{ fontSize: 32, fontWeight: 800, color: '#2563EB', letterSpacing: '-0.03em' }}>{TIERS[2].monthlyPriceSEK} kr</span>
-                <span style={{ fontSize: 14, color: '#94A3B8' }}>{t.home.perMonth}</span>
+                <span style={{ fontSize: 14, color: '#64748B' }}>{t.home.perMonth}</span>
               </div>
 
               {/* Features */}
@@ -446,7 +286,7 @@ export function Home({ session }: HomeProps) {
               {/* Price */}
               <div style={{ marginBottom: 20 }}>
                 <span style={{ fontSize: 32, fontWeight: 800, color: '#7C3AED', letterSpacing: '-0.03em' }}>{TIERS[3].monthlyPriceSEK} kr</span>
-                <span style={{ fontSize: 14, color: '#94A3B8' }}>{t.home.perMonth}</span>
+                <span style={{ fontSize: 14, color: '#64748B' }}>{t.home.perMonth}</span>
               </div>
 
               {/* Features */}
@@ -502,7 +342,7 @@ export function Home({ session }: HomeProps) {
           </div>
 
           {/* GLOMD10 promo hint */}
-          <p style={{ textAlign: 'center', fontSize: 12, color: '#94A3B8', marginTop: 12 }}>
+          <p style={{ textAlign: 'center', fontSize: 12, color: '#64748B', marginTop: 12 }}>
             {t.home.promoHint}
           </p>
         </div>
@@ -521,21 +361,21 @@ export function Home({ session }: HomeProps) {
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5, borderLeft: '1px solid #E2E8F0', paddingLeft: 10, marginLeft: 2 }}>
               <TreKronor size={18} />
-              <span style={{ fontSize: 10, color: '#94A3B8', letterSpacing: '0.04em' }}>{t.home.footerSwedishService}</span>
+              <span style={{ fontSize: 10, color: '#64748B', letterSpacing: '0.04em' }}>{t.home.footerSwedishService}</span>
             </div>
           </div>
 
           {/* Center */}
-          <p style={{ fontSize: 12, color: '#94A3B8' }}>
+          <p style={{ fontSize: 12, color: '#64748B' }}>
             {t.home.footerCopyright}
           </p>
 
           {/* Right */}
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 'clamp(12px, 4vw, 24px)' }}>
-            <Link to="/privacy" className="py-3 sm:py-0" style={{ fontSize: 12, color: '#94A3B8', textDecoration: 'none' }}>{t.home.footerPrivacy}</Link>
-            <Link to="/terms" className="py-3 sm:py-0" style={{ fontSize: 12, color: '#94A3B8', textDecoration: 'none' }}>{t.home.footerTerms}</Link>
-            <Link to="/roadmap" className="py-3 sm:py-0" style={{ fontSize: 12, color: '#94A3B8', textDecoration: 'none' }}>{t.home.footerRoadmap}</Link>
-            <Link to="/status" className="py-3 sm:py-0" style={{ fontSize: 12, color: '#94A3B8', textDecoration: 'none' }}>
+            <Link to="/privacy" className="py-3 sm:py-0" style={{ fontSize: 12, color: '#64748B', textDecoration: 'none' }}>{t.home.footerPrivacy}</Link>
+            <Link to="/terms" className="py-3 sm:py-0" style={{ fontSize: 12, color: '#64748B', textDecoration: 'none' }}>{t.home.footerTerms}</Link>
+            <Link to="/roadmap" className="py-3 sm:py-0" style={{ fontSize: 12, color: '#64748B', textDecoration: 'none' }}>{t.home.footerRoadmap}</Link>
+            <Link to="/status" className="py-3 sm:py-0" style={{ fontSize: 12, color: '#64748B', textDecoration: 'none' }}>
               {t.home.footerStatus}
             </Link>
           </div>

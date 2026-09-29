@@ -91,14 +91,18 @@ Deno.serve(async (req) => {
         const sub = await subRes.json()
         const priceId = sub.items?.data?.[0]?.price?.id
         const level = priceId ? await levelFromPrice(priceId, stripeAuth) : null
-        if (!level) break
+        if (!level) {
+          console.error(`checkout.session.completed: could not resolve level for price ${priceId} (user ${userId}, subscription ${session.subscription})`)
+          break
+        }
 
-        await sb.from('profiles').update({
+        const { error } = await sb.from('profiles').update({
           level,
           stripe_customer_id: session.customer,
           stripe_subscription_id: session.subscription,
           subscription_status: 'active',
         }).eq('id', userId)
+        if (error) console.error(`checkout.session.completed: profile update failed for user ${userId}:`, error.message)
         break
       }
 
@@ -115,6 +119,13 @@ Deno.serve(async (req) => {
         // to the free tier immediately, not just at final cancellation. Recovery
         // happens via invoice.payment_succeeded restoring the level once billing
         // actually succeeds again.
+        if (isActive && !priceLevel) {
+          // Don't write a row that says "active" while leaving level stale -- that
+          // inconsistent combination is exactly what stripe-checkout's in-place-swap
+          // check reads to decide its own behavior. Fail closed and log instead.
+          console.error(`customer.subscription.updated: active subscription ${sub.id} but could not resolve level for price ${priceId} -- skipping update`)
+          break
+        }
         const level = isActive ? priceLevel : 1
 
         const updates: Record<string, unknown> = {
@@ -123,17 +134,19 @@ Deno.serve(async (req) => {
         }
         if (level) updates.level = level
 
-        await sb.from('profiles').update(updates).eq('stripe_customer_id', sub.customer)
+        const { error } = await sb.from('profiles').update(updates).eq('stripe_customer_id', sub.customer)
+        if (error) console.error(`customer.subscription.updated: profile update failed for customer ${sub.customer}:`, error.message)
         break
       }
 
       case 'customer.subscription.deleted': {
         const sub = event.data.object
-        await sb.from('profiles').update({
+        const { error } = await sb.from('profiles').update({
           level: 1,
           stripe_subscription_id: null,
           subscription_status: 'canceled',
         }).eq('stripe_customer_id', sub.customer)
+        if (error) console.error(`customer.subscription.deleted: profile update failed for customer ${sub.customer}:`, error.message)
         break
       }
 
@@ -148,11 +161,14 @@ Deno.serve(async (req) => {
           const sub = await subRes.json()
           const priceId = sub.items?.data?.[0]?.price?.id
           const level = priceId ? await levelFromPrice(priceId, stripeAuth) : null
+          if (!level) {
+            console.error(`invoice.payment_succeeded: could not resolve level for price ${priceId} (customer ${invoice.customer}) -- skipping update`)
+            break
+          }
 
-          const updates: Record<string, unknown> = { subscription_status: 'active' }
-          if (level) updates.level = level
-
-          await sb.from('profiles').update(updates).eq('stripe_customer_id', invoice.customer)
+          const { error } = await sb.from('profiles').update({ subscription_status: 'active', level })
+            .eq('stripe_customer_id', invoice.customer)
+          if (error) console.error(`invoice.payment_succeeded: profile update failed for customer ${invoice.customer}:`, error.message)
         }
         break
       }
@@ -162,8 +178,9 @@ Deno.serve(async (req) => {
         // period. If a later retry succeeds, invoice.payment_succeeded above
         // restores the correct level.
         const invoice = event.data.object
-        await sb.from('profiles').update({ level: 1, subscription_status: 'past_due' })
+        const { error } = await sb.from('profiles').update({ level: 1, subscription_status: 'past_due' })
           .eq('stripe_customer_id', invoice.customer)
+        if (error) console.error(`invoice.payment_failed: profile update failed for customer ${invoice.customer}:`, error.message)
         break
       }
     }

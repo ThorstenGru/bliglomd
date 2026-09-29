@@ -5,6 +5,7 @@ import { useLang } from '../contexts/LanguageContext'
 import { LevelBadge } from '../components/LevelBadge'
 import { TIERS } from '../config/tiers'
 import { extractFunctionErrorMessage } from '../lib/functionError'
+import { ConsentModal } from '../components/ConsentModal'
 
 const tierColor = {
   green:  { ring: 'border-green-300',  bg: 'bg-green-50',  btn: 'bg-green-600 hover:bg-green-700',  text: 'text-green-700'  },
@@ -35,6 +36,8 @@ export function Profile() {
   const [upgrading, setUpgrading] = useState<string | null>(null)
   const [portalLoading, setPortalLoading] = useState(false)
   const [stripeError, setStripeError] = useState<string | null>(null)
+  const [consentPriceId, setConsentPriceId] = useState<string | null>(null)
+  const [consentPlanLabel, setConsentPlanLabel] = useState<string>('')
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteWord, setDeleteWord] = useState('')
@@ -105,6 +108,11 @@ export function Profile() {
     }
   }
 
+  function handleTierCTA(priceId: string, planLabel: string) {
+    setConsentPriceId(priceId)
+    setConsentPlanLabel(planLabel)
+  }
+
   async function openPortal() {
     setPortalLoading(true)
     setStripeError(null)
@@ -137,11 +145,35 @@ export function Profile() {
   }
 
   const upgradableTiers = ([2, 3] as const).filter(l => l > level)
-  const hasActiveSubscription = stripeCustomerId !== null && level > 1
+  const isPastDue = subscriptionStatus === 'past_due'
+  const hasActiveSubscription = stripeCustomerId !== null && (level > 1 || isPastDue)
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 sm:py-12 space-y-6">
+      {consentPriceId && (
+        <ConsentModal
+          priceId={consentPriceId}
+          planLabel={consentPlanLabel}
+          onConfirmed={() => { const id = consentPriceId!; setConsentPriceId(null); startCheckout(id) }}
+          onClose={() => setConsentPriceId(null)}
+        />
+      )}
+
       <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t.profile.title}</h1>
+
+      {isPastDue && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-4 sm:p-6">
+          <p className="font-semibold text-yellow-800 mb-1">{t.profile.pastDueBannerTitle}</p>
+          <p className="text-sm text-yellow-700 mb-4">{t.profile.pastDueBannerBody}</p>
+          <button
+            onClick={openPortal}
+            disabled={portalLoading}
+            className="px-4 py-3 rounded-xl text-sm font-medium bg-yellow-600 text-white hover:bg-yellow-700 transition-colors disabled:opacity-50"
+          >
+            {portalLoading ? t.profile.upgrading : t.profile.pastDueBannerBtn}
+          </button>
+        </div>
+      )}
 
       {/* Name */}
       <div className="bg-white rounded-2xl border border-gray-200 p-6">
@@ -206,7 +238,7 @@ export function Profile() {
             <p className="text-xs text-gray-500 mb-1">{t.profile.currentPlan}</p>
             <div className="flex items-center gap-2 flex-wrap">
               <LevelBadge level={level} />
-              {level > 1 && (
+              {(level > 1 || isPastDue) && (
                 <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                   subscriptionStatus === 'active' ? 'bg-green-100 text-green-700' :
                   subscriptionStatus === 'past_due' ? 'bg-yellow-100 text-yellow-700' :
@@ -254,7 +286,7 @@ export function Profile() {
                     </div>
                     <p className="text-xs text-gray-600 leading-relaxed">{tier.tagline[lang]}</p>
                     <button
-                      onClick={() => priceId && startCheckout(priceId)}
+                      onClick={() => priceId && handleTierCTA(priceId, `${tier.name} ${tier.monthlyPriceSEK} kr`)}
                       disabled={!!upgrading || isLoading}
                       className={`mt-1 w-full py-3 sm:py-2 rounded-lg text-white text-sm font-medium transition-colors disabled:opacity-50 ${c.btn}`}
                     >

@@ -124,10 +124,11 @@ export function AuthModal({ onClose }: AuthModalProps) {
               <form onSubmit={tab === 'login' ? handleLogin : handleSignup} className="space-y-4">
                 {tab === 'signup' && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="auth-fullname" className="block text-sm font-medium text-gray-700 mb-1">
                       {t.auth.fullName} <span className="text-red-500">*</span>
                     </label>
                     <input
+                      id="auth-fullname"
                       type="text"
                       required
                       autoComplete="name"
@@ -142,8 +143,9 @@ export function AuthModal({ onClose }: AuthModalProps) {
                   </div>
                 )}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t.auth.email}</label>
+                  <label htmlFor="auth-email" className="block text-sm font-medium text-gray-700 mb-1">{t.auth.email}</label>
                   <input
+                    id="auth-email"
                     type="email"
                     required
                     autoComplete="email"
@@ -154,8 +156,9 @@ export function AuthModal({ onClose }: AuthModalProps) {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t.auth.password}</label>
+                  <label htmlFor="auth-password" className="block text-sm font-medium text-gray-700 mb-1">{t.auth.password}</label>
                   <input
+                    id="auth-password"
                     type="password"
                     required
                     minLength={6}

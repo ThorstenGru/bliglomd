@@ -192,7 +192,7 @@ export function Dashboard() {
       {requests.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-200 p-6 sm:p-10 md:p-12 text-center">
           <p className="text-gray-500 text-lg mb-4">{t.dashboard.emptyTitle}</p>
-          <p className="text-gray-400 text-sm mb-6">{t.dashboard.emptySub}</p>
+          <p className="text-gray-500 text-sm mb-6">{t.dashboard.emptySub}</p>
           <button
             onClick={() => navigate('/scan')}
             className="bg-brand-600 text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-brand-700 transition-colors"
@@ -228,7 +228,7 @@ export function Dashboard() {
                       <span className="font-semibold text-gray-900">{req.company_name}</span>
                       <StatusBadge status={req.status} />
                     </div>
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-xs text-gray-400">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-xs text-gray-500">
                       {req.sent_at
                         ? <span>{t.dashboard.colSent}: {new Date(req.sent_at).toLocaleDateString(locale)}</span>
                         : <span className="italic">{t.dashboard.timeline.notSentYet}</span>
@@ -238,7 +238,7 @@ export function Dashboard() {
                       )}
                     </div>
                   </div>
-                  <span className="shrink-0 text-gray-400 text-sm select-none">
+                  <span className="shrink-0 text-gray-500 text-sm select-none">
                     {isExpanded ? '▲' : '▼'}
                   </span>
                 </button>
@@ -262,14 +262,14 @@ export function Dashboard() {
                             )}
                           </div>
                           <div className="pb-4 min-w-0">
-                            <p className={`text-sm font-medium ${ev.done ? 'text-gray-800' : 'text-gray-400'}`}>
+                            <p className={`text-sm font-medium ${ev.done ? 'text-gray-800' : 'text-gray-500'}`}>
                               {ev.label}
                             </p>
                             {ev.sub && (
-                              <p className="text-xs text-gray-400 mt-0.5 break-words">{ev.sub}</p>
+                              <p className="text-xs text-gray-500 mt-0.5 break-words">{ev.sub}</p>
                             )}
                             {ev.date && (
-                              <p className="text-xs text-gray-400 mt-0.5">{ev.date}</p>
+                              <p className="text-xs text-gray-500 mt-0.5">{ev.date}</p>
                             )}
                           </div>
                         </li>

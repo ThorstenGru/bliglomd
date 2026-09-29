@@ -1,4 +1,11 @@
+import { COMPANIES } from '../data/companies'
+
 export type Lang = 'sv' | 'en'
+
+// Computed, not hardcoded -- a stale "26+" was still on the page long after the real
+// catalog had grown well past it. Excludes 'authority' entries (government/agency guides
+// like IMY), which aren't companies.
+const SEARCHABLE_COMPANY_COUNT = COMPANIES.filter(c => c.request_type !== 'authority').length
 
 export interface Tier {
   /** Stable internal key — never changes, safe to log/store */
@@ -46,12 +53,12 @@ export const TIERS: Record<1 | 2 | 3, Tier> = {
     },
     features: {
       sv: [
-        'Sök bland 26+ företag',
+        `Sök bland ${SEARCHABLE_COMPANY_COUNT}+ företag`,
         'Guidade GDPR-instruktioner',
         'Dataintrångsskanning',
       ],
       en: [
-        'Search across 26+ companies',
+        `Search across ${SEARCHABLE_COMPANY_COUNT}+ companies`,
         'Guided GDPR instructions',
         'Data breach scan',
       ],
@@ -84,12 +91,14 @@ export const TIERS: Record<1 | 2 | 3, Tier> = {
         'Automatiskt GDPR-brev (juridiskt korrekt)',
         'Kopia–klistra och skicka',
         'Spårning av svar',
+        'Påminnelse vid utebliven respons',
       ],
       en: [
         'Everything in Trace',
         'Auto-generated GDPR letter (legally correct)',
         'Copy-paste and send',
         'Response tracking',
+        'Reminder on missed response',
       ],
     },
     timelineHint: {
@@ -126,15 +135,13 @@ export const TIERS: Record<1 | 2 | 3, Tier> = {
       sv: [
         'Allt i Cipher',
         'BliGlömd skickar åt dig',
-        'Automatisk uppföljning',
-        'Påminnelse vid utebliven respons',
+        'Automatisk uppföljning direkt till företaget',
         'Påminnelse om förnyelse av BankID-spärrar',
       ],
       en: [
         'Everything in Cipher',
         'BliGlömd sends for you',
-        'Automatic follow-up',
-        'Reminder on missed response',
+        'Automatic follow-up straight to the company',
         'Renewal reminders for BankID opt-outs',
       ],
     },

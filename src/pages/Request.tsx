@@ -46,6 +46,8 @@ export function Request() {
   const [copied, setCopied] = useState(false)
   const [markingSent, setMarkingSent] = useState(false)
   const [markedSent, setMarkedSent] = useState(false)
+  const [markingSelfReported, setMarkingSelfReported] = useState(false)
+  const [markedSelfReported, setMarkedSelfReported] = useState(false)
 
   if (!company) {
     return (
@@ -73,7 +75,7 @@ export function Request() {
 
   function renderLoadingGate() {
     return (
-      <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6 text-center text-gray-400 text-sm">
+      <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6 text-center text-gray-500 text-sm">
         {t.common.loading}
       </div>
     )
@@ -166,6 +168,41 @@ export function Request() {
     }
   }
 
+  // Some opt-out sites (Ratsit, Merinfo, Hitta.se, Birthday.se) are BankID-only -- no
+  // email exists for them at all, so neither the Cipher letter-tracking panel nor
+  // Ghost's auto-send panel ever renders (both require company.gdpr_email). BliGlömd
+  // can't do the BankID step for anyone regardless of tier, so this just tracks that
+  // the user did it themselves, open to any tier -- send-reminders only actually emails
+  // the 11-month renewal reminder to users who are on Ghost at the time it fires.
+  async function handleMarkSelfReported() {
+    if (!company) return
+    setMarkingSelfReported(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single()
+
+      const { error: dbError } = await supabase.from('requests').upsert({
+        user_id: user.id,
+        company_id: company.id,
+        company_name: company.name,
+        user_email: user.email ?? '',
+        user_name: profile?.full_name ?? user.email ?? '',
+        status: 'sent',
+        sent_at: new Date().toISOString(),
+        request_type: company.request_type,
+        sent_via: 'self_reported',
+      }, { onConflict: 'user_id,company_id' })
+
+      if (!dbError) {
+        setMarkedSelfReported(true)
+        trackFunnel('request_marked_sent', { company_id: company.id })
+      }
+    } finally {
+      setMarkingSelfReported(false)
+    }
+  }
+
   async function handleSendL3(e: React.FormEvent) {
     e.preventDefault()
     if (!company) return
@@ -179,8 +216,10 @@ export function Request() {
     try {
       const { error: fnError } = await supabase.functions.invoke('send-request', {
         body: {
+          companyId: company.id,
           companyName: company.name,
           gdprEmail: company.gdpr_email,
+          requestType: company.request_type,
           userName,
           userEmail,
           lang,
@@ -189,28 +228,9 @@ export function Request() {
 
       if (fnError) throw new Error(await extractFunctionErrorMessage(fnError))
 
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        // Upsert on (user_id, company_id) -- revisiting and re-sending updates the
-        // same tracked row instead of cluttering the dashboard with duplicates.
-        const { error: dbError } = await supabase.from('requests').upsert({
-          user_id: user.id,
-          company_id: company.id,
-          company_name: company.name,
-          user_email: userEmail,
-          user_name: userName,
-          status: 'sent',
-          sent_at: new Date().toISOString(),
-          request_type: company.request_type,
-          sent_via: 'ghost_auto',
-          company_gdpr_email: company.gdpr_email,
-        }, { onConflict: 'user_id,company_id' })
-        if (dbError) {
-          // Email was sent — show success, but warn that tracking failed
-          console.error('Failed to save request record:', dbError.message)
-        }
-      }
-
+      // Tracking (the requests row, sent_via='ghost_auto') is now written server-side by
+      // send-request itself, using the service-role key -- see migration
+      // 032_requests_ghost_auto_lockdown.sql for why this can no longer happen client-side.
       setSuccess(true)
       trackFunnel('request_sent', { company_id: company.id })
     } catch (err) {
@@ -302,9 +322,9 @@ export function Request() {
             {t.request.bankidRequired}
           </div>
         )}
-        {company.warning && (
+        {(lang === 'sv' ? company.warning_sv : company.warning_en) && (
           <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2 text-xs text-yellow-800">
-            ⚠️ {company.warning}
+            ⚠️ {lang === 'sv' ? company.warning_sv : company.warning_en}
           </div>
         )}
         {company.utgivningsbevis && isGdpr && (
@@ -376,6 +396,25 @@ export function Request() {
               >
                 {t.request.openGdpr} {company.name} ↗
               </a>
+
+              {company.bankid_required && !company.gdpr_email && (
+                <div className="mt-4 pt-4 border-t border-gray-100">
+                  <button
+                    onClick={handleMarkSelfReported}
+                    disabled={markingSelfReported || markedSelfReported}
+                    className={`px-4 py-3 rounded-xl text-sm font-medium transition-colors disabled:opacity-60 ${
+                      markedSelfReported
+                        ? 'bg-green-50 text-green-700 border border-green-200'
+                        : 'bg-white text-gray-700 border border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    {markedSelfReported ? t.request.markedSent : markingSelfReported ? t.request.marking : t.request.markBankidDone}
+                  </button>
+                  <p className="text-xs text-gray-500 mt-2">
+                    {!hasLevel(3) ? t.request.markBankidHintFree : t.request.markBankidHintGhost}
+                  </p>
+                </div>
+              )}
             </div>
           )}
 

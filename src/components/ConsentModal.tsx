@@ -152,7 +152,7 @@ export function ConsentModal({ priceId, planLabel, onConfirmed, onClose }: Conse
           </button>
         </div>
 
-        <p style={{ fontSize: 11, color: '#94A3B8', marginTop: 14, textAlign: 'center', lineHeight: 1.5 }}>
+        <p style={{ fontSize: 11, color: '#64748B', marginTop: 14, textAlign: 'center', lineHeight: 1.5 }}>
           {isEn
             ? 'Your agreement is recorded with a timestamp in our database (version ' + TERMS_VERSION + ').'
             : 'Ditt godkännande sparas med tidsstämpel i vår databas (version ' + TERMS_VERSION + ').'}

@@ -13,7 +13,7 @@ const optOutCompanies  = COMPANIES_SORTED.filter((c) => c.request_type === 'opt_
 const authorityEntries = COMPANIES_SORTED.filter((c) => c.request_type === 'authority')
 
 export function Scan() {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [breaches, setBreaches] = useState<XonBreach[]>([])
@@ -154,7 +154,7 @@ export function Scan() {
                     )}
                     {breach.xposed_records > 0 && (
                       <p className="text-xs text-red-400 mt-0.5">
-                        {breach.xposed_records.toLocaleString('sv-SE')} {t.scan.recordsLeaked}
+                        {breach.xposed_records.toLocaleString(lang === 'sv' ? 'sv-SE' : 'en-US')} {t.scan.recordsLeaked}
                       </p>
                     )}
                   </div>

@@ -10,7 +10,8 @@ interface CompanyCardProps {
 
 export function CompanyCard({ company }: CompanyCardProps) {
   const navigate = useNavigate()
-  const { t } = useLang()
+  const { t, lang } = useLang()
+  const warning = lang === 'sv' ? company.warning_sv : company.warning_en
 
   return (
     <div className={`bg-white rounded-lg border p-4 flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4 hover:border-brand-400 transition-colors ${
@@ -20,7 +21,7 @@ export function CompanyCard({ company }: CompanyCardProps) {
         <div className="flex items-center gap-2 flex-wrap">
           <h3 className="font-semibold text-gray-900">{company.name}</h3>
           <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">{company.category}</span>
-          <span className="text-xs text-gray-400">{company.country}</span>
+          <span className="text-xs text-gray-500">{company.country}</span>
           <RequestTypeBadge type={company.request_type} />
           {company.utgivningsbevis && (
             <span
@@ -48,9 +49,9 @@ export function CompanyCard({ company }: CompanyCardProps) {
           )}
         </div>
 
-        {company.warning && (
+        {warning && (
           <p className="text-xs text-amber-700 mt-1.5 bg-amber-50 rounded px-2 py-1">
-            {company.warning}
+            {warning}
           </p>
         )}
 

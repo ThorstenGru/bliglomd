@@ -36,7 +36,7 @@ export function NavBar({ session }: NavBarProps) {
       <nav className="bg-white border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 md:px-10 flex items-center justify-between gap-2 sm:gap-4" style={{ height: 60 }}>
           <div className="flex items-center gap-3 sm:gap-6 min-w-0">
-            <Link to="/" className="shrink-0 leading-none" aria-label="BliGlömd — hem">
+            <Link to="/" className="min-w-0 leading-none" aria-label={t.nav.logoAria}>
               <BrandLogo variant="compact" />
             </Link>
             {session && (
@@ -52,7 +52,7 @@ export function NavBar({ session }: NavBarProps) {
             <button
               onClick={toggleLang}
               className="text-xs font-medium text-gray-500 hover:text-gray-800 border border-gray-200 rounded-md px-2 py-1 min-h-[44px] sm:min-h-0 inline-flex items-center transition-colors"
-              aria-label="Switch language"
+              aria-label={t.nav.switchLangAria}
             >
               {t.nav.switchLang}
             </button>

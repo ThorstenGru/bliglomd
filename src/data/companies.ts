@@ -953,7 +953,8 @@ export const COMPANIES: Company[] = [
     utgivningsbevis: true,
     request_type: 'opt_out',
     bankid_required: true,
-    warning: 'Skyddet löper ut efter 12 månader och måste förnyas via BankID.',
+    warning_sv: 'Skyddet löper ut efter 12 månader och måste förnyas via BankID.',
+    warning_en: 'Protection expires after 12 months and must be renewed via BankID.',
     reminder_days: 365,
   },
   {
@@ -1078,7 +1079,8 @@ export const COMPANIES: Company[] = [
     level3_available: false,
     utgivningsbevis: true,
     request_type: 'opt_out',
-    warning: 'Åberopar ofta att fordonsregistret är offentlig information och kan avslå begäran. IMY-anmälan kan bli nödvändig.',
+    warning_sv: 'Åberopar ofta att fordonsregistret är offentlig information och kan avslå begäran. IMY-anmälan kan bli nödvändig.',
+    warning_en: 'Often claims the vehicle register is public information and may refuse the request. Filing a complaint with IMY may become necessary.',
   },
   {
     id: '180',
@@ -1131,7 +1133,8 @@ export const COMPANIES: Company[] = [
     utgivningsbevis: true,
     request_type: 'opt_out',
     sensitive: true,
-    warning: 'Visar brottsregister och domslut. Uppgifterna är offentliga men känsliga.',
+    warning_sv: 'Visar brottsregister och domslut. Uppgifterna är offentliga men känsliga.',
+    warning_en: 'Displays criminal records and court verdicts. The data is public but sensitive.',
   },
   {
     id: 'lexbase',
@@ -1150,7 +1153,8 @@ export const COMPANIES: Company[] = [
     utgivningsbevis: true,
     request_type: 'opt_out',
     sensitive: true,
-    warning: 'Visar domar och domslut från allmänna domstolar. Uppgifterna är offentliga men känsliga.',
+    warning_sv: 'Visar domar och domslut från allmänna domstolar. Uppgifterna är offentliga men känsliga.',
+    warning_en: 'Displays verdicts and rulings from general courts. The data is public but sensitive.',
   },
 
   // ── Group 3: Authority tools & guides ─────────────────────────────────────
