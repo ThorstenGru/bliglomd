@@ -135,31 +135,6 @@ const COMPONENTS: ComponentDef[] = [
     },
   },
   {
-    id: 'edge_scan',
-    category: 'edge_functions',
-    check: async () => {
-      if (!SB_URL || !SB_KEY) return { status: 'unconfigured' }
-      const t0 = performance.now()
-      try {
-        const r = await fetchWithTimeout(
-          `${SB_URL}/functions/v1/scan-email`,
-          {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({}),
-          },
-          8000
-        )
-        const ms = Math.round(performance.now() - t0)
-        if (r.status === 404) return { status: 'down', responseTime: ms, detail: 'Not deployed' }
-        if (r.status >= 500) return { status: 'degraded', responseTime: ms, detail: `HTTP ${r.status}` }
-        return { status: 'operational', responseTime: ms }
-      } catch {
-        return { status: 'down', responseTime: Math.round(performance.now() - t0) }
-      }
-    },
-  },
-  {
     id: 'brevo',
     category: 'external',
     docsUrl: 'https://www.brevo.com',
@@ -257,10 +232,6 @@ const T = {
         name: 'Edge Function: send-request',
         desc: 'Serverlös funktion som skickar GDPR-raderingsmail via Brevo API',
       },
-      edge_scan: {
-        name: 'Edge Function: scan-email',
-        desc: 'Serverlös funktion som söker dataintrång via HaveIBeenPwned API',
-      },
       brevo: {
         name: 'Brevo Mail API',
         desc: 'Extern e-posttjänst — levererar GDPR-raderingsmail till företagen och kontobekräftelser',
@@ -326,10 +297,6 @@ const T = {
       edge_send: {
         name: 'Edge Function: send-request',
         desc: 'Serverless function that sends GDPR deletion emails via Brevo API',
-      },
-      edge_scan: {
-        name: 'Edge Function: scan-email',
-        desc: 'Serverless function that checks data breaches via HaveIBeenPwned API',
       },
       brevo: {
         name: 'Brevo Mail API',
