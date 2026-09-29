@@ -38,6 +38,22 @@ export function Request() {
       ) ?? 1
     : 1
   const [selectedLevel, setSelectedLevel] = useState<1 | 2 | 3>(defaultLevel)
+
+  // defaultLevel picks the highest tier the COMPANY offers, not the highest the
+  // USER can actually see -- on first render (before userLevel has loaded) that's
+  // the only option, but once it resolves, re-point the initial tab at the user's
+  // own highest *unlocked* tier instead. Otherwise every free/Trace user opening a
+  // company that also offers Cipher/Ghost lands straight on a paywall for a tier
+  // they can't use, even though their own tier has real content right there.
+  useEffect(() => {
+    if (!company || userLevel === undefined) return
+    const unlocked: 1 | 2 | 3 = ([3, 2, 1] as const).find((l) =>
+      (l === 1 && company.level1_available) ||
+      (l === 2 && company.level2_available && userLevel !== null && userLevel >= 2) ||
+      (l === 3 && company.level3_available && userLevel !== null && userLevel >= 3)
+    ) ?? 1
+    setSelectedLevel(unlocked)
+  }, [company, userLevel])
   const [userName, setUserName] = useState('')
   const [userEmail, setUserEmail] = useState('')
   const [loading, setLoading] = useState(false)
