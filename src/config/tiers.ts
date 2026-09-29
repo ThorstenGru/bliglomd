@@ -107,13 +107,11 @@ export const TIERS: Record<1 | 2 | 3, Tier> = {
     },
     color: 'blue',
     monthlyPriceSEK: 99,
-    // SANDBOX — reverted 2026-09-29: the live Cipher/Ghost products and webhook endpoint
-    // turned out to be misconfigured (confirmed by the account owner directly in the Stripe
-    // dashboard) after the first go-live attempt. STRIPE_MODE was reverted to sandbox at the
-    // same time. Do not flip back to live until the live products (bliglomd_level metadata)
-    // and the live webhook endpoint have been rebuilt and verified from scratch.
-    // Live price ID once that's done: price_1UJFbwAT2u1nHxljLEWgqzmV (prod_UnXwn8yj2nHxWH).
-    stripeMonthlyPriceId: 'price_1UJF2CAR7wxHkiWgazzRxQYe',
+    // LIVE — rebuilt from scratch 2026-09-29 after the first Cipher/Ghost products and
+    // webhook endpoint were found misconfigured. New product, new price ID, new webhook
+    // signing secret (STRIPE_WEBHOOK_SECRET_LIVE). Sandbox price ID for rollback:
+    // price_1UJF2CAR7wxHkiWgazzRxQYe.
+    stripeMonthlyPriceId: 'price_1UKwmcAT2u1nHxljnXod1E5E',
   },
 
   3: {
@@ -149,9 +147,9 @@ export const TIERS: Record<1 | 2 | 3, Tier> = {
     },
     color: 'purple',
     monthlyPriceSEK: 199,
-    // SANDBOX — reverted 2026-09-29, see the Cipher note above.
-    // Live price ID once fixed: price_1UJFbxAT2u1nHxljAZBl09In (prod_UnXyNFtLNAiulF).
-    stripeMonthlyPriceId: 'price_1UJF2DAR7wxHkiWgOIfZS2jj',
+    // LIVE — rebuilt from scratch 2026-09-29, see the Cipher note above. Sandbox price ID
+    // for rollback: price_1UJF2DAR7wxHkiWgOIfZS2jj.
+    stripeMonthlyPriceId: 'price_1UKwnWAT2u1nHxljl0QiaEC4',
   },
 }
 
