@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /scan
+Disallow: /request/
+Disallow: /xadm
+Disallow: /status
+
+Sitemap: https://bliglömd.se/sitemap.xml
