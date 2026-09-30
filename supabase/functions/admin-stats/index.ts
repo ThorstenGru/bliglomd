@@ -35,7 +35,9 @@ const MONTH    = 30 * ONE_DAY
 // Monthly SEK price per tier — mirrors src/config/tiers.ts monthlyPriceSEK.
 // Kept as a small constant here rather than importing the frontend config,
 // since this is the only value this edge function needs from it.
-const MONTHLY_PRICE_SEK: Record<number, number> = { 1: 0, 2: 61, 3: 124 }
+// Found stale during go-live verification 2026-09-30: these were still the
+// pre-price-increase values (61/124) -- live prices are 99/199.
+const MONTHLY_PRICE_SEK: Record<number, number> = { 1: 0, 2: 99, 3: 199 }
 
 Deno.serve(async (req) => {
   const origin = req.headers.get('Origin')
@@ -78,13 +80,18 @@ Deno.serve(async (req) => {
       client.rpc('admin_response_times'),
       client.rpc('admin_stale_requests'),
       client.rpc('admin_company_trends'),
-      client.from('profiles').select('level, subscription_status'),
+      client.from('profiles').select('id, level, subscription_status'),
     ])
 
     if (ue) throw ue
 
     // The admin account is not a customer — exclude it from every customer-facing metric.
     const users = (allUsers ?? []).filter(u => u.id !== adminUser.id)
+    // Found live 2026-09-30: this exclusion was only ever applied to the user-list/
+    // DAU computation above, not here -- the admin's own profile (which, by design,
+    // can carry a real paid tier so the founder can actually use the product) was
+    // silently counted into customer-facing MRR/revenue-by-tier, inflating both.
+    const nonAdminBillingProfiles = (billingProfiles ?? []).filter(p => p.id !== adminUser.id)
 
     // Compute DAU/WAU/MAU and signup trends from the full user list
     const now = Date.now()
@@ -129,7 +136,7 @@ Deno.serve(async (req) => {
       2: { active: 0, mrr: 0 },
       3: { active: 0, mrr: 0 },
     }
-    for (const p of (billingProfiles ?? []) as { level: number; subscription_status: string }[]) {
+    for (const p of nonAdminBillingProfiles as { level: number; subscription_status: string }[]) {
       if (p.subscription_status === 'active' && (p.level === 2 || p.level === 3)) {
         revenueByTier[p.level].active++
         revenueByTier[p.level].mrr += MONTHLY_PRICE_SEK[p.level]
