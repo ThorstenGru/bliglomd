@@ -93,6 +93,8 @@ Deno.serve(async (req) => {
           stripe_customer_id: session.customer,
           stripe_subscription_id: session.subscription,
           subscription_status: 'active',
+          cancel_at_period_end: sub.cancel_at_period_end ?? false,
+          current_period_end: sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : null,
         }).eq('id', userId)
         if (error) console.error(`checkout.session.completed: profile update failed for user ${userId}:`, error.message)
         break
@@ -123,6 +125,12 @@ Deno.serve(async (req) => {
         const updates: Record<string, unknown> = {
           stripe_subscription_id: sub.id,
           subscription_status: status,
+          // Surfaces a scheduled ("cancel at period end") cancellation to the
+          // customer in our own Profile page -- found live 2026-09-30: access was
+          // correctly preserved until period end, but nothing in the app showed
+          // that a cancellation was even scheduled; only Stripe's own portal did.
+          cancel_at_period_end: sub.cancel_at_period_end ?? false,
+          current_period_end: sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : null,
         }
         if (level) updates.level = level
 
@@ -137,6 +145,8 @@ Deno.serve(async (req) => {
           level: 1,
           stripe_subscription_id: null,
           subscription_status: 'canceled',
+          cancel_at_period_end: false,
+          current_period_end: null,
         }).eq('stripe_customer_id', sub.customer)
         if (error) console.error(`customer.subscription.deleted: profile update failed for customer ${sub.customer}:`, error.message)
         break

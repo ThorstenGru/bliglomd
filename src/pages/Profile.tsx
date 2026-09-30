@@ -24,6 +24,8 @@ export function Profile() {
   const [level, setLevel] = useState<1 | 2 | 3>(1)
   const [subscriptionStatus, setSubscriptionStatus] = useState<string>('inactive')
   const [stripeCustomerId, setStripeCustomerId] = useState<string | null>(null)
+  const [cancelAtPeriodEnd, setCancelAtPeriodEnd] = useState(false)
+  const [currentPeriodEnd, setCurrentPeriodEnd] = useState<string | null>(null)
 
   const [nameSaving, setNameSaving] = useState(false)
   const [nameSaved, setNameSaved] = useState(false)
@@ -51,7 +53,7 @@ export function Profile() {
 
     const { data } = await supabase
       .from('profiles')
-      .select('full_name, level, subscription_status, stripe_customer_id')
+      .select('full_name, level, subscription_status, stripe_customer_id, cancel_at_period_end, current_period_end')
       .eq('id', user.id)
       .single()
 
@@ -60,6 +62,8 @@ export function Profile() {
       setLevel((data.level as 1 | 2 | 3) ?? 1)
       setSubscriptionStatus(data.subscription_status ?? 'inactive')
       setStripeCustomerId(data.stripe_customer_id ?? null)
+      setCancelAtPeriodEnd(data.cancel_at_period_end ?? false)
+      setCurrentPeriodEnd(data.current_period_end ?? null)
     }
     setLoading(false)
   }, [navigate])
@@ -256,6 +260,11 @@ export function Profile() {
                 </span>
               )}
             </div>
+            {cancelAtPeriodEnd && subscriptionStatus === 'active' && currentPeriodEnd && (
+              <p className="text-xs text-amber-700 mt-1">
+                {t.profile.cancelScheduled.replace('{date}', new Date(currentPeriodEnd).toLocaleDateString(lang === 'sv' ? 'sv-SE' : 'en-GB', { year: 'numeric', month: 'long', day: 'numeric' }))}
+              </p>
+            )}
           </div>
           {hasActiveSubscription && (
             <button
