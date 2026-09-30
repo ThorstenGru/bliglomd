@@ -99,10 +99,26 @@ Deno.serve(async (req) => {
             'items[0][id]': itemId,
             'items[0][price]': priceId,
             proration_behavior: 'always_invoice',
+            // Found live 2026-09-30: without this, a proration charge that can't be
+            // collected off-session (e.g. Klarna, which -- unlike a card -- requires a
+            // fresh interactive authorization for every charge) still went ahead and
+            // switched the subscription to the new price, leaving the customer
+            // half-upgraded on an unpaid "Incomplete" invoice and past_due -- which the
+            // webhook then read as "not active" and dropped them to level 1 (Trace),
+            // despite their original subscription payment having succeeded. This flag
+            // makes Stripe refuse the price change atomically instead, leaving the
+            // customer on their current (successfully paid) tier if it can't collect.
+            payment_behavior: 'error_if_incomplete',
           }),
         })
         const updated = await updateRes.json()
-        if (!updateRes.ok) throw new Error(updated.error?.message ?? 'Failed to update subscription')
+        if (!updateRes.ok) {
+          const code = updated.error?.code
+          const message = code === 'subscription_payment_intent_requires_action' || code === 'invoice_payment_intent_requires_action'
+            ? 'Your payment method needs an extra confirmation step that we can’t do for a plan change. Please cancel and re-subscribe, or use a card instead.'
+            : (updated.error?.message ?? 'Failed to update subscription')
+          throw new Error(message)
+        }
 
         // Write the new level ourselves rather than waiting on the customer.subscription.updated
         // webhook round-trip -- keeps the UI correct immediately even if webhook delivery lags.
