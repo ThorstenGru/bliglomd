@@ -48,3 +48,20 @@ jobs:
     steps:
       - uses: actions/deploy-pages@v4
         id: deployment
+
+  deploy-functions:
+    # Added 2026-09-30: before this, every Edge Function change was deployed
+    # manually via the CLI -- CI going green never actually meant the backend
+    # was live. Runs independently of the frontend build/deploy above.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Deploy Edge Functions
+        run: supabase functions deploy --project-ref ydkahdqvuykpmjkpunck --use-api
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
