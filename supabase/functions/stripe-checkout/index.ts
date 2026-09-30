@@ -141,6 +141,14 @@ Deno.serve(async (req) => {
       client_reference_id: user.id,
       allow_promotion_codes: 'true',
       'subscription_data[metadata][supabase_user_id]': user.id,
+      // Card only (2026-09-30 decision): Klarna's off-session recurring support is
+      // narrower than a card's and caused a real production incident on a tier
+      // swap (see stripeLevel/proration comment above and the go-live protocol).
+      // Omitting this let Stripe auto-offer Klarna/wallets via the account's
+      // Dashboard payment-method settings; being explicit here is what actually
+      // controls it, regardless of what's enabled there. Apple Pay/Google Pay
+      // still work -- they're wallet UIs over 'card', not a separate method.
+      'payment_method_types[0]': 'card',
     })
 
     const sessionRes = await fetch(`${STRIPE_BASE}/checkout/sessions`, {
