@@ -54,11 +54,17 @@ and is the natural internal-linking hub for the data-broker guides.
 
 ## Next steps (not yet done)
 
-- Submit `sitemap.xml` to Google Search Console + Bing Webmaster Tools — still not done,
-  blocks all of this from actually being discovered.
-- Monitor which guides get indexed/ranked first once Search Console is live, then decide
-  whether round 2 (Swish, TikTok, Snapchat, Microsoft, Adobe, bank data broker pages) is
-  worth it or whether effort should shift to the comparison-vs-doldadress.se page instead.
+- **Search Console / Bing Webmaster submission: deliberately skipped (2026-10-01).**
+  Both require signing into an account (Google/Microsoft) and the user chose not to set
+  one up for this right now. Without it, discovery relies purely on organic crawling —
+  `robots.txt` points to `sitemap.xml`, so Googlebot/Bingbot will find it on their own
+  eventually, just slower (weeks rather than days) and without the extra signals
+  (manual indexing requests, coverage reports, search query data) Search Console gives.
+  If priorities change, this is still the single highest-leverage remaining action —
+  revisit by asking the user to sign in themselves, don't do it on their behalf.
+- Once there's some organic indexing, decide whether round 2 (Swish, TikTok, Snapchat,
+  Microsoft, Adobe, bank data broker pages) is worth it or whether effort should shift to
+  the comparison-vs-doldadress.se page instead.
 
 ## Not yet worth doing
 
