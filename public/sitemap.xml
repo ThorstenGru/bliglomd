@@ -21,6 +21,41 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://bliglömd.se/guider/radera-fran-lexbase/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://bliglömd.se/guider/radera-fran-merinfo/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://bliglömd.se/guider/ta-bort-fran-google-sok/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://bliglömd.se/guider/radera-fran-allabolag/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://bliglömd.se/guider/upplysningssajter-sverige/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://bliglömd.se/guider/radera-fran-facebook-instagram/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://bliglömd.se/guider/radera-fran-klarna/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://bliglömd.se/roadmap</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>

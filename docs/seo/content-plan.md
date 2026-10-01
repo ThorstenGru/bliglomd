@@ -35,19 +35,30 @@ Priority order weighted by: (a) how often people search the exact company name +
 1. **Ratsit** — `/guider/radera-fran-ratsit/` — ✅ done. BankID opt-out, 12-month renewal, utgivningsbevis.
 2. **Mrkoll** — `/guider/radera-fran-mrkoll/` — ✅ done. No BankID, opt-out via email/form, framed around the "vague requests get rejected" angle (real differentiator: Cipher tier auto-generates a precise request).
 3. **Hitta.se** — `/guider/radera-fran-hitta/` — ✅ done. BankID opt-out, Schibsted-owned, framed around "this doesn't cover the other sites" (no paid tier available for this one — BankID-gated, so nothing to protect here, but kept the same abstraction level for consistency).
-4. **Lexbase** — `/guider/radera-fran-lexbase/` — publishes criminal records/convictions; highest emotional urgency of any company in the list, worth a dedicated page.
-5. **Merinfo** — `/guider/radera-fran-merinfo/` — same category, different opt-out flow.
-6. **Google (deindexing / "right to be forgotten")** — `/guider/ta-bort-fran-google-sok/` — huge search volume for "radera mig från google", different mechanism (search removal request, not data deletion) so needs its own explainer.
-7. **Allabolag** — `/guider/radera-fran-allabolag/` — company/board-member personal data, common search from people listed as company officers.
-8. **Krimfup / Biluppgifter / Upplysning** — bundle as one comparison guide: `/guider/upplysningssajter-sverige/` — "vilka upplysningssajter finns" is a real query and a good hub page linking to all individual guides.
-9. **Facebook/Meta & Instagram account deletion** — `/guider/radera-fran-facebook-instagram/` — evergreen high-volume query, different mechanism (account deletion, not GDPR request) but still on-topic.
-10. **Klarna / Swish** — `/guider/radera-fran-klarna/` — financial data, high anxiety topic, good for trust-building even though deletion is often restricted by law (bookkeeping retention) — worth explaining the limits honestly.
+4. **Lexbase** — `/guider/radera-fran-lexbase/` — ✅ done. Criminal records/convictions; framed around "opt-out hides it from Lexbase's search, doesn't unpublish the verdict itself."
+5. **Merinfo** — `/guider/radera-fran-merinfo/` — ✅ done. BankID opt-out, same pattern as Ratsit/Hitta.se.
+6. **Google (deindexing)** — `/guider/ta-bort-fran-google-sok/` — ✅ done. Framed around "delisting ≠ deletion" and the URL-specificity requirement.
+7. **Allabolag** — `/guider/radera-fran-allabolag/` — ✅ done. Board-member/signatory data from Bolagsverket; framed around what can be corrected vs. what's permanent public record.
+8. **Krimfup / Biluppgifter / Upplysning** — ✅ done as a hub page: `/guider/upplysningssajter-sverige/`, with a comparison table and links to all 5 individual guides already live.
+9. **Facebook/Instagram** — `/guider/radera-fran-facebook-instagram/` — ✅ done. Deactivate vs. delete distinction, retention-after-deletion nuance.
+10. **Klarna** — `/guider/radera-fran-klarna/` — ✅ done. Bokföringslagen's 7-year retention vs. GDPR, what's actually deletable.
+
+All 10 guides live as of 2026-10-01. Each links back to `/` with a CTA; the hub page
+additionally cross-links the 5 data-broker guides to each other.
 
 ## Hub page
 
-Once 4-5 guides exist, add `/guider/` index page linking all of them — internal linking
-matters more than volume at this stage, and it becomes the natural page to target
-"radera mig från internet guide" as a broader term.
+✅ Done — `/guider/upplysningssajter-sverige/`, built once 5 guides existed as planned.
+Targets "vilka upplysningssajter finns" and broader "ta bort mig från internet" queries,
+and is the natural internal-linking hub for the data-broker guides.
+
+## Next steps (not yet done)
+
+- Submit `sitemap.xml` to Google Search Console + Bing Webmaster Tools — still not done,
+  blocks all of this from actually being discovered.
+- Monitor which guides get indexed/ranked first once Search Console is live, then decide
+  whether round 2 (Swish, TikTok, Snapchat, Microsoft, Adobe, bank data broker pages) is
+  worth it or whether effort should shift to the comparison-vs-doldadress.se page instead.
 
 ## Not yet worth doing
 
