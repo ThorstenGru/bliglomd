@@ -23,31 +23,10 @@ follow-up reminders, and a role-gated internal admin panel.
 
 ## Architecture
 
-```
-Browser (React SPA — GitHub Pages / bliglömd.se)
-  ├── Supabase Auth          JWT sessions, email confirmation
-  ├── Supabase DB            PostgreSQL + Row Level Security
-  │     ├── profiles         1:1 with auth.users
-  │     ├── requests         GDPR requests + status tracking
-  │     ├── scans            Breach scan records
-  │     ├── reminders        Scheduled follow-up reminders
-  │     ├── audit_logs       Admin action log
-  │     └── admin_deletions  User deletion records
-  ├── Edge Function: scan-email       → XposedOrNot API (breach data)
-  ├── Edge Function: send-request     → Brevo API (GDPR email to company)
-  ├── Edge Function: send-reminders   → Brevo API (user renewal reminders)
-  ├── Edge Function: delete-account   → Deletes user on their own request
-  ├── Edge Function: admin-list-users → Admin: paginated user list + stats
-  ├── Edge Function: admin-update-user→ Admin: change subscription level
-  ├── Edge Function: admin-delete-user→ Admin: delete user + send audit email
-  ├── Edge Function: admin-export-user→ Admin: export all user data as JSON
-  ├── Edge Function: admin-stats      → Admin: full analytics snapshot (9 parallel queries)
-  └── Edge Function: admin-weekly-digest → Automated weekly report email
-
-Supabase Cron (pg_cron + pg_net):
-  ├── send-reminders        Daily 09:00 UTC — renewal reminders
-  └── admin-weekly-digest   Mondays 07:00 UTC — weekly stats to admin
-```
+React SPA (GitHub Pages) → Supabase (Auth + Postgres + RLS) → a set of Supabase Edge
+Functions for breach scanning, sending GDPR requests, reminders, and role-gated admin
+operations. Scheduled jobs run via pg_cron. See `supabase/functions/` and
+`supabase/migrations/` for the current list — intentionally not enumerated here.
 
 ---
 
@@ -81,170 +60,24 @@ Companies with `utgivningsbevis: true` have legal protection for archived editor
 
 ---
 
-## Database Schema
+## Database & Edge Functions
 
-### `profiles`
-| Column | Type | Notes |
-|--------|------|-------|
-| `id` | uuid PK | = `auth.users.id` |
-| `full_name` | text | |
-| `level` | int (1-3) | subscription level; default 1 |
-| `created_at` | timestamptz | |
-
-### `requests`
-| Column | Type | Notes |
-|--------|------|-------|
-| `id` | uuid PK | |
-| `user_id` | uuid FK → profiles | |
-| `company_id` | text | |
-| `company_name` | text | |
-| `user_email` | text | email used in the GDPR request |
-| `user_name` | text | name used in the GDPR request |
-| `status` | text | `pending` / `sent` / `confirmed` / `removed` / `failed` / `expired` |
-| `sent_at` | timestamptz | |
-| `response_at` | timestamptz | |
-| `created_at` | timestamptz | |
-
-### `scans`
-| Column | Type | Notes |
-|--------|------|-------|
-| `id` | uuid PK | |
-| `user_id` | uuid FK → profiles | |
-| `scan_email` | text | |
-| `breach_names` | text[] | |
-| `breach_count` | int | |
-| `created_at` | timestamptz | |
-
-### `reminders`
-| Column | Type | Notes |
-|--------|------|-------|
-| `id` | uuid PK | |
-| `request_id` | uuid FK → requests | |
-| `remind_at` | timestamptz | |
-| `sent` | boolean | |
-
-### `audit_logs`
-| Column | Type | Notes |
-|--------|------|-------|
-| `id` | uuid PK | |
-| `user_id` | uuid | actor (may be admin or end-user) |
-| `user_email` | text | |
-| `action` | text | `admin_level_change` · `admin_delete` · `admin_export` · `scan_email` · `send_request` |
-| `resource` | text | affected entity |
-| `metadata` | jsonb | action-specific data |
-| `created_at` | timestamptz | |
-
-### `admin_deletions`
-| Column | Type | Notes |
-|--------|------|-------|
-| `id` | uuid PK | |
-| `deleted_user_id` | uuid | |
-| `deleted_user_email` | text | |
-| `deleted_by_email` | text | admin who triggered the deletion |
-| `created_at` | timestamptz | |
-
-All tables use Row Level Security (RLS). Users can only read/write their own rows. Admin functions bypass RLS via the service-role key in edge functions.
-
----
-
-## Database Migrations
-
-| File | What it does |
-|------|-------------|
-| `001_initial_schema.sql` | Profiles, requests, scans, RLS policies |
-| `002_add_scan_columns.sql` | Add `breach_names[]` and `breach_count` to scans |
-| `003_schedule_reminders.sql` | Add reminders table + pg_cron schedule |
-| `004_admin.sql` | Admin role, audit_logs, admin_deletions, aggregate RPCs |
-| `005_optimize_admin.sql` | Fix audit_logs RLS DoS vector; add `admin_request_counts()` + `admin_scan_counts()` |
-| `006_admin_stats.sql` | 7 analytics RPCs: signups/requests/scans per day, top companies, request statuses, breach stats, active+stale counts, response times |
-| `007_weekly_digest_cron.sql` | pg_cron schedule — calls `admin-weekly-digest` every Monday 07:00 UTC via pg_net, reads `DIGEST_SECRET` from Supabase Vault |
-
-All migrations run via Supabase CLI (autonomous — no manual steps):
-```bash
-supabase db query --linked -f "supabase/migrations/<file>.sql"
-```
-
----
-
-## Edge Functions
-
-### `scan-email`
-Checks an email address for known data breaches.
-- **Input:** `{ "email": "user@example.com" }`
-- **Output:** `{ "breaches": [{...}] }`
-- Uses XposedOrNot API — free, no key. Returns empty array on 404. 10 s timeout.
-
-### `send-request`
-Sends a GDPR Article 17 deletion request email to a company.
-- **Input:** `{ companyName, gdprEmail, userName, userEmail, lang }`
-- **Output:** `{ "success": true, "id": "resend-id" }`
-- Uses Brevo. Input-validated. CORS restricted to `bliglömd.se` + localhost.
-
-### `send-reminders`
-Daily cron (09:00 UTC). Finds opt-out requests with annual protection that are nearing expiry and sends renewal reminder emails to the user.
-
-### `delete-account`
-User-initiated: deletes the authenticated user's own account and all their data.
-
-### `admin-list-users`
-Returns all users with request/scan counts via aggregate RPCs (no full table scan).
-
-### `admin-update-user`
-Changes a user's subscription level (1-3). Writes to audit_logs.
-
-### `admin-delete-user`
-Permanently deletes a user (auth + DB rows). Sends a deletion report email to the admin. Writes to audit_logs and admin_deletions. Deletion happens **before** email so email failure never leaves a ghost record.
-
-### `admin-export-user`
-Exports all data for a user as a JSON blob. Used for GDPR Article 20 (data portability). Writes to audit_logs.
-
-### `admin-stats`
-9 parallel queries (listUsers + 8 RPCs). Returns a full analytics envelope:
-- **Snapshot:** DAU/WAU/MAU, retention %, signups this/last week, requests this/last week, active/stale counts, avg requests per user, breach rate %
-- **Time series:** signups/requests/scans per day (30 days)
-- **Rankings:** top companies, request status breakdown, response times
-
-### `admin-weekly-digest`
-Called every Monday 07:00 UTC by pg_cron. Builds and sends an HTML report email to `admin@bliglömd.se` with:
-- Week-over-week trends (signups, requests, retention, active/stale)
-- Stale-request warning if any requests > 30 days old
-- Top 5 companies, breach stats
-- Verified via `DIGEST_SECRET` in Authorization header
+Schema, migrations, and edge function implementations live in `supabase/` — not
+reproduced here. Summary: all tables use Row Level Security, users can only read/write
+their own rows, and admin-only operations run through server-side edge functions that
+verify JWT role claims independently of the client. See `supabase/migrations/` for schema
+history and `supabase/functions/*/index.ts` for implementation details.
 
 ---
 
 ## Admin Panel
 
-Internal route, accessible only to users with `user_metadata.role === 'admin'`.
+Internal, role-gated route (`user_metadata.role === 'admin'`) with user management, an
+audit log, and an analytics dashboard. Session auto-logout after 30 minutes of
+inactivity. Implementation in `src/pages/Admin.tsx`.
 
-Tabs:
-- **Översikt** — 4 stat cards + level distribution + recent deletions
-- **Användare** — searchable/filterable user table; user detail slide-in with level selector, export, and delete
-- **Granskningslogg** — full audit event table (last 200 events)
-- **Statistik** — full analytics dashboard:
-  - 8 KPI cards (users: total/MAU/WAU/DAU/retention/new-this-week; requests: this-week trend, active count, avg/user, breach rate)
-  - 2 SVG bar charts — signups and requests per day (30-day window)
-  - Top companies horizontal bar chart
-  - Request status stacked bar
-  - Response times table (fastest-responding companies)
-  - Stale-request alert banner
-  - Auto-refreshes every 5 minutes
-
-Session auto-logout after 30 minutes of inactivity (countdown timer in sidebar).
-
----
-
-## Self-Maintaining Features
-
-The service is designed to run with zero manual intervention:
-
-| Feature | Trigger | What it does |
-|---------|---------|-------------|
-| Renewal reminders | Daily 09:00 UTC (pg_cron) | Emails users whose opt-out protection expires in ~1 month |
-| Admin analytics auto-refresh | Every 5 min (browser timer) | Keeps analytics tab current without page reload |
-| Weekly digest | Mondays 07:00 UTC (pg_cron) | Emails admin with KPIs, trends, stale-request alert |
-| Session auto-logout | 30-min countdown | Prevents unauthorized access to admin panel |
-| GitHub Actions CI/CD | Push to `main` | Builds and deploys frontend automatically |
+The service otherwise runs with minimal manual intervention: scheduled reminders and
+digests via pg_cron, and automatic deploys via GitHub Actions on push to `main`.
 
 ---
 
@@ -380,25 +213,8 @@ src/
     └── index.ts                Company, Request, Scan, RequestStatus types
 
 supabase/
-├── functions/
-│   ├── admin-delete-user/      Admin: delete user + audit email
-│   ├── admin-export-user/      Admin: GDPR data export
-│   ├── admin-list-users/       Admin: user list with counts
-│   ├── admin-stats/            Admin: full analytics endpoint
-│   ├── admin-update-user/      Admin: change subscription level
-│   ├── admin-weekly-digest/    Cron: weekly report to admin
-│   ├── delete-account/         User: self-deletion
-│   ├── scan-email/             Breach check via XposedOrNot
-│   ├── send-reminders/         Cron: renewal reminder emails
-│   └── send-request/           GDPR deletion email via Brevo
-└── migrations/
-    ├── 001_initial_schema.sql
-    ├── 002_add_scan_columns.sql
-    ├── 003_schedule_reminders.sql
-    ├── 004_admin.sql
-    ├── 005_optimize_admin.sql
-    ├── 006_admin_stats.sql
-    └── 007_weekly_digest_cron.sql
+├── functions/      Edge functions — see supabase/functions/*/index.ts
+└── migrations/      Schema history — see supabase/migrations/
 ```
 
 ---
