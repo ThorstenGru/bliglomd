@@ -18,6 +18,16 @@ Each guide:
 - Ends with a CTA back to the app
 - Added to `public/sitemap.xml`
 
+**Do not give away what's actually sold.** The free (Trace) tier already includes guided
+per-company instructions in-app — that's fine to echo publicly. But the paid tiers
+(Cipher 99kr: auto-generated legal letter; Ghost 199kr: send + track + renewal reminders
+on BliGlömd's behalf) must NOT be fully reproduced on a public page with no signup wall.
+Concretely: explain the legal mechanism and what's involved in plain language, but don't
+spell out ready-to-use letter text, exact company email addresses, or a literal numbered
+click-by-click walkthrough — keep it one level more abstract than the in-app instructions,
+and let the CTA be the reason to go create a (free) account. This was flagged directly by
+the user on the first guide (Ratsit) — see `feedback_seo_content_gating` memory.
+
 ## First 10 guides, by estimated search intent (highest first)
 
 Priority order weighted by: (a) how often people search the exact company name + "radera/ta bort/dölja", (b) whether the removal process is confusing enough to need a guide (BankID-gated, opt-out vs. deletion, time-limited), (c) already shipped as an example.
