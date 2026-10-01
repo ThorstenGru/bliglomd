@@ -56,6 +56,36 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://bliglömd.se/guider/bliglomd-vs-doldadress/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://bliglömd.se/guider/radera-fran-swish/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://bliglömd.se/guider/radera-fran-snapchat/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://bliglömd.se/guider/radera-fran-microsoft/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://bliglömd.se/guider/radera-fran-adobe/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://bliglömd.se/guider/radera-fran-tiktok/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://bliglömd.se/roadmap</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>

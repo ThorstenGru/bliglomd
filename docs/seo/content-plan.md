@@ -54,14 +54,43 @@ and is the natural internal-linking hub for the data-broker guides.
 
 ## Next steps (not yet done)
 
-- **Search Console / Bing Webmaster submission: deliberately skipped (2026-10-01).**
-  Both require signing into an account (Google/Microsoft) and the user chose not to set
-  one up for this right now. Without it, discovery relies purely on organic crawling —
-  `robots.txt` points to `sitemap.xml`, so Googlebot/Bingbot will find it on their own
-  eventually, just slower (weeks rather than days) and without the extra signals
-  (manual indexing requests, coverage reports, search query data) Search Console gives.
-  If priorities change, this is still the single highest-leverage remaining action —
-  revisit by asking the user to sign in themselves, don't do it on their behalf.
+- **Search Console: done (2026-10-01, later date).** User verified via HTML file method
+  (`public/google9b79c7d4878035d4.html`), submitted the sitemap, and requested indexing
+  for the initial batch of URLs. Bing Webmaster Tools (import-from-Google path) still open.
+
+## Round 2 guides — ✅ done (2026-10-01)
+
+Added after the first 10, per the "what else can drive traffic" discussion:
+
+- **`/guider/bliglomd-vs-doldadress/`** — comparison page vs. the main competitor.
+  Deliberately factual/neutral (deletion vs. hiding, free tier vs. none, no binding vs.
+  3–12 month binding) rather than citing competitor reviews — comparative-advertising
+  risk isn't worth it, and the structural differences are persuasive on their own. Facts
+  re-verified live on doldadress.se on 2026-10-01 before publishing (previous research
+  was 92 days stale).
+- **Swish, Snapchat, Microsoft, Adobe, TikTok** — same pattern as round 1: legal/
+  procedural nuance in full (bokföringslagen 7-year retention for Swish, Snapchat's
+  30-day deactivation window, Microsoft's "close account vs. targeted deletion"
+  distinction, Adobe's cloud-file warning, TikTok's Irish EEA entity), no literal
+  copy-paste scripts.
+
+All now in `public/sitemap.xml`. Not yet submitted individually via Search Console's
+URL Inspection — do that for this batch same as the first.
+
+## Distribution attempted beyond SEO (2026-10-01)
+
+- **AppRater (apprater.net/add)**: submitted successfully — free, no-account form.
+- **GitHub "awesome-privacy" lists**: investigated, ruled out. They require open-source
+  licensing and a 4-month-minimum repo age; BliGlömd is proprietary and the repo is new.
+  Don't revisit this path unless both of those change.
+- **Other free/no-login startup directories**: most require account creation (Product
+  Hunt, Indie Hackers, Crunchbase, F6S, etc.) — per policy, Claude doesn't create
+  accounts on the user's behalf. These need the user to sign up themselves if pursued.
+  The sandbox's auto-mode classifier also blocks some third-party form-field writes
+  ("External System Writes") even on no-account forms — AppRater's text fields went
+  through, but its URL/platform fields were blocked and the user had to finish the
+  submission manually from a pre-filled draft. Expect to hand off the same way for any
+  future directory, not assume full automation will work.
 - Once there's some organic indexing, decide whether round 2 (Swish, TikTok, Snapchat,
   Microsoft, Adobe, bank data broker pages) is worth it or whether effort should shift to
   the comparison-vs-doldadress.se page instead.
