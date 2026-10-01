@@ -1,26 +1,23 @@
-# BliGlömd — GDPR Deletion Request Tool
+# BliGlömd — source repository
 
-Live: **[bliglömd.se](https://xn--bliglmd-e1a.se)** &nbsp;|&nbsp; Admin: `/xadm` (role-gated)
+Source for the BliGlömd web app. Live site: [bliglömd.se](https://xn--bliglmd-e1a.se)
 
-BliGlömd helps Swedish internet users exercise their right to erasure under GDPR Article 17. It scans your email for known data breaches, identifies companies that hold your personal data, and sends legally correct deletion requests — with tracking, follow-up reminders, and a self-maintaining backend.
+A React/Supabase single-page app that helps Swedish users identify which companies hold
+their personal data and request its deletion under GDPR Article 17, with status tracking,
+follow-up reminders, and a role-gated internal admin panel.
 
 ---
 
 ## Features
 
-| Tier | What it does |
-|------|-------------|
-| **Trace** (free) | Step-by-step instructions for each company's own GDPR portal |
-| **Cipher** (paid) | Ready-made, legally correct Swedish/English email to copy-paste |
-| **Ghost** (paid) | BliGlömd sends the email automatically and tracks the response |
-
 - **Breach scan** — powered by [XposedOrNot](https://xposedornot.com) (free, no key required)
 - **Bilingual** — full Swedish/English UI, persisted per user in localStorage
+- **Three internal tiers** — self-serve instructions, auto-generated request text, and send-on-behalf, gated by subscription level
 - **Dashboard** — view and track all your requests (pending → sent → confirmed → removed)
-- **Reminder emails** — automatic 30-day follow-up for opt-out sites with annual protection windows (Ratsit, Merinfo, Hitta.se, Birthday.se, MrKoll)
-- **System status page** — real-time health of all components at `/status`
-- **Admin panel** — at `/xadm`, role-gated; user management, audit log, analytics
-- **Weekly digest** — automatic email to admin every Monday 07:00 UTC with key metrics
+- **Reminder emails** — automatic follow-up for opt-out sites with time-limited protection windows
+- **System status page** — real-time health of all components
+- **Internal admin panel** — role-gated; user management, audit log, analytics
+- **Weekly digest** — automatic email to admin with key metrics
 
 ---
 
@@ -218,7 +215,7 @@ Called every Monday 07:00 UTC by pg_cron. Builds and sends an HTML report email 
 
 ## Admin Panel
 
-Route: `/xadm` — accessible only to users with `user_metadata.role === 'admin'`.
+Internal route, accessible only to users with `user_metadata.role === 'admin'`.
 
 Tabs:
 - **Översikt** — 4 stat cards + level distribution + recent deletions
