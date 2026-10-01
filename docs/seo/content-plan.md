@@ -33,8 +33,8 @@ the user on the first guide (Ratsit) — see `feedback_seo_content_gating` memor
 Priority order weighted by: (a) how often people search the exact company name + "radera/ta bort/dölja", (b) whether the removal process is confusing enough to need a guide (BankID-gated, opt-out vs. deletion, time-limited), (c) already shipped as an example.
 
 1. **Ratsit** — `/guider/radera-fran-ratsit/` — ✅ done. BankID opt-out, 12-month renewal, utgivningsbevis.
-2. **Mrkoll** — `/guider/radera-fran-mrkoll/` — same opt-out pattern, one of the most-searched "ta bort mig från nätet" targets.
-3. **Hitta.se** — `/guider/radera-fran-hitta/` — very high search volume, people don't realize it's a separate opt-out from Ratsit/Mrkoll.
+2. **Mrkoll** — `/guider/radera-fran-mrkoll/` — ✅ done. No BankID, opt-out via email/form, framed around the "vague requests get rejected" angle (real differentiator: Cipher tier auto-generates a precise request).
+3. **Hitta.se** — `/guider/radera-fran-hitta/` — ✅ done. BankID opt-out, Schibsted-owned, framed around "this doesn't cover the other sites" (no paid tier available for this one — BankID-gated, so nothing to protect here, but kept the same abstraction level for consistency).
 4. **Lexbase** — `/guider/radera-fran-lexbase/` — publishes criminal records/convictions; highest emotional urgency of any company in the list, worth a dedicated page.
 5. **Merinfo** — `/guider/radera-fran-merinfo/` — same category, different opt-out flow.
 6. **Google (deindexing / "right to be forgotten")** — `/guider/ta-bort-fran-google-sok/` — huge search volume for "radera mig från google", different mechanism (search removal request, not data deletion) so needs its own explainer.

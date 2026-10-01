@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="sv">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <title>Så tar du bort dig från Hitta.se (2026) — vad som faktiskt gäller | BliGlömd</title>
+    <meta name="description" content="Varför Hitta.se kan visa dina uppgifter, hur borttagning med BankID fungerar, och varför det är en separat spärr från Ratsit och Mrkoll." />
+    <link rel="canonical" href="https://bliglömd.se/guider/radera-fran-hitta/" />
+    <meta name="theme-color" content="#1E3A8A" />
+    <meta property="og:title" content="Så tar du bort dig från Hitta.se (2026)" />
+    <meta property="og:description" content="Vad Hitta.se får visa enligt lag, hur BankID-borttagningen fungerar, och varför den inte skyddar dig på andra sajter." />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://bliglömd.se/guider/radera-fran-hitta/" />
+    <meta property="og:site_name" content="BliGlömd" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Så tar du bort dig från Hitta.se (2026)" />
+    <meta name="twitter:description" content="BankID-borttagning på Hitta.se — och varför det bara gäller just den sajten." />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "Så tar du bort dig från Hitta.se",
+        "description": "Översikt över hur borttagning av uppgifter på Hitta.se fungerar.",
+        "step": [
+          {
+            "@type": "HowToStep",
+            "name": "Logga in med BankID",
+            "text": "Hitta.se (Schibsted) hanterar borttagning via BankID-identifiering på sin egen sida för det."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Välj vilka uppgifter som ska döljas",
+            "text": "Du väljer själv vilka av dina synliga uppgifter som ska tas bort från sökresultaten."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Kom ihåg att det bara gäller Hitta.se",
+            "text": "Borttagningen är specifik för Hitta.se och påverkar inte andra upplysningssajter som Ratsit, Mrkoll eller Eniro."
+          }
+        ]
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Räcker det att ta bort mig från Hitta.se för att försvinna från upplysningssajter?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Nej. Varje upplysningssajt — Hitta.se, Ratsit, Mrkoll, Eniro och andra — har sin egen separata borttagningsprocess. Att ta bort sig från en sajt påverkar inte de andra."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Krävs BankID för borttagning på Hitta.se?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Ja. Hitta.se kräver BankID-identifiering för att hantera borttagningsförfrågan."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Kan jag kräva full radering enligt GDPR från Hitta.se?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Hitta.se har utgivningsbevis, vilket ger ett delvis undantag från GDPR:s raderingsrätt för publicerat material. Den praktiska vägen är borttagningsfunktionen med BankID."
+            }
+          }
+        ]
+      }
+    </script>
+    <style>
+      :root { color-scheme: light; }
+      body {
+        margin: 0;
+        font-family: 'Inter', system-ui, sans-serif;
+        color: #1f2937;
+        background: #F5F7FB;
+        line-height: 1.6;
+      }
+      header { background: #1E3A8A; padding: 20px 24px; }
+      header a { color: #fff; text-decoration: none; font-weight: 700; font-size: 1.1rem; }
+      main { max-width: 720px; margin: 0 auto; padding: 40px 24px 80px; }
+      h1 { font-size: 1.9rem; font-weight: 800; color: #111827; margin-bottom: 8px; }
+      .lead { color: #4b5563; font-size: 1.05rem; margin-bottom: 32px; }
+      h2 { font-size: 1.3rem; font-weight: 700; margin-top: 40px; color: #1E3A8A; }
+      ol, ul { padding-left: 22px; }
+      li { margin-bottom: 10px; }
+      .callout {
+        background: #EEF2FF;
+        border-left: 4px solid #1E3A8A;
+        padding: 16px 20px;
+        border-radius: 8px;
+        margin: 24px 0;
+      }
+      .cta {
+        margin-top: 48px;
+        padding: 28px;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        text-align: center;
+      }
+      .cta a {
+        display: inline-block;
+        margin-top: 12px;
+        background: #1E3A8A;
+        color: #fff;
+        text-decoration: none;
+        font-weight: 600;
+        padding: 12px 24px;
+        border-radius: 12px;
+      }
+      footer { text-align: center; color: #9ca3af; font-size: 0.85rem; padding: 24px; }
+      code { background: #e5e7eb; padding: 2px 6px; border-radius: 4px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a href="/">BliGlömd</a>
+    </header>
+    <main>
+      <h1>Så tar du bort dig från Hitta.se (2026)</h1>
+      <p class="lead">
+        Hitta.se (ägt av Schibsted) visar namn, adress och telefonnummer sökbart.
+        Borttagning kräver BankID — men gäller bara just den sajten.
+      </p>
+
+      <h2>Varför kan Hitta.se visa mina uppgifter?</h2>
+      <p>
+        Hitta.se har ett utgivningsbevis från Myndigheten för press, radio och tv, vilket
+        ger ett delvis undantag från GDPR:s rätt till radering (artikel 17) för publicerat
+        material. Den praktiska vägen för att dölja dina uppgifter är sajtens egen
+        borttagningsfunktion.
+      </p>
+
+      <h2>Så går det till, i stora drag</h2>
+      <p>
+        Hitta.se hanterar borttagning via BankID-identifiering direkt på sin egen sida.
+        Du väljer själv vilka uppgifter som ska döljas från sökresultaten.
+      </p>
+
+      <div class="callout">
+        <strong>Viktigt att veta:</strong> en borttagning på Hitta.se gör ingenting åt
+        samma uppgifter på Ratsit, Mrkoll, Eniro eller andra upplysningssajter — varje
+        sajt kräver sin egen separata begäran.
+      </div>
+
+      <h2>Vanliga frågor</h2>
+      <p><strong>Räcker en borttagning här för hela internet?</strong><br />
+      Nej — se rutan ovan. Varje upplysningssajt måste hanteras separat.</p>
+      <p><strong>Går det utan BankID?</strong><br />
+      Nej, Hitta.se kräver BankID för att verifiera begäran.</p>
+
+      <div class="cta">
+        <p><strong>Hitta.se är bara en av 50+ sajter som kan ha dina uppgifter</strong> —
+        var och en med sina egna regler och krav. BliGlömd samlar allt på ett ställe så
+        du slipper hålla reda på vilken sajt som kräver BankID, e-post eller annat.</p>
+        <a href="/">Se vad som gäller för dina uppgifter — gratis</a>
+      </div>
+    </main>
+    <footer>
+      &copy; 2026 BliGlömd — <a href="/privacy" style="color:inherit">Integritetspolicy</a>
+    </footer>
+  </body>
+</html>

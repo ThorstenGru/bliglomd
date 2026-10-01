@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="sv">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <title>Så tar du bort dig från Mrkoll (2026) — vad som faktiskt gäller | BliGlömd</title>
+    <meta name="description" content="Varför Mrkoll kan visa dina uppgifter, hur avanmälan fungerar utan BankID, och varför vaga förfrågningar ofta avslås." />
+    <link rel="canonical" href="https://bliglömd.se/guider/radera-fran-mrkoll/" />
+    <meta name="theme-color" content="#1E3A8A" />
+    <meta property="og:title" content="Så tar du bort dig från Mrkoll (2026)" />
+    <meta property="og:description" content="Vad Mrkoll får visa enligt lag, hur avanmälan fungerar, och varför det är lätt att göra fel i formuleringen." />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://bliglömd.se/guider/radera-fran-mrkoll/" />
+    <meta property="og:site_name" content="BliGlömd" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Så tar du bort dig från Mrkoll (2026)" />
+    <meta name="twitter:description" content="Avanmälan utan BankID — men formuleringen avgör om den går igenom." />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "Så tar du bort dig från Mrkoll",
+        "description": "Översikt över hur avanmälan från Mrkoll fungerar och vad som krävs för att den ska godkännas.",
+        "step": [
+          {
+            "@type": "HowToStep",
+            "name": "Hitta avanmälningsvägen",
+            "text": "Mrkoll kräver inte BankID för avanmälan — det går via e-post eller ett webbformulär på deras sajt."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Specificera vilka uppgifter som avses",
+            "text": "En vag begäran (\"ta bort allt om mig\") riskerar att avslås eller fördröjas. Begäran behöver peka ut exakt vilka uppgifter som ska tas bort."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Vänta på bekräftelse",
+            "text": "Mrkoll bekräftar normalt avanmälan separat — spara bekräftelsen som bevis om uppgifterna skulle dyka upp igen."
+          }
+        ]
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Kan jag kräva att Mrkoll raderar mina uppgifter enligt GDPR artikel 17?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Inte fullt ut. Mrkoll har utgivningsbevis och kan åberopa databasundantaget i tryckfrihetsförordningen för insamlat offentligt material. Det finns dock en frivillig avanmälan som de flesta använder i praktiken."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Krävs BankID för att avanmäla sig från Mrkoll?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Nej. Till skillnad från till exempel Ratsit kan avanmälan från Mrkoll göras via e-post eller webbformulär, utan BankID-identifiering."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Varför avslås vissa avanmälningsförfrågningar till Mrkoll?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "De vanligaste orsakerna är en för vag begäran eller att den inte tydligt pekar ut vilka specifika uppgifter som avses. En välformulerad begäran som hänvisar till rätt grund ökar chansen att den godkänns direkt."
+            }
+          }
+        ]
+      }
+    </script>
+    <style>
+      :root { color-scheme: light; }
+      body {
+        margin: 0;
+        font-family: 'Inter', system-ui, sans-serif;
+        color: #1f2937;
+        background: #F5F7FB;
+        line-height: 1.6;
+      }
+      header { background: #1E3A8A; padding: 20px 24px; }
+      header a { color: #fff; text-decoration: none; font-weight: 700; font-size: 1.1rem; }
+      main { max-width: 720px; margin: 0 auto; padding: 40px 24px 80px; }
+      h1 { font-size: 1.9rem; font-weight: 800; color: #111827; margin-bottom: 8px; }
+      .lead { color: #4b5563; font-size: 1.05rem; margin-bottom: 32px; }
+      h2 { font-size: 1.3rem; font-weight: 700; margin-top: 40px; color: #1E3A8A; }
+      ol, ul { padding-left: 22px; }
+      li { margin-bottom: 10px; }
+      .callout {
+        background: #EEF2FF;
+        border-left: 4px solid #1E3A8A;
+        padding: 16px 20px;
+        border-radius: 8px;
+        margin: 24px 0;
+      }
+      .cta {
+        margin-top: 48px;
+        padding: 28px;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        text-align: center;
+      }
+      .cta a {
+        display: inline-block;
+        margin-top: 12px;
+        background: #1E3A8A;
+        color: #fff;
+        text-decoration: none;
+        font-weight: 600;
+        padding: 12px 24px;
+        border-radius: 12px;
+      }
+      footer { text-align: center; color: #9ca3af; font-size: 0.85rem; padding: 24px; }
+      code { background: #e5e7eb; padding: 2px 6px; border-radius: 4px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a href="/">BliGlömd</a>
+    </header>
+    <main>
+      <h1>Så tar du bort dig från Mrkoll (2026)</h1>
+      <p class="lead">
+        Mrkoll visar namn, ålder, adress och andra personuppgifter sökbart för vem som helst.
+        Till skillnad från Ratsit krävs ingen BankID — men det är ändå lätt att få sin
+        begäran avvisad om den är felformulerad.
+      </p>
+
+      <h2>Varför kan Mrkoll visa mina uppgifter?</h2>
+      <p>
+        Mrkoll har, precis som flera andra svenska upplysningssajter, ett utgivningsbevis
+        från Myndigheten för press, radio och tv. Det ger ett skydd enligt tryckfrihets-
+        förordningens databasundantag, vilket innebär att GDPR:s rätt till radering
+        (artikel 17) inte gäller fullt ut. I praktiken erbjuder Mrkoll ändå en frivillig
+        avanmälan som de flesta använder.
+      </p>
+
+      <h2>Så går det till, i stora drag</h2>
+      <p>
+        Avanmälan sker via e-post eller ett webbformulär — ingen BankID krävs. Det som
+        oftast avgör om begäran går igenom snabbt är <strong>formuleringen</strong>:
+        en begäran som är tydlig om vilka exakta uppgifter som avses hanteras snabbare
+        än en generell "ta bort allt om mig".
+      </p>
+
+      <div class="callout">
+        <strong>Vanligaste misstaget:</strong> en för vag eller juridiskt otydlig begäran
+        riskerar att avslås eller fastna i onödig korrespondens fram och tillbaka.
+      </div>
+
+      <h2>Vanliga frågor</h2>
+      <p><strong>Kan jag kräva radering enligt GDPR?</strong><br />
+      Inte fullt ut — se förklaringen om utgivningsbevis ovan. Avanmälan är den praktiska vägen.</p>
+      <p><strong>Behöver jag BankID?</strong><br />
+      Nej, till skillnad från Ratsit går det via e-post eller webbformulär.</p>
+
+      <div class="cta">
+        <p><strong>Mrkoll är bara en av 50+ sajter som kan ha dina uppgifter</strong> — var och
+        en med sina egna regler. BliGlömd vet vilken formulering och rättslig grund som
+        krävs för varje tjänst, och kan generera en korrekt begäran automatiskt.</p>
+        <a href="/">Se vad som gäller för dina uppgifter — gratis</a>
+      </div>
+    </main>
+    <footer>
+      &copy; 2026 BliGlömd — <a href="/privacy" style="color:inherit">Integritetspolicy</a>
+    </footer>
+  </body>
+</html>
