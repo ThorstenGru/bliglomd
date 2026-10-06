@@ -372,6 +372,7 @@ export function Home({ session }: HomeProps) {
 
           {/* Right */}
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 'clamp(12px, 4vw, 24px)' }}>
+            <a href="/guider/" className="py-3 sm:py-0" style={{ fontSize: 12, color: '#64748B', textDecoration: 'none' }}>Guider</a>
             <Link to="/privacy" className="py-3 sm:py-0" style={{ fontSize: 12, color: '#64748B', textDecoration: 'none' }}>{t.home.footerPrivacy}</Link>
             <Link to="/terms" className="py-3 sm:py-0" style={{ fontSize: 12, color: '#64748B', textDecoration: 'none' }}>{t.home.footerTerms}</Link>
             <Link to="/roadmap" className="py-3 sm:py-0" style={{ fontSize: 12, color: '#64748B', textDecoration: 'none' }}>{t.home.footerRoadmap}</Link>
