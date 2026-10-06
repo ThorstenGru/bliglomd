@@ -20,8 +20,48 @@ function trend(cur: number, prev: number): string {
   return `<span style="color:${color};font-weight:600">${arrow} ${Math.abs(delta)} (${pct}%)</span>`
 }
 
+type Traffic = {
+  visits: number; visitsPrev: number; pageviews: number
+  guideLanding: number; guideLandingPrev: number; ctaClicks: number
+  topGuides: [string, number][]; topRefs: [string, number][]
+}
+
+function trafficHtml(t: Traffic): string {
+  const list = (items: [string, number][]) => items.length === 0
+    ? '<tr><td colspan="2" style="color:#94A3B8;font-size:12px">Ingen data ännu</td></tr>'
+    : items.map(([k, n], i) =>
+        `<tr><td style="padding:4px 0;color:#64748B;font-size:12px">${i + 1}. ${escapeHtml(k)}</td>
+             <td style="padding:4px 0;font-weight:700;font-size:12px;text-align:right">${n}</td></tr>`).join('')
+  const ctr = t.guideLanding > 0 ? Math.round((t.ctaClicks / t.guideLanding) * 100) : 0
+  return `
+  <table style="width:100%;border-collapse:collapse;background:white;border-radius:10px;overflow:hidden;margin-bottom:16px">
+    <thead><tr style="background:#F8FAFC">
+      <th style="padding:10px 16px;text-align:left;font-size:11px;color:#94A3B8;font-weight:600;letter-spacing:0.05em;text-transform:uppercase">Trafik (egen statistik)</th>
+      <th style="padding:10px 16px;text-align:right;font-size:11px;color:#94A3B8;font-weight:600;letter-spacing:0.05em;text-transform:uppercase">Denna vecka</th>
+      <th style="padding:10px 16px;text-align:right;font-size:11px;color:#94A3B8;font-weight:600;letter-spacing:0.05em;text-transform:uppercase">Trend</th>
+    </tr></thead>
+    <tbody>
+      <tr style="border-top:1px solid #F1F5F9"><td style="padding:10px 16px;font-size:13px;color:#374151">Besök (sessioner)</td><td style="padding:10px 16px;font-size:14px;font-weight:700;text-align:right">${t.visits}</td><td style="padding:10px 16px;text-align:right;font-size:12px">${trend(t.visits, t.visitsPrev)}</td></tr>
+      <tr style="border-top:1px solid #F1F5F9"><td style="padding:10px 16px;font-size:13px;color:#374151">Sidvisningar</td><td style="padding:10px 16px;font-size:14px;font-weight:700;text-align:right">${t.pageviews}</td><td></td></tr>
+      <tr style="border-top:1px solid #F1F5F9"><td style="padding:10px 16px;font-size:13px;color:#374151">Besök som landar på en guide</td><td style="padding:10px 16px;font-size:14px;font-weight:700;text-align:right">${t.guideLanding}</td><td style="padding:10px 16px;text-align:right;font-size:12px">${trend(t.guideLanding, t.guideLandingPrev)}</td></tr>
+      <tr style="border-top:1px solid #F1F5F9"><td style="padding:10px 16px;font-size:13px;color:#374151">Klick guide → skanning</td><td style="padding:10px 16px;font-size:14px;font-weight:700;text-align:right">${t.ctaClicks}</td><td style="padding:10px 16px;text-align:right;font-size:12px;color:#64748B">${ctr}% av guidebesök</td></tr>
+    </tbody>
+  </table>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+    <div style="background:white;border-radius:10px;padding:16px 18px">
+      <p style="font-size:11px;color:#94A3B8;text-transform:uppercase;letter-spacing:0.05em;margin:0 0 8px">Toppguider</p>
+      <table style="width:100%">${list(t.topGuides)}</table>
+    </div>
+    <div style="background:white;border-radius:10px;padding:16px 18px">
+      <p style="font-size:11px;color:#94A3B8;text-transform:uppercase;letter-spacing:0.05em;margin:0 0 8px">Källor (referrer)</p>
+      <table style="width:100%">${list(t.topRefs)}</table>
+    </div>
+  </div>`
+}
+
 function buildDigestHtml(data: Record<string, unknown>, weekLabel: string): string {
   const s   = data.snapshot as Record<string, number>
+  const traffic = data.traffic as Traffic
   const top = (data.top_companies as { company_name: string; cnt: number }[]).slice(0, 5)
 
   const rows = [
@@ -76,6 +116,8 @@ function buildDigestHtml(data: Record<string, unknown>, weekLabel: string): stri
       ).join('')}
     </tbody>
   </table>
+
+  ${trafficHtml(traffic)}
 
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
     <div style="background:white;border-radius:10px;padding:16px 18px">
@@ -199,6 +241,33 @@ Deno.serve(async (req) => {
       avg_breaches:   Number(breach.avg_breaches),
     }
 
+    const sinceIso = new Date(now - 2 * WEEK).toISOString()
+    const { data: evRows } = await client
+      .from('analytics_events')
+      .select('session_id, event_type, path, referrer_domain, metadata, created_at')
+      .gte('created_at', sinceIso)
+      .in('event_type', ['pageview', 'guide_cta_click'])
+      .limit(50000)
+    const events = (evRows ?? []) as { session_id: string; event_type: string; path: string | null; referrer_domain: string | null; metadata: Record<string, string> | null; created_at: string }[]
+    const thisWk = events.filter(e => now - new Date(e.created_at).getTime() < WEEK)
+    const prevWk = events.filter(e => now - new Date(e.created_at).getTime() >= WEEK)
+    const isGuide = (p: string | null) => !!p && p.startsWith('/guider/')
+    const tally = (arr: string[]) => Object.entries(arr.reduce<Record<string, number>>((m, k) => (m[k] = (m[k] ?? 0) + 1, m), {}))
+      .sort((a, b) => b[1] - a[1]).slice(0, 5) as [string, number][]
+    const pvThis = thisWk.filter(e => e.event_type === 'pageview')
+    const pvPrev = prevWk.filter(e => e.event_type === 'pageview')
+    const landings = (arr: typeof pvThis) => arr.filter(e => e.metadata?.is_landing === 'true')
+    const traffic = {
+      visits:           new Set(pvThis.map(e => e.session_id)).size,
+      visitsPrev:       new Set(pvPrev.map(e => e.session_id)).size,
+      pageviews:        pvThis.length,
+      guideLanding:     landings(pvThis).filter(e => isGuide(e.path)).length,
+      guideLandingPrev: landings(pvPrev).filter(e => isGuide(e.path)).length,
+      ctaClicks:        thisWk.filter(e => e.event_type === 'guide_cta_click').length,
+      topGuides:        tally(pvThis.filter(e => isGuide(e.path)).map(e => e.path!)),
+      topRefs:          tally(landings(pvThis).map(e => e.referrer_domain || 'Direkt/okänd')),
+    }
+
     const weekLabel = new Date().toLocaleDateString('sv-SE', { year: 'numeric', month: 'short', day: 'numeric' })
 
     const emailRes = await fetch('https://api.brevo.com/v3/smtp/email', {
@@ -208,7 +277,7 @@ Deno.serve(async (req) => {
         sender: { name: 'BliGlömd System', email: 'noreply@xn--bliglmd-e1a.se' },
         to: [{ email: ADMIN_EMAIL }],
         subject: `[BliGlömd] Veckorapport — ${weekLabel}`,
-        htmlContent: buildDigestHtml({ snapshot, top_companies: topCompanies ?? [] }, weekLabel),
+        htmlContent: buildDigestHtml({ snapshot, top_companies: topCompanies ?? [], traffic }, weekLabel),
       }),
     })
 
